@@ -1,0 +1,125 @@
+---
+title: "CompMS2miner WorkFlow"
+author: "WMB Edmands"
+date: "Sunday, June 21, 2015"
+output: pdf_document
+---
+
+Matches MS1 features to MS2 spectra (.mzXML) files based on a 
+mass-to-charge and retention time tolerance. Composite spectra and other data
+can subsequently be visualized during any stage of the CompMS2miner
+processing workflow. Composite spectra can be denoised, ion signals grouped 
+and summed, substructure groups identified, common Phase II metabolites
+predicted and features matched to data bases monoisotopic mass data 
+and insilico MS2 fragmentation data.
+The resulting data can then be readily curated by sending to a local or online
+couchDB database.
+
+Ensure all necessary R packages are installed, rCharts must be installed from 
+GitHub using the install_github function of devtools. The rCharts packages is
+used for reactive graphical visualizations in the shiny application. 
+The following will install this additional package resource:
+
+```{r eval=FALSE}
+install.packages("devtools")
+library(devtools)
+## install rCharts directly from github using devtools
+install_github("ramnathv/rCharts")
+```
+
+At any stage during the compMS2 workflow a compMS2 class object can be visualized
+with a Shiny application. Full usage of the compMS2shiny application functionality requires an internet connection.
+The end result of following the workflow within this document using the example data provided can be visualized using the function:
+
+```{r, eval=FALSE}
+library(CompMS2miner)
+compMS2shiny(compMS2example)
+```
+The following example illustrates the CompMS2miner workflow:
+
+## 1. construct compMS2 class object.
+From MS2 data (in the .mzXML file format) and an MS1feature table. The compMS2 object can also be constructed in as a parallel computation in the case of large peak tables and/ or larger numbers of MS2 data files.
+```{r, include=F}
+library(CompMS2miner)
+```
+```{r, collapse=TRUE}
+# file path example MS1features in comma delimited csv file 
+# (see ?example_mzXML_MS1features for details).
+MS1features_example <- system.file("extdata", "MS1features_example.csv", 
+                                   package = "CompMS2miner")
+# mzXml file examples directory
+mzXmlDir_example <- dirname(MS1features_example)
+# use parallel package to detect number of cores
+nSlaves <- parallel::detectCores()
+# create compMS2 object
+compMS2demo <- compMS2(MS1featuresCsvName = MS1features_example, 
+                       mzXMLdir = mzXmlDir_example, nSlaves=nSlaves,
+                       mode = "pos", precursorPpm = 10, ret = 10, 
+                       TICfilter = 10000)
+# View summary of compMS2 class object at any time 
+compMS2demo
+```
+
+##2. Dynamic noise filtration.
+filter variable noise from the data using a dynamic noise filter.
+```{r, collapse=TRUE}
+# dynamic noise filter
+compMS2demo <- deconvNoise(compMS2demo, "DNF")
+# View summary of compMS2 class object at any time 
+compMS2demo 
+
+```
+
+##3. Intra-spectrum ion grouping and inter-MS2 file spectra grouping with signal summing.
+group and sum ions from different scans and then combine summed ion composite spectra
+across multiple files. This create a single composite spectra for each MS1 EIC
+matched to MS2 precursor scans.
+```{r, collapse=TRUE}
+# intra-spectrum ion grouping and signal summing
+compMS2demo <- combineMS2(compMS2demo, "Ions")
+# View summary of compMS2 class object at any time 
+compMS2demo
+#inter spectrum ion grouping and signal summing
+compMS2demo <- combineMS2(compMS2demo, "Spectra") 
+# View summary of compMS2 class object at any time 
+compMS2demo
+
+```
+
+## 4. Possible substructure identification. 
+Characteristic neutral losses/ fragments of electrospray adducts and metabolites from literature sources (?Substructure_masses for details).
+```{r, collapse=TRUE}
+# annotate substructures
+compMS2demo <- subStructure(compMS2demo, "Annotate")
+# identify most probable substructure annotation based on total relative intensity
+# explained
+compMS2demo <- subStructure(compMS2demo, "prob")
+# summary of most probable substructure annotation
+mostProbSubStr <- subStructure(compMS2demo, "probSummary")
+
+```
+
+##5. Metabolite identification methods.
+A variety of metabolite identification methods are implemented through the
+function metID (see ?metID) for further details.
+```{r, eval=FALSE, collapse=TRUE}
+# annotate composite MS2 matched MS1 features to metabolomic databases (default
+#is HMDB, also DrugBank, T3DB and ReSpect databases can also be queried).
+#Warning: this may take 2-3 mins as large number of query masses
+ compMS2demo <- metID(compMS2demo, "dbAnnotate")
+
+# select most probable annotations based on substructures detected
+ compMS2demo <- metID(compMS2demo, "dbProb")
+
+# predict Phase II metabolites from SMILES codes
+ compMS2demo <- metID(compMS2demo, "predSMILES")
+
+# metFrag insilico fragmentation
+#compMS2demo <- metID(compMS2demo, "metFrag")
+
+```
+
+##6. Optional curate data in CouchDB/ publish results as a shiny App. 
+CompMS2 class objects can be sent to either a local or online couchDB database.
+Furthermore, the results of the CompMS2miner workflow can be published on the 
+web as a shiny application to share metabolite identification information.

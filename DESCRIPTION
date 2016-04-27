@@ -1,0 +1,17 @@
+Package: CompMS2miner
+Title: metabolite identification workflow for metabolomic high-resolution LC-MS
+    datasets.
+Version: 0.0.1.0
+Date: 2016-06-23
+Author: William MB Edmands <edmandsw@berkeley.edu>
+Maintainer: William MB Edmands <edmandsw@berkeley.edu>
+Description: metabolite identification workflow for metabolomic high-resolution
+    LC-MS datasets.
+Depends: R (>= 3.1.0)
+Imports: foreach, mzR, rCharts, Rcpp, shiny, ChemmineR, ChemmineOB, couchDB, fastcluster, data.table, doSNOW, DT, methods, parallel, RcppEigen, reshape2, rjson, tcltk2
+License: GPL (>= 2) + file LICENSE
+BugReports: https://github.com/WMBEdmands/CompMS2miner/issues/new
+#biocViews: MassSpectrometry, Metabolomics
+LazyData: true
+LazyLoad: true
+RoxygenNote: 5.0.0

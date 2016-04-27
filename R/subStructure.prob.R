@@ -1,0 +1,79 @@
+#' Identifies probable substructure type 
+#' 
+#' @description Identifies probable substructure type based on the summed
+#' relative intensites and therefore proportion of total composite spectrum 
+#' intensity explained.
+#' @param a compMS2 object 
+#' 
+#' @return a data.frame of probable substructure annotations for each composite
+#' spectrum, ranked by the sum of the relative intensities for that substructure
+#' type 
+#' @export
+setGeneric("subStructure.prob", function(object, ...) standardGeneric("subStructure.prob"))
+
+setMethod("subStructure.prob", signature = "CompMS2", function(object){
+  
+  # error handling
+  if(class(object) != "CompMS2"){
+    stop("argument object is not an CompMS2 class object")
+  } else if ("Frag.ID.type" %in% colnames(compSpectra(object)[[1]])){
+    
+    message("Identifying likely substructure type...")
+    flush.console()
+    
+    names_CompSpec <- names(compSpectra(object))
+    substrBestIds <- lapply(c(1:length(compSpectra(object))), function(x){
+      spec.df <- compSpectra(object)[[x]]
+      subStrTypes <- unlist(spec.df[, c("Frag.ID.type", "interfrag.loss.type", 
+                                        "Neutral.loss.type")])
+      # remove unannotated
+      subStrTypes <- subStrTypes[subStrTypes != ""]
+      if(length(subStrTypes) > 0){
+      # remove duplicates
+      subStrTypes <- unique(paste0(subStrTypes, 
+                                   gsub("[A-Za-z]|\\.", "", names(subStrTypes))))
+      
+      # vector intensities
+      names(subStrTypes) <- spec.df$Rel_Intensity[as.numeric(gsub("[[:alpha:]]|[[:punct:]]|[[:space:]]", 
+                                                "", subStrTypes))]
+      # unlist any multiple IDs
+      subStrTypes <- unlist(strsplit(subStrTypes, ";"))
+      # remove last character string split
+      names(subStrTypes) <- substring(names(subStrTypes), 1, 
+                                      ifelse(as.numeric(names(subStrTypes)) > 1000,
+                                             nchar(names(subStrTypes))- 1, nchar(names(subStrTypes))))
+#        <- Ints
+      # sum rel intensities
+      subStrs.tmp <- gsub("[0-9]", "", subStrTypes)
+      subStrTypes <- tapply(as.numeric(names(subStrTypes)), subStrs.tmp, sum)
+      subStrs.tmp <- data.frame(table(subStrs.tmp), stringsAsFactors = F)
+     # subStrTypes <- subStrTypes / sum(spec.df$intensity) 
+      # summary results
+      subStrTypes <- data.frame(compSpecName = rep(names_CompSpec[x], 
+                                                   length(subStrTypes)),
+                                SubStrType = names(subStrTypes), 
+                                SumRelInt = subStrTypes,
+                                stringsAsFactors = F)
+      subStrTypes <- merge(subStrTypes, subStrs.tmp, by.x = "SubStrType", 
+                           by.y = "subStrs.tmp")
+      subStrTypes <- subStrTypes[order(subStrTypes$SumRelInt,
+                                       decreasing = T), ]
+      subStrTypes$nPeaks <- length(spec.df$intensity)
+      } else {
+      subStrTypes <- data.frame(compSpecName = names_CompSpec[x],
+                                SubStrType = "no substructure detected", 
+                                SumRelInt = "no substructure detected", 
+                                Freq = "no substructure detected",
+                                nPeaks = "no substructure detected",
+                                stringsAsFactors = F)
+      }
+      return(subStrTypes)
+    })
+  } else {
+    stop("subStructure.Annotate function has not yet been applied")
+  }
+     
+    subStrAnno(object) <- do.call("rbind", substrBestIds)
+    return(object)
+    
+  })
