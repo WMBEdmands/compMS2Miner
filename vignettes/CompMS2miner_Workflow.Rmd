@@ -1,8 +1,12 @@
 ---
-title: "CompMS2miner WorkFlow"
+title: "CompMS2miner_Workflow"
 author: "WMB Edmands"
-date: "Sunday, June 21, 2015"
-output: pdf_document
+date: '`r format(Sys.Date(), "%B %e, %Y")`'
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CompMS2miner_Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 Matches MS1 features to MS2 spectra (.mzXML) files based on a 
@@ -52,7 +56,7 @@ mzXmlDir_example <- dirname(MS1features_example)
 # use parallel package to detect number of cores
 nSlaves <- parallel::detectCores()
 # create compMS2 object
-compMS2demo <- compMS2(MS1featuresCsvName = MS1features_example, 
+compMS2demo <- compMS2(MS1features = MS1features_example, 
                        mzXMLdir = mzXmlDir_example, nSlaves=nSlaves,
                        mode = "pos", precursorPpm = 10, ret = 10, 
                        TICfilter = 10000)
@@ -114,7 +118,7 @@ function metID (see ?metID) for further details.
 # predict Phase II metabolites from SMILES codes
  compMS2demo <- metID(compMS2demo, "predSMILES")
 
-# metFrag insilico fragmentation
+# metFrag insilico fragmentation..in development
 #compMS2demo <- metID(compMS2demo, "metFrag")
 
 ```
@@ -122,4 +126,4 @@ function metID (see ?metID) for further details.
 ##6. Optional curate data in CouchDB/ publish results as a shiny App. 
 CompMS2 class objects can be sent to either a local or online couchDB database.
 Furthermore, the results of the CompMS2miner workflow can be published on the 
-web as a shiny application to share metabolite identification information.
+web as a shiny application to share metabolite identification information (In development).

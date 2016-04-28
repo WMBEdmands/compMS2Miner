@@ -30,6 +30,11 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
                                                 "negative"), 
           " ionisation mode")
   flush.console()
+  # if foreach package not installed
+  if(!require(foreach)){
+    install.packages('foreach')
+    require(foreach)
+  }
   # set proxy settings
 #   setInternet2(TRUE) 
   # set global options
