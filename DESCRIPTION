@@ -4,11 +4,11 @@ Title: metabolite identification workflow for metabolomic high-resolution LC-MS
 Version: 1.0.4
 Date: 2016-06-23
 Authors@R: c(
-    person("William", "Edmands", 'MB', role = c("aut", "cre"), email="edmandsw@berkeley.edu"),
+    person("William MB", "Edmands", role = c("aut", "cre"), email="edmandsw@berkeley.edu"),
     person("Lauren", "Petrick", role = "aut", email = "lpetrick@berkeley.edu"),
-    person("Dinesh", "Barupal", 'K', role = "aut", email = "barupal@gmail.com"),
+    person("Dinesh K", "Barupal", role = "aut", email = "barupal@gmail.com"),
     person("Augustin", "Scalbert", role = "aut", email = "scalberta@iarc.fr"),
-    person("Stephen", "Rappaport", 'M', role = "aut", email = "srappaport@berkeley.edu"))
+    person("Stephen M", "Rappaport", role = "aut", email = "srappaport@berkeley.edu"))
 Author: William MB Edmands [aut, cre], Lauren Petrick [aut], Dinesh K Barupal [aut], Augustin Scalbert [aut], Stephen M Rappaport [aut]
 Maintainer: William MB Edmands <edmandsw@berkeley.edu>
 Description: metabolite identification workflow for metabolomic high-resolution
