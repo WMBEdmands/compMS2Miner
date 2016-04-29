@@ -13,8 +13,8 @@
 #' @param MS1features either a data.frame, full file path as a character string to a  .csv file of a MS1 feature table in the form observation (samples) in columns and
 #' variables (Mass spectral signals) in rows, the first 3 columns must consist of:
 #' \enumerate{
-#'  \item EIC number of unique peak identifier.
-#'  \item mass to charge ratio of peak group.
+#'  \item EIC number or unique peak identifier.
+#'  \item mass-to-charge ratio of peak group.
 #'  \item median/ peak apex retention time in seconds. 
 #'  }
 #'  If argument is not supplied a GUI (tcltk) file selection window will open and a .csv file can then be selected. 

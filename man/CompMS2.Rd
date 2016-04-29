@@ -8,17 +8,25 @@ compMS2(MS1features = NULL, mzXMLdir = NULL, nSlaves = NULL,
   mode = "pos", precursorPpm = 10, ret = 10, TICfilter = 10000)
 }
 \arguments{
-\item{nSlaves}{Number of cores for parallel computation?}
+\item{MS1features}{either a data.frame, full file path as a character string to a  .csv file of a MS1 feature table in the form observation (samples) in columns and
+variables (Mass spectral signals) in rows, the first 3 columns must consist of:
+\enumerate{
+ \item EIC number of unique peak identifier.
+ \item mass to charge ratio of peak group.
+ \item median/ peak apex retention time in seconds. 
+ }
+ If argument is not supplied a GUI (tcltk) file selection window will open and a .csv file can then be selected.}
 
-\item{mode}{Ionisation polarity ?}
+\item{nSlaves}{numeric Number of cores for parallel computation.}
 
-\item{precursorPpm}{Parts per million mass accuracy to match MS1 features to MS2 spectra (ppm)}
+\item{mode}{character Ionisation polarity must be either 'pos' or 'neg'.}
 
-\item{ret}{Retention time tolerance to match MS1 features to MS2 spectra (+/- seconds)}
+\item{precursorPpm}{numeric Parts per million mass accuracy to match MS1 features to MS2 spectra (ppm)}
 
-\item{TICfilter}{Minimum Total Ion Current to consider an MS2 spectrum ? 
-#@param pH Approximate pH of mobile phase for LogD of DB matches 
-#@param minTanimotoScore minimum tanimoto chemical similarity score?}
+\item{ret}{numeric retention time tolerance to match MS1 features to MS2 spectra (+/- seconds).}
+
+\item{TICfilter}{numeric Minimum Total Ion Current to consider an MS2 spectrum. Any MS2 scan
+below this threshold will not be considered.}
 }
 \value{
 A compMS2 object
