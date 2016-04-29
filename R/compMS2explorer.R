@@ -19,13 +19,7 @@ setMethod("compMS2explorer", signature = "CompMS2", function(object, browserLaun
       #    library(XML)
       #    library(RCurl)
       ###feature names from compMS2 object
-      # install shiny if necessary
-      if(!require(shiny)){
-      install.packages('shiny')
-      if(!require(shiny)){
-      stop('the shiny package is required for the compMS2explorer application...\n')  
-      }
-      }
+      
       composite_spectra <- compSpectra(object)
       Features.v <- names(composite_spectra)
       ###DB search names

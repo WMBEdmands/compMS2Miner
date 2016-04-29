@@ -33,8 +33,38 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
   # if foreach package not installed
   if(!require(foreach)){
     install.packages('foreach')
-    require(foreach)
+    if(!require(foreach)){
+      stop('Unable to install the foreach package which is required for correct functioning of the compMS2miner package...\n')
+    }
   }
+  # if foreach package not installed
+  if(!require(Rcpp)){
+    install.packages('Rcpp')
+    if(!require(Rcpp)){
+      stop('Unable to install the Rcpp package which is required for correct functioning of the compMS2miner package...\n')
+    }
+    }
+  
+  # install shiny if necessary
+  if(!require(shiny)){
+    install.packages('shiny')
+    if(!require(shiny)){
+      stop('Unable to install the rCharts package which is required for correct functioning of the compMS2explorer application...\n')  
+    }
+  }
+  # install rCharts/ devtools if necessary
+  if(!require(rCharts)){
+    if(!require(devtools)){
+      install.packages('devtools')
+    }
+    if(!require(devtools)){
+      stop('Unable to install the devtools package which is required for correct functioning of the compMS2explorer application...\n')    
+    }
+    devtools::install_github('ramnathv/rCharts')
+    if(!require(rCharts)){
+      stop('Unable to install the rCharts package which is required for correct functioning of the compMS2explorer application...\n')  
+    }  
+  } 
   # set proxy settings
 #   setInternet2(TRUE) 
   # set global options
