@@ -17,7 +17,7 @@ and summed, substructure groups identified, common Phase II metabolites
 predicted and features matched to data bases monoisotopic mass data 
 and insilico MS2 fragmentation data.
 The resulting data can then be readily curated by sending to a local or online
-couchDB database.
+couchDB database. 
 
 Ensure all necessary R packages are installed, rCharts must be installed from 
 GitHub using the install_github function of devtools. The rCharts packages is

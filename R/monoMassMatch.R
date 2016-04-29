@@ -82,7 +82,8 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
                                        metMasses + 44.998201,  
                                        metMasses + 20.974666,	
                                        metMasses + 36.948606,	
-                                       metMasses + 59.013851,	
+                                       metMasses + 59.013851,
+                                       metMasses + 82.00307,
                                        2 * metMasses + 44.998201,	
                                        metMasses /2 - 1.007276,	
                                        metMasses /3 - 1.007276,	
@@ -90,7 +91,7 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
                                        3 * metMasses - 1.007276,	
                                        2 * metMasses + 59.013851), nrow = length(metMasses)))
       colnames(metMasses)<- c("M-H", "M-H2O-H", "M+FA-H", "M+Na-2H", "M+K-2H", 
-                              "M+Hac-H", "M2+FA-H", "M-2H", "M-3H", "M2-H", "M3-H",
+                              "M+Hac-H", "M+Hac+Na-H", "M2+FA-H", "M-2H", "M-3H", "M2-H", "M3-H",
                               "M2+Hac-H")
     }
     # add substr mass shifts
