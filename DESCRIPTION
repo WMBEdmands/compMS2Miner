@@ -1,6 +1,6 @@
 Package: CompMS2miner
-Title: metabolite identification workflow for metabolomic high-resolution LC-MS
-    datasets
+Title: metabolite identification workflow for metabolomic
+    high-resolution LC-MS datasets
 Version: 1.0.4
 Date: 2016-06-23
 Authors@R: c(
@@ -9,19 +9,39 @@ Authors@R: c(
     person("Dinesh K", "Barupal", role = "aut", email = "barupal@gmail.com"),
     person("Augustin", "Scalbert", role = "aut", email = "scalberta@iarc.fr"),
     person("Stephen M", "Rappaport", role = "aut", email = "srappaport@berkeley.edu"))
-Author: William MB Edmands [aut, cre], Lauren Petrick [aut], Dinesh K Barupal [aut], Augustin Scalbert [aut], Stephen M Rappaport [aut]
+Author: William MB Edmands [aut, cre], Lauren Petrick [aut], Dinesh K Barupal
+    [aut], Augustin Scalbert [aut], Stephen M Rappaport [aut]
 Maintainer: William MB Edmands <edmandsw@berkeley.edu>
 Description: metabolite identification workflow for metabolomic high-resolution
     LC-MS datasets.
-Depends: R (>= 3.1.0)
-Imports: foreach, mzR, rCharts, Rcpp, shiny, ChemmineR, ChemmineOB, couchDB, fastcluster, data.table, doSNOW, DT, methods, parallel, RcppEigen, reshape2, rjson, tcltk2
+Depends:
+    R (>= 3.1.0)
+Imports:
+    foreach,
+    mzR,
+    rCharts,
+    Rcpp,
+    shiny,
+    ChemmineR,
+    couchDB,
+    fastcluster,
+    data.table,
+    doSNOW,
+    DT,
+    methods,
+    parallel,
+    RcppEigen,
+    reshape2,
+    rjson,
+    tcltk2
 License: GPL (>= 2) + file LICENSE
 BugReports: https://github.com/WMBEdmands/CompMS2miner/issues/new
 URL: dx.doi.org/10.5281/zenodo.50590 (stable release v1.0.0)
 #biocViews: MassSpectrometry, Metabolomics
 LazyData: true
 LazyLoad: true
-RoxygenNote: 5.0.0
-Suggests: knitr,
+RoxygenNote: 5.0.1
+Suggests:
+    knitr,
     rmarkdown
 VignetteBuilder: knitr
