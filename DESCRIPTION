@@ -22,7 +22,6 @@ Imports:
     rCharts,
     Rcpp,
     shiny,
-    ChemmineR,
     couchDB,
     fastcluster,
     data.table,
