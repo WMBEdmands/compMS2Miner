@@ -25,15 +25,16 @@ of peaks is lower than the maximum (default = 5).}
 }
 \value{
 a list containing 3 objects:
-1. Above.noise The dynamic noise filtered matrix/ dataframe 
-2. metaData a dataframe with the following column names:
+\enumerate{
+\item Above.noise The dynamic noise filtered matrix/ dataframe 
+\item metaData a dataframe with the following column names:
        1. Noise.level the noise level determined by the dynamic noise filter 
           function.
        2. IntCompSpec Total intensity composite spectrum.
        3. TotalIntSNR Sparse ion signal to noise ratio 
        (mean intensity/ stdev intensity)
        4. nPeaks number of peaks in composite spectrum
-3. aboveMinPeaks Logical are the number of signals above the minimum level
+\item aboveMinPeaks Logical are the number of signals above the minimum level}
 }
 \description{
 Dynamic Noise filtration

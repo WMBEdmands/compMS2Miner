@@ -3,8 +3,7 @@
 setGeneric("intFeatCorr", function(object, ...) standardGeneric("intFeatCorr"))
 
 setMethod("intFeatCorr", signature = "CompMS2", function(object,
-                                                         sampleIDstring = NULL
-){
+                                                         sampleIDstring = NULL){
   
   # error handling
   if(class(object) != "CompMS2"){

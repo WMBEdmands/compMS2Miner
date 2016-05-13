@@ -20,6 +20,6 @@ A compMS2 object with noise filtered composite spectra.
 Filter spectral noise from a CompMS2 class object
 }
 \seealso{
-deconvNoise.DNF, deconvNoise.maxInt
+\code{\link{deconvNoise.DNF}}, \code{\link{deconvNoise.maxInt}}
 }
 

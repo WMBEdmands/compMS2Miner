@@ -17,7 +17,6 @@
 #' @source Xu H. and Frietas M. "A Dynamic Noise Level Algorithm for Spectral 
 #' Screening of Peptide MS/MS Spectra" 2010 BMC Bioinformatics.
 #' @export 
-
 setGeneric("deconvNoise.DNF", function(object, ...) standardGeneric("deconvNoise.DNF"))
 
 setMethod("deconvNoise.DNF", signature = "CompMS2", function(object, DNF=2, 

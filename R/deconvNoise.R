@@ -5,7 +5,7 @@
 #' @param ... option arguments to be passed along.
 #' 
 #' @return A compMS2 object with noise filtered composite spectra.
-#' @seealso deconvNoise.DNF, deconvNoise.maxInt
+#' @seealso \code{\link{deconvNoise.DNF}}, \code{\link{deconvNoise.maxInt}}
 #' @export
 setGeneric("deconvNoise", function(object, ...) standardGeneric("deconvNoise"))
 
