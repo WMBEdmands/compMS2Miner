@@ -1,5 +1,6 @@
 #' get PubMed title function adapted from PubChemWordcloud package v 0.3.2
 #' @param pmid pubmed id number
+#' @export
 getTitles <- function(pmid){
   if(length(pmid) > 0){
     eDDownload <- "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id="
