@@ -251,67 +251,67 @@ setMethod("compMS2explorer", signature = "CompMS2", function(object, browserLaun
               ##### 1. Raw data plot ####
               ###########################
               
-              output$Raw_data_plot <- rCharts::renderChart({  
-                
-                plot.df<-data.frame(composite_spectra[[feat.indx]], stringsAsFactors = F)
-                colnames(plot.df)<-gsub("\\.","_",colnames(plot.df))
-                if(!is.null(plot.df$Frag_ID))
-                {
-                  
-                  #           plot.df[, c("mass", "intensity", "Rel_Intensity", "Precursorfrag_diff")] <- apply(plot.df[, c("mass", "intensity",  "Rel_Intensity", "Precursorfrag_diff")], 2, as.numeric)
-                  plot.df$Precursorfrag_diff<-as.numeric(plot.df$Precursorfrag_diff)
-                  plot.df$Fragment_Assigned<-ifelse(apply(plot.df[,c("Frag_ID","Neutral_loss","interfrag_loss")],1,function(x) any(x!="")),"Fragment_identified","No_Fragment_identified")
-                  r1<-rCharts::rPlot(x = "bin(mass,2)", y = "intensity", data=plot.df , type = "bar",size = list(const = 5),color="Fragment_Assigned",
-                                     tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
-                                     ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
-                  #           
-                  r1$guides(
-                    color=list(scale = "#! function(value){
-                               color_mapping = {No_Fragment_identified: '#6495ED',Fragment_identified:'#FF3030'}
-                               return color_mapping[value];                  
-              } !#"),
-                    x = list(min=0,max=max(plot.df$mass)+50,title = 'm/z'),
-                    y = list(title = 'intensity')
-                    )
-                  r1$set(width = 1000, height = 700)
-                  r1$set(dom="Raw_data_plot")
-                  
-                  return(r1)
-                  
-              } else {
-                #           plot.df[, c("mass", "intensity", "Rel_Intensity", "Precursorfrag_diff")] <- apply(plot.df[, c("mass", "intensity",  "Rel_Intensity", "Precursorfrag_diff")], 2, as.numeric)
-                r1<-rCharts::rPlot(x = "bin(mass,2)", y = "intensity", data=plot.df , type = "bar",size = list(const = 5),#,color="Fragment_Assigned",
-                                   tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass }!#")
-                #           
-                r1$guides(
-                  x = list(min=0,max=max(plot.df$mass)+50,title = 'm/z'),
-                  y = list(title = 'intensity')
-                )
-                r1$set(width = 1000, height = 700)
-                r1$set(dom="Raw_data_plot")
-                
-                return(r1)
-              }
-              #         plot.df<-as.data.frame(composite_spectrum$composite_spectrum,stringsAsFactors=F)
-              #         colnames(plot.df)<-gsub("\\.","_",colnames(plot.df))
-              #         plot.df$MetFrag<-ifelse(plot.df[,input$plotChoice]=="","No_Fragment_identified","MetFrag_assigned")
-              #         r1<-rPlot(x = "bin(mass,2)", y = "intensity", data=plot.df , type = "bar",size = list(const = 5),color="MetFrag",
-              #                   tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
-              #                   ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
-              #         r1$guides(
-              #           color=list(scale = "#! function(value){
-              #                      color_mapping = {No_Fragment_identified: '#6495ED',MetFrag_assigned:'#BF3EFF'}
-              #                      return color_mapping[value];                  
-              #                      } !#"),
-              #           x = list(min=0,max=max(plot.df$mass)+50,title = 'm/z'),
-              #           y = list(title = 'intensity')
-              #         )
-              #         r1$set(width = 1000, height = 700)
-              #         r1$set(dom="Raw_data_plot")
-              #         
-              #         return(r1)
-              #       }
-              })
+              # output$Raw_data_plot <- rCharts::renderChart({  
+              #   
+              #   plot.df<-data.frame(composite_spectra[[feat.indx]], stringsAsFactors = F)
+              #   colnames(plot.df)<-gsub("\\.","_",colnames(plot.df))
+              #   if(!is.null(plot.df$Frag_ID))
+              #   {
+              #     
+              #     #           plot.df[, c("mass", "intensity", "Rel_Intensity", "Precursorfrag_diff")] <- apply(plot.df[, c("mass", "intensity",  "Rel_Intensity", "Precursorfrag_diff")], 2, as.numeric)
+              #     plot.df$Precursorfrag_diff<-as.numeric(plot.df$Precursorfrag_diff)
+              #     plot.df$Fragment_Assigned<-ifelse(apply(plot.df[,c("Frag_ID","Neutral_loss","interfrag_loss")],1,function(x) any(x!="")),"Fragment_identified","No_Fragment_identified")
+              #     r1<-rCharts::rPlot(x = "bin(mass,2)", y = "intensity", data=plot.df , type = "bar",size = list(const = 5),color="Fragment_Assigned",
+              #                        tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
+              #                        ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
+              #     #           
+              #     r1$guides(
+              #       color=list(scale = "#! function(value){
+              #                  color_mapping = {No_Fragment_identified: '#6495ED',Fragment_identified:'#FF3030'}
+              #                  return color_mapping[value];                  
+              # } !#"),
+              #       x = list(min=0,max=max(plot.df$mass)+50,title = 'm/z'),
+              #       y = list(title = 'intensity')
+              #       )
+              #     r1$set(width = 1000, height = 700)
+              #     r1$set(dom="Raw_data_plot")
+              #     
+              #     return(r1)
+              #     
+              # } else {
+              #   #           plot.df[, c("mass", "intensity", "Rel_Intensity", "Precursorfrag_diff")] <- apply(plot.df[, c("mass", "intensity",  "Rel_Intensity", "Precursorfrag_diff")], 2, as.numeric)
+              #   r1<-rCharts::rPlot(x = "bin(mass,2)", y = "intensity", data=plot.df , type = "bar",size = list(const = 5),#,color="Fragment_Assigned",
+              #                      tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass }!#")
+              #   #           
+              #   r1$guides(
+              #     x = list(min=0,max=max(plot.df$mass)+50,title = 'm/z'),
+              #     y = list(title = 'intensity')
+              #   )
+              #   r1$set(width = 1000, height = 700)
+              #   r1$set(dom="Raw_data_plot")
+              #   
+              #   return(r1)
+              # }
+              # #         plot.df<-as.data.frame(composite_spectrum$composite_spectrum,stringsAsFactors=F)
+              # #         colnames(plot.df)<-gsub("\\.","_",colnames(plot.df))
+              # #         plot.df$MetFrag<-ifelse(plot.df[,input$plotChoice]=="","No_Fragment_identified","MetFrag_assigned")
+              # #         r1<-rPlot(x = "bin(mass,2)", y = "intensity", data=plot.df , type = "bar",size = list(const = 5),color="MetFrag",
+              # #                   tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
+              # #                   ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
+              # #         r1$guides(
+              # #           color=list(scale = "#! function(value){
+              # #                      color_mapping = {No_Fragment_identified: '#6495ED',MetFrag_assigned:'#BF3EFF'}
+              # #                      return color_mapping[value];                  
+              # #                      } !#"),
+              # #           x = list(min=0,max=max(plot.df$mass)+50,title = 'm/z'),
+              # #           y = list(title = 'intensity')
+              # #         )
+              # #         r1$set(width = 1000, height = 700)
+              # #         r1$set(dom="Raw_data_plot")
+              # #         
+              # #         return(r1)
+              # #       }
+              # })
               
               ###########################
               ##### 2. metadata table ###
@@ -683,7 +683,7 @@ setMethod("compMS2explorer", signature = "CompMS2", function(object, browserLaun
         shiny::column(width=8,
                       shiny::conditionalPanel(condition="input.tabbedPanelButton >'0' & input.FeatureNames!='No MS2 features found'",
                                               shiny::tabsetPanel(
-                                                shiny::tabPanel("Composite MS2 plot",rCharts::chartOutput("Raw_data_plot","PolyCharts")),#,#plotOutput("MS2_plot",width = "800px", height = "600px")), 
+                                                # shiny::tabPanel("Composite MS2 plot",rCharts::chartOutput("Raw_data_plot","PolyCharts")),#,#plotOutput("MS2_plot",width = "800px", height = "600px")), 
                                                 shiny::tabPanel("MS2 spectrum table",DT::dataTableOutput(outputId="MS2_data")),
                                                 shiny::tabPanel("MS1 MS2 match summary",DT::dataTableOutput(outputId="metadata")),
                                                 shiny::tabPanel("DB Annotations", DT::dataTableOutput(outputId="DB.results")),
