@@ -2,11 +2,16 @@
 % Please edit documentation in R/compMS2explorer.R
 \name{compMS2explorer}
 \alias{compMS2explorer}
-\title{shiny viz}
+\title{Visualize your CompMS2miner results output using a shiny app.}
 \usage{
 compMS2explorer(object, ...)
 }
+\arguments{
+\item{object}{a compMS2 class object}
+
+\item{browserLaunch}{logical launch app in web browser (default = TRUE).}
+}
 \description{
-shiny viz
+Visualize your CompMS2miner results output using a shiny app.
 }
 
