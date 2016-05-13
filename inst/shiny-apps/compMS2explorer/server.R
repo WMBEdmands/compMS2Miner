@@ -11,8 +11,8 @@ shiny::shinyServer(function(input,  output, session){
   })
   # feature selection shiny::reactive
   Featureselection <- shiny::reactive({
-    if(input$goButton==0){ 
-      return() } else if (input$goButton > 0 & input$All_Features==TRUE) {
+    if(input$goButton == 0){ 
+      return() } else if (input$goButton > 0 & input$All_Features == TRUE) {
         
         NoFeaturesIndx <- ""
         FeaturesIndx <- ""  
@@ -27,7 +27,7 @@ shiny::shinyServer(function(input,  output, session){
           NoFeaturesIndx <- unique(c(NoFeaturesIndx,  grep(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  2])))
           NoSubStrmatchFreq <- length(NoFeaturesIndx)
           #               NoFeaturesIndx <- Features.v[NoFeaturesIndx]
-          if(length(NoFeaturesIndx) == 0){NoFeaturesIndx <- ""}
+          if(length(NoFeaturesIndx)  ==  0){NoFeaturesIndx <- ""}
         }
         
         if (any(input$SubStrTypes!=""))
@@ -39,11 +39,11 @@ shiny::shinyServer(function(input,  output, session){
           FeaturesIndx <- grep(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  1])
           FeaturesIndx <- unique(c(FeaturesIndx,  grep(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  2])))
           SubStrmatchFreq <- length(NoFeaturesIndx)
-          if(length(FeaturesIndx) == 0){FeaturesIndx <- ""}
+          if(length(FeaturesIndx)  ==  0){FeaturesIndx <- ""}
         }
         
         # if features indices not equal 
-        if(setequal(FeaturesIndx,  NoFeaturesIndx)==F)
+        if(setequal(FeaturesIndx,  NoFeaturesIndx) == F)
         { 
           if(!is.character(FeaturesIndx))
           {
@@ -60,7 +60,7 @@ shiny::shinyServer(function(input,  output, session){
           Feature.v.sub <- Features.v
         }
         
-        if(length(Feature.v.sub)==0)
+        if(length(Feature.v.sub) == 0)
         {
           return("No MS2 features found")
         } else {
@@ -70,14 +70,14 @@ shiny::shinyServer(function(input,  output, session){
   # DB name match shiny::reactive
   DBFeatureselection <- shiny::reactive({
     
-    if(input$DBbutton == 0){ return()
+    if(input$DBbutton  ==  0){ return()
     } else if (input$DBbutton > 0){
       DBnamesTMP <- grep(input$DB_match_name,  DBmatches[,  1],  ignore.case=T)
       DBnamesTMP <- unique(c(DBnamesTMP,  grep(input$DB_match_name,  DBmatches[,  2], 
                                               ignore.case=T)))
       
       Feature.v.sub <- Features.v[DBnamesTMP]
-      if(length(Feature.v.sub)==0)
+      if(length(Feature.v.sub) == 0)
       {
         return("No MS2 features found")
       } else {
@@ -147,7 +147,7 @@ shiny::shinyServer(function(input,  output, session){
         
         if(!is.null(input$CommentButton))
         {
-          if(input$CommentButton==0)
+          if(input$CommentButton == 0)
           {
             vars <- shiny::reactiveValues(actionCounter=0)
           } else {
@@ -167,6 +167,7 @@ shiny::shinyServer(function(input,  output, session){
           colnames(plotDfTmp) <- gsub("\\.", "_", colnames(plotDfTmp))
           plotDfTmp$Precursorfrag_diff <- as.numeric(plotDfTmp$Precursorfrag_diff)
           plotDfTmp$Fragment_Assigned <- ifelse(apply(plotDfTmp[, c("Frag_ID", "Neutral_loss", "interfrag_loss")], 1, function(x) any(x!="")), "Fragment_identified", "No_Fragment_identified")
+          plotDfTmp <- plotDfTmp[, grepl('_SMILES', colnames(plotDfTmp))  ==  F, drop=F]
           return(plotDfTmp)
         })
         output$MS2_plot <- shiny::renderPlot({
@@ -181,7 +182,7 @@ shiny::shinyServer(function(input,  output, session){
               }
               
               plot(plotDfTmp[, c('mass', 'intensity')], xlim=xlimTmp, ylim=ylimTmp,
-                   type='h', col=ifelse(plotDfTmp$Fragment_Assigned == 'Fragment_identified', 'red', 'black'))
+                   type='h', col=ifelse(plotDfTmp$Fragment_Assigned  ==  'Fragment_identified', 'red', 'black'))
         
           })
         
@@ -196,9 +197,9 @@ shiny::shinyServer(function(input,  output, session){
         # ui tab 1 nearpoints plot click 
         output$compMS2tableInfo <- renderPrint({
           plotDfTmp <- plotDf()
-          plotDfTmp <- plotDfTmp[, grepl('_SMILES', colnames(plotDfTmp)) == F, drop=F]
+          
           brushedPoints(plotDfTmp, input$compMS2_brush, xvar = "mass", yvar = "intensity")
-          })
+          }, width = 280)
           
         # output$Raw_data_plot <- rCharts::renderChart({  
         #   
@@ -243,7 +244,7 @@ shiny::shinyServer(function(input,  output, session){
         # }
         # #         plot.df <- as.data.frame(composite_spectrum$composite_spectrum, stringsAsFactors=F)
         # #         colnames(plot.df) <- gsub("\\.", "_", colnames(plot.df))
-        # #         plot.df$MetFrag <- ifelse(plot.df[, input$plotChoice]=="", "No_Fragment_identified", "MetFrag_assigned")
+        # #         plot.df$MetFrag <- ifelse(plot.df[, input$plotChoice] == "", "No_Fragment_identified", "MetFrag_assigned")
         # #         r1 <- rPlot(x = "bin(mass, 2)",  y = "intensity",  data=plot.df ,  type = "bar", size = list(const = 5), color="MetFrag", 
         # #                   tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
         # #                   ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
@@ -330,7 +331,7 @@ shiny::shinyServer(function(input,  output, session){
         ###########################
         
         output$DB.results <- DT::renderDataTable({
-          if(length(object@DBanno) == 0){
+          if(length(object@DBanno)  ==  0){
             DB.results <- data.frame("metID.dbAnnotate function has not yet been run",  stringsAsFactors=F)
             colnames(DB.results) <- "Result"
             return(DB.results) 
@@ -342,7 +343,7 @@ shiny::shinyServer(function(input,  output, session){
             # clickable SMILES pugRest
             SMILESindx <- grep("SMILES$", colnames(DB.results))
             DB.results[, SMILESindx] <- sapply(SMILESindx, function(x){
-              NoFuncIndx <- DB.results[,  x] == ""
+              NoFuncIndx <- DB.results[,  x]  ==  ""
               ifelse(NoFuncIndx, "", 
                      paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", 
                             gsub("/|\\\\", "",  DB.results[, x]), "/PNG", "' target='_blank'>",  
@@ -358,7 +359,7 @@ shiny::shinyServer(function(input,  output, session){
         ##############################
         
         output$BestCandidates <- DT::renderDataTable({
-          if(length(object@BestAnno) == 0){
+          if(length(object@BestAnno)  ==  0){
             DB.results <- data.frame("metID.dbProb function has not yet been run", stringsAsFactors=F)
             colnames(DB.results) <- "Result"
             return(DB.results) 
@@ -370,7 +371,7 @@ shiny::shinyServer(function(input,  output, session){
             # clickable SMILES pugRest
             SMILESindx <- grep("SMILES$", colnames(DB.results))
             DB.results[, SMILESindx] <- sapply(SMILESindx, function(x){
-              NoFuncIndx <- DB.results[,  x] == ""
+              NoFuncIndx <- DB.results[,  x]  ==  ""
               ifelse(NoFuncIndx, "", 
                      paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", 
                             gsub("/|\\\\", "",  DB.results[, x]), "/PNG", "' target='_blank'>",  
@@ -387,7 +388,7 @@ shiny::shinyServer(function(input,  output, session){
         ############################################
         
         output$BestSubStrAnno <- DT::renderDataTable({
-          if(nrow(subStrAnno.df) == 0){
+          if(nrow(subStrAnno.df)  ==  0){
             SbStrResults <- data.frame("subStructure.prob function has not yet been run",  stringsAsFactors=F)
             colnames(SbStrResults) <- "Result"
             return(SbStrResults) 
@@ -399,7 +400,7 @@ shiny::shinyServer(function(input,  output, session){
         
         ##ui for word cloud
         output$wordCloudSelect <- renderUI({
-          if(length(object@DBanno) == 0){
+          if(length(object@DBanno)  ==  0){
             DBmatches <- "metID.dbAnnotate function has not yet been run/ No matches to DB"
           } else {
             DBmatches <- tmp.DBanno.res[[feat.indx]]$DBname
@@ -422,10 +423,10 @@ shiny::shinyServer(function(input,  output, session){
         ####################################
         
         output$WordCloud <- shiny::renderPlot({
-          if(length(object@DBanno) == 0){
+          if(length(object@DBanno)  ==  0){
             ClAbs <- data.frame(word="metID.dbAnnotate function not run",  freq=1)
             PubMedWordcloud::plotWordCloud(ClAbs,  min.freq=1,  max.words=100,  rot.per=0)
-          } else if (nrow(tmp.DBanno.res[[feat.indx]])  == 0) {
+          } else if (nrow(tmp.DBanno.res[[feat.indx]])   ==  0) {
             ClAbs <- data.frame(word="No matches to DB",  freq=1)
             PubMedWordcloud::plotWordCloud(ClAbs,  min.freq=1,  max.words=100,  rot.per=0)
           } else {
@@ -469,11 +470,11 @@ shiny::shinyServer(function(input,  output, session){
         ###########################################
         
         output$WordCloudTable <- shiny::renderTable({
-          if(length(object@DBanno) == 0){
+          if(length(object@DBanno)  ==  0){
             WordCloud.df <- data.frame("No PMIDs returned")
             colnames(WordCloud.df) <- input$FeatureNames
             return(WordCloud.df)
-          } else if (nrow(tmp.DBanno.res[[feat.indx]])  == 0) {
+          } else if (nrow(tmp.DBanno.res[[feat.indx]])   ==  0) {
             WordCloud.df <- data.frame("No PMIDs returned")
             colnames(WordCloud.df) <- input$FeatureNames
             return(WordCloud.df)
@@ -508,7 +509,7 @@ shiny::shinyServer(function(input,  output, session){
         #####################################
         
         output$MetFragTable <- shiny::renderTable({
-          if(length(tmp.metFrag) == 0)
+          if(length(tmp.metFrag)  ==  0)
           {
             metFrag.df.tmp <- "metID.MetFrag function has not yet been run"
             metFrag.df.tmp <- data.frame(metFrag.df.tmp)
@@ -552,7 +553,7 @@ shiny::shinyServer(function(input,  output, session){
         output$CommentSectionHeader <- shiny::renderUI({shiny::tags$b("Add metabolite identification notes including any useful html links here...\n
                                                                       NB. Do not forget to save your comments to the features results directory using the button on the left")})
         output$UserComments <- shiny::renderUI({
-          if(length(Comments(compMS2)) == 0){
+          if(length(Comments(compMS2))  ==  0){
             PrevComment <- "No previous comments"
           } else if(is.null(Comments(object)[[feat.indx]])){
             PrevComment <- "No previous comments"
