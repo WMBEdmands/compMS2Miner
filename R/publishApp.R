@@ -2,11 +2,11 @@
 #' 
 #' you must hold a shinyapps.io account and have a token.
 #' use this command from the package rsconnect to set up your token
-#' \code{rsconnect::setAccountInfo(name='your_shinyapps.io_user_name', token='your_token', secret='your_secret')}
+#' \code{setAccountInfo(name='your_shinyapps.io_user_name', token='your_token', secret='your_secret')}
 #' Following this the app can be deployed on your account
 #' @param object a compMS2 class object 
 #' @param appName a name for your new app.
-#' @param ... further arguments to the \code{\link{shinyapps::deployApp}} function
+#' @param ... further arguments to the \code{\link{deployApp}} function
 #' @export
 setGeneric("publishApp", function(object, appName=NULL, ...) standardGeneric("publishApp"))
 
