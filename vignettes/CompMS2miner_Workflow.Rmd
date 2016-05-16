@@ -19,18 +19,6 @@ and insilico MS2 fragmentation data.
 The resulting data can then be readily curated by sending to a local or online
 couchDB database. 
 
-Ensure all necessary R packages are installed, rCharts must be installed from 
-GitHub using the install_github function of devtools. The rCharts packages is
-used for reactive graphical visualizations in the shiny application. 
-The following will install this additional package resource:
-
-```{r eval=FALSE}
-install.packages("devtools")
-library(devtools)
-## install rCharts directly from github using devtools
-install_github("ramnathv/rCharts")
-```
-
 At any stage during the compMS2 workflow a compMS2 class object can be visualized
 with a Shiny application. Full usage of the compMS2shiny application functionality requires an internet connection.
 The end result of following the workflow within this document using the example data provided can be visualized using the function:
@@ -118,12 +106,21 @@ function metID (see ?metID) for further details.
 # predict Phase II metabolites from SMILES codes
  compMS2demo <- metID(compMS2demo, "predSMILES")
 
-# metFrag insilico fragmentation..in development
-#compMS2demo <- metID(compMS2demo, "metFrag")
+# metFrag insilico fragmentation.
+compMS2demo <- metID(compMS2demo, "metFrag")
 
 ```
 
 ##6. Optional curate data in CouchDB/ publish results as a shiny App. 
 CompMS2 class objects can be sent to either a local or online couchDB database.
 Furthermore, the results of the CompMS2miner workflow can be published on the 
-web as a shiny application to share metabolite identification information (In development).
+web as a shiny application to share metabolite identification information using 
+the publishApp function.
+
+```{r, eval=FALSE, collapse=TRUE}
+# publish your app to shinyapps.io see ?publishApp for more details
+# you may need to install the rsconnect and shinyapps packages and also sign up for a shinyapps.io account if you don't have one.
+# quick guide here for setting up your account: http://shiny.rstudio.com/articles/shinyapps.html
+publishApp(compMS2demo, appName='compMS2demo')
+
+```

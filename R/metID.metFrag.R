@@ -14,9 +14,12 @@
 #' @param featureSubSet optional character vector of feature names to on which to
 #' perform metFrag queries
 #' otherwise the default is to perform metFrag queries on all features.
-#' @param metFragJar file path to metfrag jar file, is unsupplied a file selection
-#'  window will appear. The jar file can be downloaded freely at 
+#' @param metFragJar file path to metfrag jar file, if null the external MetFragJarFile.jar
+#' found in the ext data directory will be utilized. Although the maintainers
+#' of CompMS2miner will endeavor to install any updated jar files the latest
+#' version can be downloaded here: 
 #'  \url{https://github.com/c-ruttkies/Tools/raw/master/MetFragCommandLineTool.jar}
+#'  and the full path to the downloaded .jar file can alternatively be supplied.
 #' @param keepTempSdf logical default = FALSE, sdf, mf and results files will
 #' be created temporarily otherwise temporary files will be retained in named
 #' subdirectories (see details).
@@ -43,7 +46,7 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
                                                           featureSubSet=NULL,
                                                           metFragJar=NULL, 
                                                           keepTempSdf=FALSE){
-  # to do list auto download MetFragJar internally
+  # to do list auto download metFragJar internally
   # error handling
   if(class(object) != "CompMS2"){
     stop("argument object is not an CompMS2 class object")
@@ -51,17 +54,24 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
     stop("metID.dbProb function has not yet been run or no probable annotations have been selected")
   } else if (all(sapply(BestAnno(object), is.null))){
     stop("metID.dbProb function has not yet been run or no probable annotations have been selected")
+  } else if (!require(ChemmineR)){
+    stop("the ChemmineR package must be installed from the Bioconductor repository to proceed.")
+  } else if (!require(ChemmineOB)){
+    stop("the ChemmineOB package must be installed from the Bioconductor repository to proceed.")
   } else {
-    if (is.null(MetFragJar)){
-      tcltk::tkmessageBox(message = "Select the MetFrag .jar (Java Archive) file in the next window. This can be downloaded directly from Github
-                          at the following web address: https://github.com/c-ruttkies/Tools/raw/master/MetFragCommandLineTool.jar" )
+    if (is.null(metFragJar)){
+      # tcltk::tkmessageBox(message = "Select the MetFrag .jar (Java Archive) file in the next window. This can be downloaded directly from Github
+      #                     at the following web address: https://github.com/c-ruttkies/Tools/raw/master/MetFragCommandLineTool.jar" )
+      # 
+      # 
+      # metFragJar <- tcltk::tclvalue(tcltk::tkgetOpenFile(filetypes = "{{Java Archive file} {.jar}} {{All files} *}",
+      #                                                    title="select your MetFrag .jar file"))
       
-      
-      MetFragJar <- tcltk::tclvalue(tcltk::tkgetOpenFile(filetypes = "{{Java Archive file} {.jar}} {{All files} *}",
-                                                         title="select your MetFrag .jar file"))
+      # internal to package in external data
+      metFragJar <- system.file("extdata", "MetFragCommandLineTool.jar", package = "CompMS2miner")
     }
     
-    # if MetFrag file empty then create list
+    # if metFrag file empty then create list
     if(length(MetFrag(object)) == 0){
       metFrag.res.tmp <- vector("list", length(compSpectra(object)))
       names(metFrag.res.tmp) <- names(compSpectra(object))
@@ -90,8 +100,8 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
       Neut.mass.tmp <- ifelse(Parameters(object)$mode == "pos", Neut.mass.tmp - 1.00726,
                               Neut.mass.tmp + 1.00726)
       
-      # create MetFrag Query File
-      MetFragQuery <- paste0("# Sample: ", names(compSpectra(object))[indx.tmp], "\n", 
+      # create metFrag Query File
+      metFragQuery <- paste0("# Sample: ", names(compSpectra(object))[indx.tmp], "\n", 
                              "# Parent Mass: ", Neut.mass.tmp , "\n", 
                              "# Search PPM: ", Parameters(object)$precursorPpm, "\n", 
                              "# Mode:", ifelse(Parameters(object)$mode == "pos", 3, 1), "\n", 
@@ -101,16 +111,16 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
       if(keepTempSdf == F){
         tmp.metFragDir <- paste0(getwd(),"/sdf_MetFragResults")
         suppressWarnings(dir.create(tmp.metFragDir))
-        MetFragQueryFile <- paste0(tmp.metFragDir, "/", FeatName.tmp, "_metFragQuery.mf")
+        metFragQueryFile <- paste0(tmp.metFragDir, "/", FeatName.tmp, "_metFragQuery.mf")
       } else {
         tmp.metFragDir <- paste0(getwd(), "/sdf_MetFragResults/")
         suppressWarnings(dir.create(tmp.metFragDir))
         tmp.metFragDir <- paste0(getwd(), "/sdf_MetFragResults/", FeatName.tmp)
         suppressWarnings(dir.create(tmp.metFragDir))
-        MetFragQueryFile <- paste0(tmp.metFragDir, "/", FeatName.tmp, "_metFragQuery.mf")
+        metFragQueryFile <- paste0(tmp.metFragDir, "/", FeatName.tmp, "_metFragQuery.mf")
       }
       # write mf query file   
-      writeLines(MetFragQuery, con=MetFragQueryFile)
+      writeLines(metFragQuery, con=metFragQueryFile)
       
       # create and write temporary sdf file
       # extract smiles codes from tmp best anno df
@@ -145,13 +155,14 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
           ChemmineR::write.SDF(SDF_tmp, SDF_file_name_tmp)
           
           message('sending metfrag query feature "', FeatName.tmp, '"...')
-          command <- paste0('java -jar "', MetFragJar,'" -D "', MetFragQueryFile,'" -R "', 
-                            dirname(MetFragQueryFile),'" -F -d sdf -L "',
+          command <- paste0('java -jar "', metFragJar,'" -D "', metFragQueryFile,'" -R "', 
+                            dirname(metFragQueryFile),'" -F -d sdf -L "',
                             SDF_file_name_tmp,'"')
           log <- system(command, intern = T, show.output.on.console = F, ignore.stderr = T)
+          # check if results returned
+          fragFiles <- list.files(path=tmp.metFragDir, pattern='_fragments\\.sdf$')
           # if an error during system command
-          if(!is.null(attr(log, "status"))){
-          if(attr(log, "status") != 1){
+          if(length(fragFiles) > 0){
             sdf.results.name <- paste0(tmp.metFragDir,"/results_",names(compSpectra(object))[indx.tmp],".sdf")
             ###read back in .sdf fragments data to store in compMS2 object 
             #if(file.exists(sdf.results.name))
@@ -198,13 +209,9 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
             colnames(sdf.results.df)[1:2] <- c("DBname", "WebAddress")
             
             
-            # add MetFrag results back to object
+            # add metFrag results back to object
             MetFrag(object)[[indx.tmp]] <- sdf.results.df
-          } else {
-            MetFrag(object)[[indx.tmp]] <- log
-            message(log)
-            flush.console()
-          } 
+          
           } else {
             MetFrag(object)[[indx.tmp]] <- log
             message(log)

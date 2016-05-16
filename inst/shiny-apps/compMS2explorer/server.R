@@ -365,6 +365,12 @@ shiny::shinyServer(function(input,  output, session){
             return(DB.results) 
           } else {
             DB.results <- tmp.BestAnno[[feat.indx]]
+          
+          if(nrow(DB.results) == 0){
+              DB.results <- data.frame("no best/ most likely annotations based on substructures identified", stringsAsFactors=F)
+              colnames(DB.results) <- "Result"
+              return(DB.results) 
+            } else {
             ###create clickable url links to DB in table
             DB.results$DBid  <- paste0("<a href='http://", DB.results$WebAddress,  DB.results$DBid,  
                                      "' target='_blank'>",  DB.results$DBid,  "</a>")
@@ -380,7 +386,7 @@ shiny::shinyServer(function(input,  output, session){
             DB.results$WebAddress <- NULL 
             DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")] <- lapply(DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")],  as.numeric)
             return(DB.results)
-          }},  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
+          }}},  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
         
         
         ############################################

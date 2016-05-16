@@ -1,9 +1,3 @@
-## ----eval=FALSE----------------------------------------------------------
-#  install.packages("devtools")
-#  library(devtools)
-#  ## install rCharts directly from github using devtools
-#  install_github("ramnathv/rCharts")
-
 ## ---- eval=FALSE---------------------------------------------------------
 #  library(CompMS2miner)
 #  compMS2shiny(compMS2example)
@@ -68,7 +62,14 @@ mostProbSubStr <- subStructure(compMS2demo, "probSummary")
 #  # predict Phase II metabolites from SMILES codes
 #   compMS2demo <- metID(compMS2demo, "predSMILES")
 #  
-#  # metFrag insilico fragmentation..in development
-#  #compMS2demo <- metID(compMS2demo, "metFrag")
+#  # metFrag insilico fragmentation.
+#  compMS2demo <- metID(compMS2demo, "metFrag")
+#  
+
+## ---- eval=FALSE, collapse=TRUE------------------------------------------
+#  # publish your app to shinyapps.io see ?publishApp for more details
+#  # you may need to install the rsconnect and shinyapps packages and also sign up for a shinyapps.io account if you don't have one.
+#  # quick guide here for setting up your account: http://shiny.rstudio.com/articles/shinyapps.html
+#  publishApp(compMS2demo, appName='compMS2demo')
 #  
 

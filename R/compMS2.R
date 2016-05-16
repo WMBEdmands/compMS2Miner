@@ -58,18 +58,18 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
     }
   }
   # install rCharts/ devtools if necessary
-  if(!require(rCharts)){
-    if(!require(devtools)){
-      install.packages('devtools')
-    }
-    if(!require(devtools)){
-      stop('Unable to install the devtools package which is required for correct functioning of the compMS2explorer application...\n')    
-    }
-    devtools::install_github('ramnathv/rCharts')
-    if(!require(rCharts)){
-      stop('Unable to install the rCharts package which is required for correct functioning of the compMS2explorer application...\n')  
-    }  
-  } 
+  # if(!require(rCharts)){
+  #   if(!require(devtools)){
+  #     install.packages('devtools')
+  #   }
+  #   if(!require(devtools)){
+  #     stop('Unable to install the devtools package which is required for correct functioning of the compMS2explorer application...\n')    
+  #   }
+  #   devtools::install_github('ramnathv/rCharts')
+  #   if(!require(rCharts)){
+  #     stop('Unable to install the rCharts package which is required for correct functioning of the compMS2explorer application...\n')  
+  #   }  
+  # } 
   # set proxy settings
 #   setInternet2(TRUE) 
   # set global options
