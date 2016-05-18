@@ -64,7 +64,7 @@ if(all(SubStrType.inputs == "The subStructure.Annotate function has not yet been
   SubStrType.inputs <- "The subStructure.Annotate function has not yet been run"
 }
 ###extract mass and RT values
-mass.v <- sapply(object@metaData,function(x) as.numeric(x[grep("MS1_mz", names(x))][[1]][1]))
-RT.v <- sapply(object@metaData, function(x) as.numeric(x[grep("MS1_RT", names(x))][[1]][1]))
-TotalFeatures<-length(unique(gsub(".+_","",Features.v)))
-TotalCompSpectra<-length(Features.v)
+mass.v <- sapply(metaData.tmp,function(x) as.numeric(x[grep("MS1_mz", names(x))][[1]][1]))
+RT.v <- sapply(metaData.tmp, function(x) as.numeric(x[grep("MS1_RT", names(x))][[1]][1]))
+TotalFeatures <- length(unique(gsub(".+_", "", Features.v)))
+TotalCompSpectra <- length(Features.v)

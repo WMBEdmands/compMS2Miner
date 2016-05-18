@@ -3,65 +3,51 @@ library(shiny)
 
 shiny::shinyServer(function(input,  output, session){ 
   
-  observe({
-    if(input$CloseAppBtn > 0){
-      
-      shiny::stopApp(UserComments.v)
-    }
-  })
+  # observe({
+  #   if(input$CloseAppBtn > 0){
+  #     
+  #     shiny::stopApp(UserComments.v)
+  #   }
+  # })
   # feature selection shiny::reactive
   Featureselection <- shiny::reactive({
     if(input$goButton == 0){ 
-      return() } else if (input$goButton > 0 & input$All_Features == TRUE) {
+      return() } else if (input$goButton > 0){
         
-        NoFeaturesIndx <- ""
-        FeaturesIndx <- ""  
+        FeaturesIndx <- rep(T, nrow(SubStr_types))
+        NoFeaturesIndx <- rep(F, nrow(SubStr_types))
         
-        if (any(input$NotSubStrTypes!="")) 
-        {
+        if(any(input$NotSubStrTypes != "")){
           ###escape special characters
           NotSubStrTypes <- gsub("\\+",  "\\\\+",  input$NotSubStrTypes)
           NotSubStrTypes <- gsub("\\[",  "\\\\[",  NotSubStrTypes)
           NotSubStrTypes <- gsub("\\]",  "\\\\]",  NotSubStrTypes)
-          NoFeaturesIndx <- grep(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  1])
-          NoFeaturesIndx <- unique(c(NoFeaturesIndx,  grep(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  2])))
-          NoSubStrmatchFreq <- length(NoFeaturesIndx)
-          #               NoFeaturesIndx <- Features.v[NoFeaturesIndx]
-          if(length(NoFeaturesIndx)  ==  0){NoFeaturesIndx <- ""}
+          NoFeaturesIndx <- grepl(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  1]) | grepl(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  2])
         }
         
-        if (any(input$SubStrTypes!=""))
-        {
+        if (any(input$SubStrTypes != "")){
           ###escape special characters
           SubStrTypes <- gsub("\\+",  "\\\\+",  input$SubStrTypes)
           SubStrTypes <- gsub("\\[",  "\\\\[",  SubStrTypes)
           SubStrTypes <- gsub("\\]",  "\\\\]",  SubStrTypes)
-          FeaturesIndx <- grep(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  1])
-          FeaturesIndx <- unique(c(FeaturesIndx,  grep(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  2])))
-          SubStrmatchFreq <- length(NoFeaturesIndx)
-          if(length(FeaturesIndx)  ==  0){FeaturesIndx <- ""}
+          FeaturesIndx <- grepl(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  1]) | grepl(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  2])
         }
         
-        # if features indices not equal 
-        if(setequal(FeaturesIndx,  NoFeaturesIndx) == F)
-        { 
-          if(!is.character(FeaturesIndx))
-          {
-            FeaturesIndx <- setdiff(FeaturesIndx,  NoFeaturesIndx)
-            
-            Feature.v.sub <- Features.v[FeaturesIndx]
-            
-          } else {
-            
-            Feature.v.sub <- Features.v[-NoFeaturesIndx]
-          }
-          
-        } else {
-          Feature.v.sub <- Features.v
+        FeaturesIndx[NoFeaturesIndx == T] <- F 
+        # filter by mz and Rt
+        if(input$All_Features == F){
+          # if values in boxes then process
+        if(input$mass_to_charge != '' & input$mass_accuracy != ''){
+        FeaturesIndx <-  mass.v < (as.numeric(input$mass_to_charge) + ((as.numeric(input$mass_to_charge) / 1E06) * as.numeric(input$mass_accuracy)))  & mass.v > (as.numeric(input$mass_to_charge) - ((as.numeric(input$mass_to_charge) / 1E06) * as.numeric(input$mass_accuracy))) & FeaturesIndx
+        }
+        if(input$retentionTime != '' & input$RTtolerance != ''){
+        FeaturesIndx <-  RT.v < (as.numeric(input$retentionTime) + as.numeric(input$RTtolerance))  & RT.v > (as.numeric(input$retentionTime) - as.numeric(input$RTtolerance)) & FeaturesIndx 
+        }
         }
         
-        if(length(Feature.v.sub) == 0)
-        {
+        Feature.v.sub <- Features.v[FeaturesIndx]
+        
+        if(length(Feature.v.sub) == 0){
           return("No MS2 features found")
         } else {
           return(Feature.v.sub)}
@@ -145,16 +131,16 @@ shiny::shinyServer(function(input,  output, session){
     if(input$tabbedPanelButton > 0){
       if(input$FeatureNames %in% Features.v){
         
-        if(!is.null(input$CommentButton))
-        {
-          if(input$CommentButton == 0)
-          {
-            vars <- shiny::reactiveValues(actionCounter=0)
-          } else {
-            vars <- shiny::reactiveValues(actionCounter=0)
-            vars$actionCounter <- input$CommentButton 
-          }
-        }
+        # if(!is.null(input$CommentButton))
+        # {
+        #   if(input$CommentButton == 0)
+        #   {
+        #     vars <- shiny::reactiveValues(actionCounter=0)
+        #   } else {
+        #     vars <- shiny::reactiveValues(actionCounter=0)
+        #     vars$actionCounter <- input$CommentButton 
+        #   }
+        # }
         # isolate feature index
         feat.indx <- which(Features.v %in% shiny::isolate(input$FeatureNames))
         
