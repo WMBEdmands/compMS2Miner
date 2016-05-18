@@ -16,7 +16,7 @@ shiny::shinyServer(function(input,  output, session){
         
         FeaturesIndx <- rep(T, nrow(SubStr_types))
         NoFeaturesIndx <- rep(F, nrow(SubStr_types))
-        
+        likelySubStrIndx <- 
         if(any(input$NotSubStrTypes != "")){
           ###escape special characters
           NotSubStrTypes <- gsub("\\+",  "\\\\+",  input$NotSubStrTypes)
@@ -34,6 +34,16 @@ shiny::shinyServer(function(input,  output, session){
         }
         
         FeaturesIndx[NoFeaturesIndx == T] <- F 
+        
+        if(any(input$subStrAnnoTypes != '')){
+          if(input$subStrAnnoThresh != ''){
+            likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType) & as.numeric(x$SumRelInt) > as.numeric(input$subStrAnnoThresh)))
+          } else {
+        likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType)))
+          }
+          FeaturesIndx[likelySubStrIndx == F] <- F 
+        }
+
         # filter by mz and Rt
         if(input$All_Features == F){
           # if values in boxes then process

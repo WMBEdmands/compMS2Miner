@@ -10,12 +10,15 @@ shiny::shinyUI(shiny::fluidPage(
                                 shiny::numericInput("RTtolerance", label=shiny::tags$b("retention time tolerance (+/- seconds) : "), value=5, min=1, max=700, step=1), 
                                 shiny::selectInput("SubStrTypes", label=shiny::tags$b("Substructure types to include (multiple combinations) :"), choices=c(" ", SubStrType.inputs), multiple=T), 
                                 shiny::selectInput("NotSubStrTypes", label=shiny::tags$b("Substructure types to exclude (multiple combinations) :"), choices=c(" ", SubStrType.inputs), multiple=T), 
+                                shiny::selectInput("subStrAnnoTypes", label=shiny::tags$b("Most likely substructure types above a summed relative intensity threshold (multiple combinations) :"), choices=c(" ", subStrAnno.inputs), multiple=T), 
+                                shiny::numericInput("subStrAnnoThresh", label=shiny::tags$b("summed relative intensity threshold (likely substructure types). "), value=10, min=0, max=1000, step=1),
+                                
                                 #selectInput("Possible_contaminants", label=tags$b("Possible contaminant/false positive annotations to exclude (name_frequency) :"), choices=c(" ", as.character(AnnoFreq$name)), multiple=T), 
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
                                 shiny::checkboxInput("DB_matches", "Database matches", value=FALSE), 
                                 shiny::actionButton("goButton", "Submit")
   ), 
-  shiny::column(width=2, 
+  shiny::column(width=2,
                 shiny::textInput("DB_match_name", "Search for database matches by name", value="e.g. p-cresol"), 
                 shiny::actionButton("DBbutton", "Submit"), 
                 # shiny::br(),

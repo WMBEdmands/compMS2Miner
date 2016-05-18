@@ -10,6 +10,15 @@ metaData.tmp <- object@metaData
 UserComments.v <- vector("list", length(composite_spectra))
 # best substructure anno
 subStrAnno.df <- object@subStrAnno
+
+if(nrow(subStrAnno.df) > 0){
+subStrAnno.df$SumRelInt <- ifelse(subStrAnno.df$SumRelInt == "no substructure detected", 
+                                  0, subStrAnno.df$SumRelInt)
+subStrAnno.df$SumRelInt <- round(as.numeric(subStrAnno.df$SumRelInt), digits=2)  
+}
+subStrAnno.list <- split(subStrAnno.df, subStrAnno.df$compSpecName)
+subStrAnno.inputs <- unique(subStrAnno.df$SubStrType)
+
 # metFrag 
 tmp.metFrag <- object@MetFrag
 ###order by EIC number
@@ -17,7 +26,7 @@ EICorderIndx <- order(as.numeric(gsub(".+_","",Features.v)))
 Features.v <- Features.v[EICorderIndx]
 composite_spectra <- composite_spectra[EICorderIndx]
 metaData.tmp <- metaData.tmp[EICorderIndx]
-
+subStrAnno.list <- subStrAnno.list[EICorderIndx]
 names(UserComments.v) <- names(composite_spectra)
 if(length(tmp.DBanno.res) > 0){
   tmp.DBanno.res <- tmp.DBanno.res[EICorderIndx]
