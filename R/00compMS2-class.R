@@ -20,7 +20,7 @@
 setClass("CompMS2",
          representation(compSpectra = "list",
                         metaData = "list",
-                        MS1features = "data.frame",
+                        # MS1features = "data.frame",
                         DBanno = "list",
                         BestAnno = "list",
                         subStrAnno = "data.frame",

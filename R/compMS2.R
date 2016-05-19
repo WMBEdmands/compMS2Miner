@@ -150,7 +150,7 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
   compSpectra(compMS2) <- lapply(Results, function(x) x$spectra)
   metaData(compMS2) <- lapply(Results, function(x) x$metaData)
   # MS1 feature table
-  MS1features(compMS2) <- MS1features
+  # MS1features(compMS2) <- MS1features
   Parameters(compMS2) <- data.frame(nSlaves=ifelse(is.null(nSlaves), 0, nSlaves),
                                     mode=mode, precursorPpm=precursorPpm,
                                     ret=ret, TICfilter=TICfilter)
@@ -190,6 +190,34 @@ setMethod("show", "CompMS2", function(object) {
   }
 })
 
+
+# split method e.g. cut(1:length(x@compSpectra), 2)
+setMethod("split", "CompMS2", function(x, f){
+stopifnot(class(x) == 'CompMS2')
+  
+  splitX <- vector('list', nlevels(f))
+  for(i in 1:nlevels(f)){
+  tmpCompMS2 <- new('CompMS2')
+  indxTmp <- which(f == levels(f)[i])
+  tmpCompMS2@compSpectra <- x@compSpectra[indxTmp]
+  tmpCompMS2@metaData <- x@metaData
+  # tmpCompMS2@MS1features <- x@MS1features
+  tmpCompMS2@DBanno <- x@DBanno[indxTmp]
+  tmpCompMS2@BestAnno <- x@BestAnno[indxTmp]
+  subStrIndx <- x@subStrAnno$compSpecName %in% names(tmpCompMS2@compSpectra)[indxTmp]
+  tmpCompMS2@subStrAnno <- x@subStrAnno[subStrIndx, , drop=F]
+  tmpCompMS2@Comments<- x@Comments[indxTmp]
+  tmpCompMS2@file.paths <- x@file.paths
+  tmpCompMS2@Parameters <- x@Parameters
+  tmpCompMS2@couchDBconn <- x@couchDBconn
+  tmpCompMS2@MetFrag <- x@MetFrag[indxTmp]
+  tmpCompMS2@CFModelling <- x@CFModelling[indxTmp]
+  splitX[[i]] <- tmpCompMS2
+  names(splitX)[i] <- i
+  }
+  return(splitX)
+})
+
 setGeneric("filePaths", function(object, ...) standardGeneric("filePaths"))
 
 setMethod("filePaths", "CompMS2", function(object) object@file.paths)
@@ -200,6 +228,7 @@ setReplaceMethod("filePaths", "CompMS2", function(object, value) {
   object@file.paths <- value
   return(object)
 })
+
 
 setGeneric("compSpectra", function(object, ...) standardGeneric("compSpectra"))
 
@@ -223,16 +252,16 @@ setReplaceMethod("metaData", "CompMS2", function(object, value) {
   return(object)
 })
 
-setGeneric("MS1features", function(object, ...) standardGeneric("MS1features"))
-
-setMethod("MS1features", "CompMS2", function(object) object@MS1features)
-
-setGeneric("MS1features<-", function(object, value) standardGeneric("MS1features<-"))
-
-setReplaceMethod("MS1features", "CompMS2", function(object, value) {
-  object@MS1features <- value
-  return(object)
-})
+# setGeneric("MS1features", function(object, ...) standardGeneric("MS1features"))
+# 
+# setMethod("MS1features", "CompMS2", function(object) object@MS1features)
+# 
+# setGeneric("MS1features<-", function(object, value) standardGeneric("MS1features<-"))
+# 
+# setReplaceMethod("MS1features", "CompMS2", function(object, value) {
+#   object@MS1features <- value
+#   return(object)
+# })
 
 setGeneric("DBanno", function(object, ...) standardGeneric("DBanno"))
 
