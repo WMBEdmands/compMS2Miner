@@ -13,12 +13,12 @@ metID.metFrag(object, ...)
 perform metFrag queries
 otherwise the default is to perform metFrag queries on all features.}
 
-\item{metFragJar}{file path to metfrag jar file, if null the external MetFragJarFile.jar
-found in the ext data directory will be utilized. Although the maintainers
-of CompMS2miner will endeavor to install any updated jar files the latest
+\item{metFragJar}{file path to metfrag jar file the latest
 version can be downloaded here: 
  \url{https://github.com/c-ruttkies/Tools/raw/master/MetFragCommandLineTool.jar}
- and the full path to the downloaded .jar file can alternatively be supplied.}
+ and the full path to the downloaded .jar file must be supplied. Alternatively,
+ a file selection window (tcltk based) will appear if this argument is not supplied
+ and the user must navigate to the jar file.}
 
 \item{keepTempSdf}{logical default = FALSE, sdf, mf and results files will
 be created temporarily otherwise temporary files will be retained in named

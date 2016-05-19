@@ -4,12 +4,15 @@
 \alias{publishApp}
 \title{Publish your compMS2explorer app on shinyapps.io}
 \usage{
-publishApp(object, appName = NULL, ...)
+publishApp(object, appName = NULL, writeDir = NULL, ...)
 }
 \arguments{
 \item{object}{a compMS2 class object}
 
-\item{appName}{a name for your new app.}
+\item{appName}{character name for your new app (e.g. 'compMS2example').}
+
+\item{writeDir}{character full path to a directory to save the compMS2 results
+and the current shiny app to. This zip file can then be shared with others.}
 
 \item{...}{further arguments to the \code{\link{deployApp}} function}
 }
