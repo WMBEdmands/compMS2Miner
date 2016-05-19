@@ -3,7 +3,6 @@
 #' @param subdir character sub-directory of the repo containing the shiny and data.
 #' @param auth_token character private repo authorization token. 
 #' @export
-#' 
 runGitHubApp <- function(repo=NULL, subdir=NULL, auth_token=NULL){
   # error handling
   stopifnot(is.character(repo))
