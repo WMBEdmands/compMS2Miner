@@ -4,7 +4,8 @@
 \alias{runGitHubApp}
 \title{run github shiny modified from shiny and devtools}
 \usage{
-runGitHubApp(repo = NULL, subdir = NULL, auth_token = NULL)
+runGitHubApp(repo = NULL, subdir = NULL, auth_token = NULL,
+  browserLaunch = TRUE)
 }
 \arguments{
 \item{repo}{character github username and repository name. in the form "username/repositoryName"}
@@ -12,6 +13,8 @@ runGitHubApp(repo = NULL, subdir = NULL, auth_token = NULL)
 \item{subdir}{character sub-directory of the repo containing the shiny and data.}
 
 \item{auth_token}{character private repo authorization token.}
+
+\item{browserLaunch}{logical launch app in web browser (default = TRUE).}
 }
 \description{
 run github shiny modified from shiny and devtools

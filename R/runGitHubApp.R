@@ -2,8 +2,9 @@
 #' @param repo character github username and repository name. in the form "username/repositoryName"
 #' @param subdir character sub-directory of the repo containing the shiny and data.
 #' @param auth_token character private repo authorization token. 
+#' @param browserLaunch logical launch app in web browser (default = TRUE).
 #' @export
-runGitHubApp <- function(repo=NULL, subdir=NULL, auth_token=NULL){
+runGitHubApp <- function(repo=NULL, subdir=NULL, auth_token=NULL, browserLaunch=TRUE){
   # error handling
   stopifnot(is.character(repo))
   stopifnot(is.character(subdir))
@@ -32,5 +33,5 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, auth_token=NULL){
   }
   tmpAppDir <- tempfile(pattern='CompMS2miner')
   appPathTmp <- utils::unzip(pathTmp[tmpIndx], exdir=tmpAppDir)
-  shiny::runApp(dirname(appPathTmp[1]))
+  shiny::runApp(dirname(appPathTmp[1]), launch.browser = browserLaunch)
 } # end function
