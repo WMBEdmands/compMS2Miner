@@ -15,11 +15,11 @@ shiny::shinyUI(shiny::fluidPage(
                                 
                                 #selectInput("Possible_contaminants", label=tags$b("Possible contaminant/false positive annotations to exclude (name_frequency) :"), choices=c(" ", as.character(AnnoFreq$name)), multiple=T), 
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
-                                shiny::checkboxInput("DB_matches", "Database matches", value=FALSE), 
                                 shiny::actionButton("goButton", "Submit")
   ), 
   shiny::column(width=2,
-                shiny::textInput("DB_match_name", "Search for database matches by name", value="e.g. p-cresol"), 
+                shiny::textInput("DB_match_name", "Search for database matches by name", value="e.g. p-cresol"),
+                shiny::radioButtons("DB_match_table", 'Search in:', choices=c('DB Annotations', 'Best Annotations')), 
                 shiny::actionButton("DBbutton", "Submit"), 
                 # shiny::br(),
                 # shiny::br(),
@@ -49,6 +49,10 @@ shiny::shinyUI(shiny::fluidPage(
                                                           shiny::verbatimTextOutput("compMS2Hover"),   
                                                           shiny::plotOutput("MS2_plot", width = "800px",  height = "600px", brush = 'compMS2_brush', hover='compMS2_hover'), 
                                                           verbatimTextOutput("compMS2tableInfo")),
+                                          shiny::tabPanel('Overview plot', 
+                                                          shiny::plotOutput("overview_plot", width = "800px",  height = "600px", brush = 'overview_brush'), 
+                                                          verbatimTextOutput("overviewtableInfo")),
+                                         
                                           # shiny::tabPanel("Composite MS2 plot", rCharts::chartOutput("Raw_data_plot", "PolyCharts")), #, #plotOutput("MS2_plot", width = "800px",  height = "600px")),  
                                           shiny::tabPanel("MS2 spectrum table", DT::dataTableOutput(outputId="MS2_data")), 
                                           shiny::tabPanel("MS1 MS2 match summary", DT::dataTableOutput(outputId="metadata")), 
@@ -59,6 +63,7 @@ shiny::shinyUI(shiny::fluidPage(
                                           shiny::tabPanel("PubMed Word Cloud",  shiny::uiOutput("wordCloudSelect"),  shiny::uiOutput("nPMIDAbstracts"),  shiny::verbatimTextOutput("WordCloudText"), 
                                                           shiny::uiOutput("nRandomArticles"),  shiny::tableOutput(outputId="WordCloudTable"),  shiny::plotOutput("WordCloud", width = "800px",  height = "600px")), 
                                           shiny::tabPanel("MetFrag results",  shiny::tableOutput(outputId="MetFragTable")), 
+                                          
                                           shiny::tabPanel("Substructure type table"), #, tableOutput(outputId="SubStr_type")), 
                                           shiny::tabPanel("InterFeature Correlation"), #, chartOutput("InterFeatureCorr", "morris")), #uiOutput("CorrCoefMin"), 
                                           shiny::tabPanel("Chemical Similarity Scores"), #uiOutput("Compound"), uiOutput("IntraInter"), chartOutput("ChemicalSimilarity", "morris")), 

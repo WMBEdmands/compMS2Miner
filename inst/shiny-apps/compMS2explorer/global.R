@@ -4,20 +4,13 @@ composite_spectra <- object@compSpectra
 Features.v <- names(composite_spectra)
 ###DB search names
 tmp.DBanno.res <- object@DBanno
+
 ### best anno
 tmp.BestAnno <- object@BestAnno
 metaData.tmp <- object@metaData
 UserComments.v <- vector("list", length(composite_spectra))
 # best substructure anno
 subStrAnno.df <- object@subStrAnno
-
-if(nrow(subStrAnno.df) > 0){
-subStrAnno.df$SumRelInt <- ifelse(subStrAnno.df$SumRelInt == "no substructure detected", 
-                                  0, subStrAnno.df$SumRelInt)
-subStrAnno.df$SumRelInt <- round(as.numeric(subStrAnno.df$SumRelInt), digits=2)  
-}
-subStrAnno.list <- split(subStrAnno.df, subStrAnno.df$compSpecName)
-subStrAnno.inputs <- unique(subStrAnno.df$SubStrType)
 
 # metFrag 
 tmp.metFrag <- object@MetFrag
@@ -26,7 +19,7 @@ EICorderIndx <- order(as.numeric(gsub(".+_","",Features.v)))
 Features.v <- Features.v[EICorderIndx]
 composite_spectra <- composite_spectra[EICorderIndx]
 metaData.tmp <- metaData.tmp[EICorderIndx]
-subStrAnno.list <- subStrAnno.list[EICorderIndx]
+
 names(UserComments.v) <- names(composite_spectra)
 if(length(tmp.DBanno.res) > 0){
   tmp.DBanno.res <- tmp.DBanno.res[EICorderIndx]
@@ -49,6 +42,20 @@ if(length(object@DBanno) > 0){
 } else {
   DBmatches <- matrix("The metID.dbAnnotate function has not yet been run", 
                       ncol = 2, nrow = length(composite_spectra))
+}
+
+# DB match df to string match
+if(length(object@BestAnno) > 0){
+  DBBestMatches <-  t(sapply(tmp.BestAnno, function(x){
+    names.tmp <- x$DBname
+    ESI_type.tmp <- x$ESI_type
+    SubStr_type.tmp <- x$SubStr_type
+    names.tmp <- data.frame(names.tmp, ESI_type.tmp, SubStr_type.tmp, 
+                            stringsAsFactors = F)
+  }))
+} else {
+  DBBestMatches <- matrix("The metID.dbProb function has not yet been run", 
+                          ncol = 2, nrow = length(composite_spectra))
 }
 # substructures id'd
 if(!is.null(composite_spectra[[1]]$Frag.ID)){
@@ -75,5 +82,28 @@ if(all(SubStrType.inputs == "The subStructure.Annotate function has not yet been
 ###extract mass and RT values
 mass.v <- sapply(metaData.tmp,function(x) as.numeric(x[grep("MS1_mz", names(x))][[1]][1]))
 RT.v <- sapply(metaData.tmp, function(x) as.numeric(x[grep("MS1_RT", names(x))][[1]][1]))
+meanPrecursorInt <- sapply(metaData.tmp, function(x) mean(as.numeric(unlist(x[grep("precursorIntensity", names(x))]))))
+allFeatTable <- data.frame(specNames=names(mass.v), mass=mass.v, rt=RT.v, meanPrecursorInt=meanPrecursorInt, precursorInt_group=as.numeric(cut(meanPrecursorInt, 10)),  stringsAsFactors = F) #  
+
+# substr annotations if necessary
+if(nrow(subStrAnno.df) > 0){
+  # sort by EICno
+  subStrAnno.df <- subStrAnno.df[order(as.numeric(gsub(".+_","", subStrAnno.df$compSpecName))), , drop=F]
+  duplEntTmp <- duplicated(subStrAnno.df$compSpecName) == F
+  bestAnnoSubStr <- subStrAnno.df[duplEntTmp, , drop=F]
+  matchIndxTmp <- match(allFeatTable$specNames, bestAnnoSubStr$compSpecName)
+  bestAnnoSubStr <- bestAnnoSubStr[matchIndxTmp, c(1, 3:5)]
+  colnames(bestAnnoSubStr)[1] <- 'possible substructure'
+  bestAnnoSubStr$SumRelInt <- suppressWarnings(ifelse(is.na(bestAnnoSubStr$SumRelInt), NA, round(as.numeric(bestAnnoSubStr$SumRelInt), 2))) 
+  allFeatTable <- cbind(allFeatTable, bestAnnoSubStr)
+  subStrAnno.df$SumRelInt <- ifelse(subStrAnno.df$SumRelInt == "no substructure detected", 
+                                    0, subStrAnno.df$SumRelInt)
+  subStrAnno.df$SumRelInt <- round(as.numeric(subStrAnno.df$SumRelInt), digits=2)  
+}
+subStrAnno.list <- split(subStrAnno.df, subStrAnno.df$compSpecName)
+# sort 
+subStrAnno.list <- subStrAnno.list[order(as.numeric(gsub(".+_","", names(subStrAnno.list))))]
+subStrAnno.inputs <- unique(subStrAnno.df$SubStrType)
+
 TotalFeatures <- length(unique(gsub(".+_", "", Features.v)))
 TotalCompSpectra <- length(Features.v)

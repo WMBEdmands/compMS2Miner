@@ -16,7 +16,6 @@ shiny::shinyServer(function(input,  output, session){
         
         FeaturesIndx <- rep(T, nrow(SubStr_types))
         NoFeaturesIndx <- rep(F, nrow(SubStr_types))
-        likelySubStrIndx <- 
         if(any(input$NotSubStrTypes != "")){
           ###escape special characters
           NotSubStrTypes <- gsub("\\+",  "\\\\+",  input$NotSubStrTypes)
@@ -68,11 +67,56 @@ shiny::shinyServer(function(input,  output, session){
     
     if(input$DBbutton  ==  0){ return()
     } else if (input$DBbutton > 0){
-      DBnamesTMP <- grep(input$DB_match_name,  DBmatches[,  1],  ignore.case=T)
-      DBnamesTMP <- unique(c(DBnamesTMP,  grep(input$DB_match_name,  DBmatches[,  2], 
-                                              ignore.case=T)))
+      if(input$DB_match_table == 'DB Annotations'){
+      FeaturesIndx <- grepl(input$DB_match_name,  DBmatches[,  1],  ignore.case=T)
+      } else if (input$DB_match_table == 'Best Annotations'){
+        FeaturesIndx <- grepl(input$DB_match_name,   DBBestMatches[,  1],  ignore.case=T)   
+      }
+      # FeaturesIndx <- ifelse(FeaturesIndx == T | grepl(input$DB_match_name,  DBmatches[,  2],  ignore.case=T), T, F)
+      # 
+      # DBnamesTMP <- unique(c(DBnamesTMP,  grep(input$DB_match_name,  DBmatches[,  2], 
+      #                                         ignore.case=T)))
       
-      Feature.v.sub <- Features.v[DBnamesTMP]
+      NoFeaturesIndx <- rep(F, nrow(SubStr_types))
+      if(any(input$NotSubStrTypes != "")){
+        ###escape special characters
+        NotSubStrTypes <- gsub("\\+",  "\\\\+",  input$NotSubStrTypes)
+        NotSubStrTypes <- gsub("\\[",  "\\\\[",  NotSubStrTypes)
+        NotSubStrTypes <- gsub("\\]",  "\\\\]",  NotSubStrTypes)
+        NoFeaturesIndx <- grepl(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  1]) | grepl(paste(NotSubStrTypes,  collapse = "|"),  SubStr_types[,  2])
+      }
+      
+      if (any(input$SubStrTypes != "")){
+        ###escape special characters
+        SubStrTypes <- gsub("\\+",  "\\\\+",  input$SubStrTypes)
+        SubStrTypes <- gsub("\\[",  "\\\\[",  SubStrTypes)
+        SubStrTypes <- gsub("\\]",  "\\\\]",  SubStrTypes)
+        FeaturesIndx <- grepl(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  1]) | grepl(paste(SubStrTypes,  collapse = "|"),  SubStr_types[,  2])
+      }
+      
+      FeaturesIndx[NoFeaturesIndx == T] <- F 
+      
+      if(any(input$subStrAnnoTypes != '')){
+        if(input$subStrAnnoThresh != ''){
+          likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType) & as.numeric(x$SumRelInt) > as.numeric(input$subStrAnnoThresh)))
+        } else {
+          likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType)))
+        }
+        FeaturesIndx[likelySubStrIndx == F] <- F 
+      }
+      
+      # filter by mz and Rt
+      if(input$All_Features == F){
+        # if values in boxes then process
+        if(input$mass_to_charge != '' & input$mass_accuracy != ''){
+          FeaturesIndx <-  mass.v < (as.numeric(input$mass_to_charge) + ((as.numeric(input$mass_to_charge) / 1E06) * as.numeric(input$mass_accuracy)))  & mass.v > (as.numeric(input$mass_to_charge) - ((as.numeric(input$mass_to_charge) / 1E06) * as.numeric(input$mass_accuracy))) & FeaturesIndx
+        }
+        if(input$retentionTime != '' & input$RTtolerance != ''){
+          FeaturesIndx <-  RT.v < (as.numeric(input$retentionTime) + as.numeric(input$RTtolerance))  & RT.v > (as.numeric(input$retentionTime) - as.numeric(input$RTtolerance)) & FeaturesIndx 
+        }
+      }
+      
+      Feature.v.sub <- Features.v[FeaturesIndx]
       if(length(Feature.v.sub) == 0)
       {
         return("No MS2 features found")
@@ -182,6 +226,7 @@ shiny::shinyServer(function(input,  output, session){
         
           })
         
+        
         # ui tab 1 text plot hover and main plot
         output$compMS2Hover <- shiny::renderText({
           if(!is.null(input$compMS2_hover)){
@@ -195,70 +240,35 @@ shiny::shinyServer(function(input,  output, session){
           plotDfTmp <- plotDf()
           
           brushedPoints(plotDfTmp, input$compMS2_brush, xvar = "mass", yvar = "intensity")
-          }, width = 280)
+        }, width = 280)
           
-        # output$Raw_data_plot <- rCharts::renderChart({  
-        #   
-        #   plot.df <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)
-        #   colnames(plot.df) <- gsub("\\.", "_", colnames(plot.df))
-        #   if(!is.null(plot.df$Frag_ID))
-        #   {
-        #     
-        #     #           plot.df[,  c("mass",  "intensity",  "Rel_Intensity",  "Precursorfrag_diff")] <- apply(plot.df[,  c("mass",  "intensity",   "Rel_Intensity",  "Precursorfrag_diff")],  2,  as.numeric)
-        #     plot.df$Precursorfrag_diff <- as.numeric(plot.df$Precursorfrag_diff)
-        #     plot.df$Fragment_Assigned <- ifelse(apply(plot.df[, c("Frag_ID", "Neutral_loss", "interfrag_loss")], 1, function(x) any(x!="")), "Fragment_identified", "No_Fragment_identified")
-        #     r1 <- rCharts::rPlot(x = "bin(mass, 2)",  y = "intensity",  data=plot.df ,  type = "bar", size = list(const = 5), color="Fragment_Assigned", 
-        #                        tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
-        #                        ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
-        #     #           
-        #     r1$guides(
-        #       color=list(scale = "#! function(value){
-        #                  color_mapping = {No_Fragment_identified: '#6495ED', Fragment_identified:'#FF3030'}
-        #                  return color_mapping[value];                  
-        # } !#"), 
-        #       x = list(min=0, max=max(plot.df$mass)+50, title = 'm/z'), 
-        #       y = list(title = 'intensity')
-        #       )
-        #     r1$set(width = 1000,  height = 700)
-        #     r1$set(dom="Raw_data_plot")
-        #     
-        #     return(r1)
-        #     
-        # } else {
-        #   #           plot.df[,  c("mass",  "intensity",  "Rel_Intensity",  "Precursorfrag_diff")] <- apply(plot.df[,  c("mass",  "intensity",   "Rel_Intensity",  "Precursorfrag_diff")],  2,  as.numeric)
-        #   r1 <- rCharts::rPlot(x = "bin(mass, 2)",  y = "intensity",  data=plot.df ,  type = "bar", size = list(const = 5), #, color="Fragment_Assigned", 
-        #                      tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass }!#")
-        #   #           
-        #   r1$guides(
-        #     x = list(min=0, max=max(plot.df$mass)+50, title = 'm/z'), 
-        #     y = list(title = 'intensity')
-        #   )
-        #   r1$set(width = 1000,  height = 700)
-        #   r1$set(dom="Raw_data_plot")
-        #   
-        #   return(r1)
-        # }
-        # #         plot.df <- as.data.frame(composite_spectrum$composite_spectrum, stringsAsFactors=F)
-        # #         colnames(plot.df) <- gsub("\\.", "_", colnames(plot.df))
-        # #         plot.df$MetFrag <- ifelse(plot.df[, input$plotChoice] == "", "No_Fragment_identified", "MetFrag_assigned")
-        # #         r1 <- rPlot(x = "bin(mass, 2)",  y = "intensity",  data=plot.df ,  type = "bar", size = list(const = 5), color="MetFrag", 
-        # #                   tooltip = "#!function(item){ return ' intensity: ' + item.intensity + ' mass: ' + item.mass + ' Relative Intensity: ' + item.Rel_Intensity + ' Precursor Frag diff: ' + item.Precursorfrag_diff + 
-        # #                   ' interfrag diff: ' + item.interfrag_diff + ' Frag ID: ' + item.Frag_ID + ' Neutral Loss ID: ' + item.Neutral_loss + ' interfrag loss:  ' + item.interfrag_loss }!#")
-        # #         r1$guides(
-        # #           color=list(scale = "#! function(value){
-        # #                      color_mapping = {No_Fragment_identified: '#6495ED', MetFrag_assigned:'#BF3EFF'}
-        # #                      return color_mapping[value];                  
-        # #                      } !#"), 
-        # #           x = list(min=0, max=max(plot.df$mass)+50, title = 'm/z'), 
-        # #           y = list(title = 'intensity')
-        # #         )
-        # #         r1$set(width = 1000,  height = 700)
-        # #         r1$set(dom="Raw_data_plot")
-        # #         
-        # #         return(r1)
-        # #       }
-        # })
+        ###########################
+        ##### 9. overview plot ####
+        ########################### 
+      
+       
+        output$overview_plot <- shiny::renderPlot({
+          
+          if(!is.null(input$overview_brush)){
+            xlimTmp <- c(input$overview_brush$xmin, input$overview_brush$xmax)
+            ylimTmp <- c(input$overview_brush$ymin, input$overview_brush$ymax)
+          } else {
+            xlimTmp <- c(min(allFeatTable$rt), max(allFeatTable$rt))
+            ylimTmp <- c(min(allFeatTable$mass), max(allFeatTable$mass))
+          }
+          Featurenames <- shiny::isolate({Featureselection()})
+          subFeatTable <- allFeatTable[allFeatTable$specNames %in% Featurenames, , drop=F]
+          colsTmp <- rep("darkblue", nrow(subFeatTable))
+          colsTmp[feat.indx] <- 'red'
+          with(subFeatTable, symbols(x=rt, y=mass, circles=precursorInt_group, inches=1/8, bg=colsTmp, fg=NULL, ylab='m/z', xlab='retentionTime', ylim = ylimTmp, xlim = xlimTmp))
+      })
         
+        
+        # ui tab 9 nearpoints plot click 
+        output$overviewtableInfo <- renderPrint({
+          Featurenames <- shiny::isolate({Featureselection()})
+          subFeatTable <- allFeatTable[allFeatTable$specNames %in% Featurenames, , drop=F]
+          brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, width = 280)
         ###########################
         ##### 2. metadata table ###
         ###########################
