@@ -259,7 +259,8 @@ shiny::shinyServer(function(input,  output, session){
           Featurenames <- shiny::isolate({Featureselection()})
           subFeatTable <- allFeatTable[allFeatTable$specNames %in% Featurenames, , drop=F]
           colsTmp <- rep("darkblue", nrow(subFeatTable))
-          colsTmp[feat.indx] <- 'red'
+          selectedFeat <- allFeatTable$specNames[feat.indx]
+          colsTmp[subFeatTable$specNames %in% selectedFeat] <- 'red'
           with(subFeatTable, symbols(x=rt, y=mass, circles=precursorInt_group, inches=1/8, bg=colsTmp, fg=NULL, ylab='m/z', xlab='retentionTime', ylim = ylimTmp, xlim = xlimTmp))
       })
         

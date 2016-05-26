@@ -3,11 +3,11 @@
 #' @param subdir character sub-directory of the repo containing the shiny and data.
 #' @param auth_token character private repo authorization token. 
 #' @param browserLaunch logical launch app in web browser (default = TRUE).
+#'
 #' @export
 runGitHubApp <- function(repo=NULL, subdir=NULL, auth_token=NULL, browserLaunch=TRUE){
   # error handling
   stopifnot(is.character(repo))
-  stopifnot(is.character(subdir))
   
     res <- strsplit(repo, "/")[[1]]
     if(length(res) != 2){ 
@@ -26,7 +26,16 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, auth_token=NULL, browserLaunch=
   dir.create(outdir)
   
   pathTmp <- utils::unzip(bundle, exdir = outdir) 
-  
+  # if sub directory not supplied then print list of options to console
+  if(is.null(subdir)){
+   availOpts <- basename(pathTmp) 
+   availOpts <- availOpts[grep('\\.zip$', availOpts)]
+   availOpts <- gsub('\\.zip', '', availOpts)
+   message('\n"subdir" argument not supplied. Available directories within the repo include:\n',
+           paste0(availOpts, '\n'), '\nPlease type a directory name without quotations and press [enter] to continue:')
+   flush.console()
+   subdir <- readline()
+  }
   tmpIndx <- grepl(paste0('/', subdir, '/'), pathTmp)
   if(!any(tmpIndx)){
     stop(subdir, ' sub-directory name not found please check and try again...')
