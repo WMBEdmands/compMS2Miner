@@ -256,8 +256,16 @@ shiny::shinyServer(function(input,  output, session){
             xlimTmp <- c(min(allFeatTable$rt), max(allFeatTable$rt))
             ylimTmp <- c(min(allFeatTable$mass), max(allFeatTable$mass))
           }
+          if(input$goButton){
           Featurenames <- shiny::isolate({Featureselection()})
+          }
+          if(input$DBbutton){
+          Featurenames <- shiny::isolate({DBFeatureselection()})
+          }
           subFeatTable <- allFeatTable[allFeatTable$specNames %in% Featurenames, , drop=F]
+          if(nrow(subFeatTable) ==  0){
+          subFeatTable <- allFeatTable  
+          }
           colsTmp <- rep("darkblue", nrow(subFeatTable))
           selectedFeat <- allFeatTable$specNames[feat.indx]
           colsTmp[subFeatTable$specNames %in% selectedFeat] <- 'red'
@@ -267,8 +275,17 @@ shiny::shinyServer(function(input,  output, session){
         
         # ui tab 9 nearpoints plot click 
         output$overviewtableInfo <- renderPrint({
-          Featurenames <- shiny::isolate({Featureselection()})
+          if(input$goButton){
+            Featurenames <- shiny::isolate({Featureselection()})
+          }
+          if(input$DBbutton){
+            Featurenames <- shiny::isolate({DBFeatureselection()})
+          }
           subFeatTable <- allFeatTable[allFeatTable$specNames %in% Featurenames, , drop=F]
+          if(nrow(subFeatTable) ==  0){
+            subFeatTable <- allFeatTable  
+          }
+          
           brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, width = 280)
         ###########################
         ##### 2. metadata table ###
