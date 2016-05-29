@@ -41,7 +41,7 @@ setMethod("subStructure.Annotate", signature = "CompMS2",
     # comp spectra
     comp_spectra.tmp <- compSpectra(object)
     #    
-    #     if(Parameters(object)$nSlaves > 0){
+    #     if(Parameters(object)$nCores > 0){
     #     
     message("matching Precursor to fragment and interfragment neutral losses and fragments in ",
             length(compSpectra(object)), " composite spectra")

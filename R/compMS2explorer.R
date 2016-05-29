@@ -19,6 +19,8 @@ setMethod("compMS2explorer", signature = "CompMS2", function(object, browserLaun
       if (appDir == "") {
         stop("Could not find example directory. Try re-installing `mypackage`.", call. = FALSE)
       }
+    # add readOnly = F to parameters
+    Parameters(object)$readOnly <- FALSE
     save(object, file=paste0(appDir, '/compMS2object.RData'))  
       shiny::runApp(appDir, display.mode = "normal", launch.browser = browserLaunch)
     }

@@ -18,7 +18,7 @@
 #'  \item median/ peak apex retention time in seconds. 
 #'  }
 #'  If argument is not supplied a GUI (tcltk) file selection window will open and a .csv file can then be selected. 
-#' @param nSlaves numeric Number of cores for parallel computation.
+#' @param nCores numeric Number of cores for parallel computation.
 #' @param mode character Ionisation polarity must be either 'pos' or 'neg'.
 #' @param precursorPpm numeric Parts per million mass accuracy to match MS1 features to MS2 spectra (ppm) 
 #' @param ret numeric retention time tolerance to match MS1 features to MS2 spectra (+/- seconds). 
@@ -27,8 +27,8 @@
 #' 
 #' @return A compMS2 object                   
 #' @export
-compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
-                     nSlaves = NULL, mode = "pos", 
+compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL, nCores = NULL, argsCorrNetwork=list(obsNames=NULL, corrThresh=0.6, corrMethod="spearman", delta=0.05, MTC="BH"),
+                      mode = "pos", 
                      precursorPpm = 10, ret = 10, TICfilter = 10000){
   
   message("creating compMS2 object in ", ifelse(mode == "pos","positive", 
@@ -54,7 +54,7 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
   if(!require(shiny)){
     install.packages('shiny')
     if(!require(shiny)){
-      stop('Unable to install the rCharts package which is required for correct functioning of the compMS2explorer application...\n')  
+      stop('Unable to install the shiny package which is required for correct functioning of the compMS2explorer application...\n')  
     }
   }
   # install rCharts/ devtools if necessary
@@ -112,11 +112,11 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
          " MS2 (.mzXML) files were detected within the directory..."))
   flush.console()
 
-  if(!is.null(nSlaves)){
+  if(!is.null(nCores)){
     
-    message(paste0("Starting SNOW cluster with ", nSlaves, " local sockets..."))
+    message(paste0("Starting SNOW cluster with ", nCores, " local sockets..."))
     flush.console()
-    cl <- parallel::makeCluster(nSlaves) 
+    cl <- parallel::makeCluster(nCores) 
     doSNOW::registerDoSNOW(cl)
     
     message("matching MS1 peak table features to the following MS2 files: ")
@@ -145,16 +145,25 @@ compMS2 <-  function(MS1features = NULL, mzXMLdir = NULL,
   }
   
   Results <- unlist(Results, recursive = F)
-  compMS2 <- new("CompMS2")
-  filePaths(compMS2) <- MS2files
-  compSpectra(compMS2) <- lapply(Results, function(x) x$spectra)
-  metaData(compMS2) <- lapply(Results, function(x) x$metaData)
+  object <- new("CompMS2")
+  filePaths(object) <- MS2files
+  compSpectra(object) <- lapply(Results, function(x) x$spectra)
+  metaData(object) <- lapply(Results, function(x) x$metaData)
   # MS1 feature table
-  # MS1features(compMS2) <- MS1features
-  Parameters(compMS2) <- data.frame(nSlaves=ifelse(is.null(nSlaves), 0, nSlaves),
+  # MS1features(object) <- MS1features
+  Parameters(object) <- data.frame(nCores=ifelse(is.null(nCores), 0, nCores),
                                     mode=mode, precursorPpm=precursorPpm,
                                     ret=ret, TICfilter=TICfilter)
-  return(compMS2)
+  # if obsNames supplied then perform corrNetwork 
+  if(!is.null(argsCorrNetwork$obsNames)){
+    argsCorrNetwork[['object']] <- object
+    argsCorrNetwork[['peakTable']] <- MS1features
+    object <- do.call(metID.corrNetwork, argsCorrNetwork)  
+  } else {
+  message('\n"obsNames" in argsCorrNetwork argument missing. Not performing correlation network calculation.\n')
+  flush.console()
+  }
+  return(object)
   } # end CompMS2obj function
 
 setMethod("show", "CompMS2", function(object) {

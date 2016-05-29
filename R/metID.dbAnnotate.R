@@ -64,7 +64,7 @@ setMethod("metID.dbAnnotate", signature = "CompMS2", function(object, ppm = NULL
     
     DBAnnoMatches <- monoMassMatch(unknowns = unknowns, metMasses.df =  metDB,  
                                    subStrMasses = subStrMasses, subStrNames = subStrNames, 
-                                   nSlaves = Parameters(object)$nSlaves, mode = Parameters(object)$mode, 
+                                   nCores = Parameters(object)$nCores, mode = Parameters(object)$mode, 
                                    ppm = Parameters(object)$precursorPpm,
                                    dbEntryWebAddress = dbEntryWebAddress)
     if(length(DBanno(object)) > 0){

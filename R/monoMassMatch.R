@@ -4,7 +4,7 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
                           DB_entry_names = NULL, DB_SMILES = NULL,
                           dbEntryWebAddress = NULL, 
                           subStrMasses = NULL, subStrNames = NULL, 
-                          nSlaves = NULL, mode="pos", ppm = 10){
+                          nCores = NULL, mode="pos", ppm = 10){
   # error handling
   if(is.null(unknowns)){
     stop("unknowns argument is missing with no default")    
@@ -152,7 +152,7 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
     #    exactMassMatch.c <- compiler::cmpfun(exactMassMatch)
     # matching unknowns to possible ESI artefacts and substructure masses shifts
     
-    #    if(!is.null(nSlaves)){
+    #    if(!is.null(nCores)){
     #      if(require(Rcpp) == T){
     #        ##############################################################################
     #        ##############################################################################
@@ -182,14 +182,14 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
     #   ##############################################################################
     #   ##############################################################################
     #   
-    #   message(paste0("Starting SNOW cluster with ", nSlaves,
+    #   message(paste0("Starting SNOW cluster with ", nCores,
     #                  " local sockets..."))
     #   flush.console()
     #   pmt <- proc.time()
-    #   cl <- parallel::makeCluster(nSlaves) 
+    #   cl <- parallel::makeCluster(nCores) 
     #   doSNOW::registerDoSNOW(cl)
     #   
-    #   chunkIndx <- split(seq_along(unknowns), cut(seq_along(unknowns), nSlaves))
+    #   chunkIndx <- split(seq_along(unknowns), cut(seq_along(unknowns), nCores))
     #   # foreach and dopar from foreach package
     #   matches.tmp <- foreach(j = 1:length(chunkIndx), .packages = "Rcpp") %dopar% {
     #     exactMassMatchC_parallel(chunk = chunkIndx[[j]])}
@@ -200,11 +200,11 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
     #   
     #      } else {
     #      # create a cluster using the doSNOW package
-    #      message(paste0("Starting SNOW cluster with ", nSlaves,
+    #      message(paste0("Starting SNOW cluster with ", nCores,
     #                     " local sockets..."))
     #      flush.console()
     #      
-    #      cl <- parallel::makeCluster(nSlaves) 
+    #      cl <- parallel::makeCluster(nCores) 
     #      doSNOW::registerDoSNOW(cl)
     #      
     #      # foreach and dopar from foreach package

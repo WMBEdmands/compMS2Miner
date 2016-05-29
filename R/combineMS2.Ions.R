@@ -29,13 +29,13 @@ setMethod("combineMS2.Ions", signature = "CompMS2", function(object,
                    " composite spectra..."))
     flush.console()
     
-    if(object@Parameters$nSlaves > 0){
+    if(object@Parameters$nCores > 0){
       # create a cluster using the doSNOW package
-      message(paste0("Starting SNOW cluster with ", object@Parameters$nSlaves,
+      message(paste0("Starting SNOW cluster with ", object@Parameters$nCores,
                      " local sockets..."))
       flush.console()
       
-      cl <- parallel::makeCluster(object@Parameters$nSlaves) 
+      cl <- parallel::makeCluster(object@Parameters$nCores) 
       doSNOW::registerDoSNOW(cl)
       
       # foreach and dopar from foreach package

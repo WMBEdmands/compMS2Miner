@@ -4,8 +4,10 @@
 \alias{compMS2}
 \title{Constructor for compMS2 class object from a peak table and MS2 mzXML file(s)}
 \usage{
-compMS2(MS1features = NULL, mzXMLdir = NULL, nSlaves = NULL,
-  mode = "pos", precursorPpm = 10, ret = 10, TICfilter = 10000)
+compMS2(MS1features = NULL, mzXMLdir = NULL, nCores = NULL,
+  argsCorrNetwork = list(obsNames = NULL, corrThresh = 0.6, corrMethod =
+  "spearman", delta = 0.05, MTC = "BH"), mode = "pos", precursorPpm = 10,
+  ret = 10, TICfilter = 10000)
 }
 \arguments{
 \item{MS1features}{either a data.frame, full file path as a character string to a  .csv file of a MS1 feature table in the form observation (samples) in columns and
@@ -17,7 +19,7 @@ variables (Mass spectral signals) in rows, the first 3 columns must consist of:
  }
  If argument is not supplied a GUI (tcltk) file selection window will open and a .csv file can then be selected.}
 
-\item{nSlaves}{numeric Number of cores for parallel computation.}
+\item{nCores}{numeric Number of cores for parallel computation.}
 
 \item{mode}{character Ionisation polarity must be either 'pos' or 'neg'.}
 

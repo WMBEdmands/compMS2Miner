@@ -25,18 +25,20 @@
 #'    (\code{\link{metID.PredSMILES}}). 
 #' 
 #' 4. Lipophilicity (LogD) calculation using the ChemAxon command line interface,
-#'    this requires ChemAxon software to be installed (\code{\link{metID.LogDchemAxon}}).
+#'    this requires ChemAxon software to be installed (In development) (\code{\link{metID.LogDchemAxon}}).
 #' 
 #' 5. Combinatorial insilico fragment prediction using the command line version
 #'    of MetFrag (\code{\link{metID.metFrag}}).
 #' 
-#' 6. Inter- and intra-feature chemical similarity scoring (\code{\link{metID.chemSim}}).
+#' 6. Inter- and intra-feature chemical similarity scoring (In development) (\code{\link{metID.chemSim}}).
+#' 
+#' 7. Correlation network from a peak table. This function calculates a correlation matrix from the peak areas/ height sample columns and creates a prefuse force directed correlation network that can then be visualized in the \code{\link{compMS2explorer}} application. \code{\link{metID.corrNetwork}}
 #' 
 #' @return A compMS2 object with various metabolite identification information.
 #' @seealso \code{\link{metID.dbAnnotate}}, \code{\link{metID.dbProb}}, 
 #' \code{\link{metID.predSMILES}}, 
 #' \code{\link{metID.LogDChemAxon}}, \code{\link{metID.metFrag}}, 
-#' \code{\link{metID.chemSim}}
+#' \code{\link{metID.chemSim}}, \code{\link{metID.corrNetwork}} 
 #' @export
 setGeneric("metID", function(object, ...) standardGeneric("metID"))
 
@@ -44,7 +46,7 @@ setMethod("metID", signature = "CompMS2", function(object, method="dbAnnotate",
                                                     ...) {
   
   method <- match.arg(method, c("dbAnnotate", "dbProb", "predSMILES", 
-                                "LogDChemAxon", "metFrag", "CFM", "chemSim"))
+                                "LogDChemAxon", "metFrag", "CFM", "chemSim", "corrNetwork"))
   method <- paste("metID", method, sep=".")
   invisible(do.call(method, alist(object, ...)))
 }) 

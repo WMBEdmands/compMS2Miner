@@ -1,14 +1,31 @@
 library(CompMS2miner)
 library(shiny)
+library(igraph)
+library(rhandsontable)
 
-shiny::shinyServer(function(input,  output, session){ 
+shiny::shinyServer(function(input,  output, session){
+  # comment lines below if action button is used to commit changes
+  values = reactiveValues()
+  setHot = function(x) values[["hot"]] = x
   
-  # observe({
-  #   if(input$CloseAppBtn > 0){
-  #     
-  #     shiny::stopApp(UserComments.v)
-  #   }
-  # })
+  
+  output$hot = renderRHandsontable({
+    if (!is.null(input$hot)) {
+      metIDcomments = hot_to_r(input$hot)
+    } 
+    
+    setHot(metIDcomments)
+    rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
+      # hot_col('compSpectrum', readOnly = T) %>%
+      hot_table(highlightCol = TRUE, highlightRow = TRUE)
+  })
+  # options(shiny.trace=T)
+  observe({
+    if(input$CloseAppBtn > 0){
+      write.csv(values[["hot"]], 'metID_comments.csv', row.names = F)
+      shiny::stopApp()
+    }
+  })
   # feature selection shiny::reactive
   Featureselection <- shiny::reactive({
     if(input$goButton == 0){ 
@@ -36,7 +53,7 @@ shiny::shinyServer(function(input,  output, session){
         
         if(any(input$subStrAnnoTypes != '')){
           if(input$subStrAnnoThresh != ''){
-            likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType) & as.numeric(x$SumRelInt) > as.numeric(input$subStrAnnoThresh)))
+            likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType) & as.numeric(x$SumRelInt) >= as.numeric(input$subStrAnnoThresh)))
           } else {
         likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType)))
           }
@@ -98,7 +115,7 @@ shiny::shinyServer(function(input,  output, session){
       
       if(any(input$subStrAnnoTypes != '')){
         if(input$subStrAnnoThresh != ''){
-          likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType) & as.numeric(x$SumRelInt) > as.numeric(input$subStrAnnoThresh)))
+          likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType) & as.numeric(x$SumRelInt) >= as.numeric(input$subStrAnnoThresh)))
         } else {
           likelySubStrIndx  <- sapply(subStrAnno.list, function(x) any(grepl(paste(input$subStrAnnoTypes,  collapse = "|"), x$SubStrType)))
         }
@@ -125,8 +142,7 @@ shiny::shinyServer(function(input,  output, session){
     }
   })
   # feature selection observer
-  observe({ if(input$goButton)
-  {
+  observe({ if(input$goButton){
     output$FeatureNames = shiny::renderUI({
       Featurenames <- shiny::isolate({Featureselection()})
       shiny::selectizeInput('FeatureNames',  'Choose a feature to plot :',  
@@ -154,8 +170,7 @@ shiny::shinyServer(function(input,  output, session){
   })
   
   # DB matches observer
-  observe({ if(input$DBbutton)
-  {
+  observe({ if(input$DBbutton){
     output$FeatureNames = shiny::renderUI({
       Featurenames <- shiny::isolate({DBFeatureselection()})
       shiny::selectizeInput('FeatureNames',  'Choose a feature to plot :',  
@@ -222,7 +237,7 @@ shiny::shinyServer(function(input,  output, session){
               }
               
               plot(plotDfTmp[, c('mass', 'intensity')], xlim=xlimTmp, ylim=ylimTmp,
-                   type='h', col=ifelse(plotDfTmp$Fragment_Assigned  ==  'Fragment_identified', 'red', 'black'))
+                   type='h', col=ifelse(plotDfTmp$Fragment_Assigned  ==  'Fragment_identified', 'red', 'black'), cex.axis=1.5, cex.lab=1.5)
         
           })
         
@@ -269,7 +284,7 @@ shiny::shinyServer(function(input,  output, session){
           colsTmp <- rep("darkblue", nrow(subFeatTable))
           selectedFeat <- allFeatTable$specNames[feat.indx]
           colsTmp[subFeatTable$specNames %in% selectedFeat] <- 'red'
-          with(subFeatTable, symbols(x=rt, y=mass, circles=precursorInt_group, inches=1/8, bg=colsTmp, fg=NULL, ylab='m/z', xlab='retentionTime', ylim = ylimTmp, xlim = xlimTmp))
+          with(subFeatTable, symbols(x=rt, y=mass, circles=precursorInt_group, inches=1/8, bg=colsTmp, fg=NULL, ylab='m/z', xlab='retentionTime', cex.axis=1.5, cex.lab=1.5, ylim = ylimTmp, xlim = xlimTmp))
       })
         
         
@@ -287,6 +302,39 @@ shiny::shinyServer(function(input,  output, session){
           }
           
           brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, width = 280)
+        
+        ###########################
+        ##### 10. network plot ####
+        ########################### 
+        output$nNodesEdges <- shiny::renderText({
+          paste0('nodes: ', nNodes, ' edges: ', nEdges, ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
+        })
+        
+        output$network_plot <- shiny::renderPlot({
+          if(length(object@network) > 0){
+            if(!is.null(input$network_brush)){
+              xlimTmp <- c(input$network_brush$xmin, input$network_brush$xmax)
+              ylimTmp <- c(input$network_brush$ymin, input$network_brush$ymax)
+            } else {
+              xlimTmp <- c(-1, 1)
+              ylimTmp <- c(-1, 1)
+            } 
+             
+            vertexSizeSub <- vertexSize
+            MS2netColsSub <- MS2netColours
+            selFeatIndx <- netMatchIndx %in% feat.indx
+            if(any(selFeatIndx)){
+            vertexSizeSub[selFeatIndx] <- 9
+            MS2netColsSub[selFeatIndx] <- "#E69F00"
+            }
+            # black background igraph
+            par(bg = "black")
+            
+            plot(netTmp, layout=layoutTmp, edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(netTmp)$name, vertex.size=vertexSizeSub, vertex.label.cex=1.3, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+            legend('topleft', c("currently selected spectrum (if present)", "MS2 matched EIC", "unmatched EIC", paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(21, 21, 21, NA), lty=c(NA, NA, NA, 1), lwd=c(1, 1, 1, 3),
+                   col=c("black", "black", "black", 'gray33'), pt.bg=c("#E69F00" , "#D55E00", "#0072B2", "gray33"), pt.cex=4, cex=1.4, bg='gray79', ncol=1)#text.col='white', bty="n",
+          }
+        })
         ###########################
         ##### 2. metadata table ###
         ###########################

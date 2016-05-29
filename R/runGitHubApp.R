@@ -37,7 +37,7 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, dirPath=NULL, auth_token=NULL, 
    flush.console()
    subdir <- readline()
   }
-  tmpIndx <- grepl(paste0('/', subdir, '/'), pathTmp)
+  tmpIndx <- grepl(paste0(subdir, '.zip$'), pathTmp)
   if(!any(tmpIndx)){
     stop(subdir, ' sub-directory name not found please check and try again...')
   }

@@ -66,7 +66,7 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
       metFragJar <- tcltk::tclvalue(tcltk::tkgetOpenFile(filetypes = "{{Java Archive file} {.jar}} {{All files} *}",
                                                          title="select your MetFrag .jar file"))
       
-      # internal to package in external data
+      # internal to package in external data too large file size...
       # metFragJar <- system.file("extdata", "MetFragCommandLineTool.jar", package = "CompMS2miner")
     }
     
@@ -86,7 +86,10 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
            paste0(sapply(featsureSubSet[featureSubSet.indx == F], message), "\n"))
     }
     
-    
+    ###calculate parent ions from metMasses supplied 
+    # electrospray adducts taken from 
+    # http://fiehnlab.ucdavis.edu/staff/kind/Metabolomics/MS-Adduct-Calculator/
+   
     #   pb <- txtProgressBar(min=0,max=length(featureSubSet),style=3)
     featureSubSet <- which(names(compSpectra(object)) %in% featureSubSet)
     for(i in 1:length(featureSubSet)){
@@ -96,6 +99,7 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
       FeatName.tmp <- names(compSpectra(object))[indx.tmp]
       Neut.mass.tmp <- metaData(object)[[indx.tmp]]
       Neut.mass.tmp <- Neut.mass.tmp[[grep("MS1_mz", names(Neut.mass.tmp))[1]]][1]
+      # add proton
       Neut.mass.tmp <- ifelse(Parameters(object)$mode == "pos", Neut.mass.tmp - 1.00726,
                               Neut.mass.tmp + 1.00726)
       
@@ -126,7 +130,24 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
       bestAnno.tmp <- BestAnno(object)[[indx.tmp]]
       SMILES_tmp <- unlist(bestAnno.tmp[, grep("SMILES", colnames(bestAnno.tmp)), 
                                         drop = F])
-      SMILES_tmp <- SMILES_tmp[SMILES_tmp != ""]
+      # empty SMILES entries
+      emptySMILES <- SMILES_tmp != ""
+      SMILES_tmp <- SMILES_tmp[emptySMILES]
+      # # add electrospray adduct
+      # esiTypeTmp <- gsub('^M[0-9]|^M|\\+|-|[0-9]H$|H$', '', bestAnno.tmp[, "ESI_type"])
+      # nEsiAdducts <- gsub('[A-Z]|[a-z]', '', esiTypeTmp)
+      # nEsiAdducts <- ifelse(nEsiAdducts == '', 1, as.numeric(nEsiAdducts))
+      # # esi types
+      # esiTypeTmp <- gsub('[0-9]', '', esiTypeTmp)
+      # esiTypeTmp <- ifelse(esiTypeTmp == '', '', paste0('[', esiTypeTmp, ']'))
+      # # smiles names
+      # SMILES_namesTmp <- names(SMILES_tmp)
+      # # add electrospray adducts
+      # SMILES_tmp <- sapply(1:length(SMILES_tmp), function(x){
+      #   smTmp <- paste0(SMILES_tmp[x], '.', paste(rep(esiTypeTmp[x], nEsiAdducts[x]), collapse='.'))
+      #   smTmp <- gsub('\\.$', '', smTmp)
+      # })
+      # names(SMILES_tmp) <- SMILES_namesTmp
       
       if(nrow(bestAnno.tmp) == 1) {
         #add DB ids to SMILES names
@@ -136,7 +157,7 @@ setMethod("metID.metFrag", signature = "CompMS2", function(object,
         names(SMILES_tmp) <- paste0(gsub("SMILES.+", "", names(SMILES_tmp)), 
                                     bestAnno.tmp$DBid[as.numeric(gsub(".+SMILES|SMILES", "", names(SMILES_tmp)))])
       }
-      SMILES_tmp <- SMILES_tmp[duplicated(names(SMILES_tmp))==F]
+      SMILES_tmp <- SMILES_tmp[duplicated(names(SMILES_tmp)) == F]
       
       if(length(SMILES_tmp) > 0){
         # convert first to SMILES set object and then SDF (ChemmineR/OB)

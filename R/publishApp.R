@@ -31,10 +31,12 @@ setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL, ..
     if (appDir == ""){
       stop('Could not find example directory. Try re-installing "CompMS2miner".', call. = FALSE)
     }
-
-    save(object, file=paste0(appDir, '/compMS2object.RData'))  
-    
+        
     if(!is.null(writeDir)){
+    # add readOnly = F to parameters when zipped so collaborators can create their own edits
+    Parameters(object)$readOnly <- FALSE
+    save(object, file=paste0(appDir, '/compMS2object.RData'))  
+      
     # create directory to bundle app in
     appDirWrite <- paste0(writeDir, '/', appName)
     dir.create(appDirWrite)
@@ -69,6 +71,10 @@ setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL, ..
     # packrat::init(appDirWrite) 
     # 
     } else {
+    # add readOnly = TRUE to parameters when published so viewers cannot edit
+    Parameters(object)$readOnly <- TRUE
+    save(object, file=paste0(appDir, '/compMS2object.RData'))  
+      
     # deploy app
     shinyapps::deployApp(appDir = appDir, appName=appName, ...)
     }

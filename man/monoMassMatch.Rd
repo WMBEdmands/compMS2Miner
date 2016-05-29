@@ -7,7 +7,7 @@
 monoMassMatch(unknowns = NULL, metMasses.df = NULL, metMasses = NULL,
   DB_unique_IDs = NULL, DB_entry_names = NULL, DB_SMILES = NULL,
   dbEntryWebAddress = NULL, subStrMasses = NULL, subStrNames = NULL,
-  nSlaves = NULL, mode = "pos", ppm = 10)
+  nCores = NULL, mode = "pos", ppm = 10)
 }
 \description{
 Monoisotopic mass matching unknown to data base entry

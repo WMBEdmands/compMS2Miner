@@ -1,4 +1,6 @@
 load(file='compMS2object.RData')
+library(igraph)
+library(rhandsontable)
 
 composite_spectra <- object@compSpectra
 Features.v <- names(composite_spectra)
@@ -107,3 +109,20 @@ subStrAnno.inputs <- unique(subStrAnno.df$SubStrType)
 
 TotalFeatures <- length(unique(gsub(".+_", "", Features.v)))
 TotalCompSpectra <- length(Features.v)
+# network graph
+if(length(object@network) > 0){
+netTmp <- object@network$networkGraph
+layoutTmp <- object@network$layout
+netMatchIndx <- match(as.numeric(attr(V(netTmp), "names")), as.numeric(gsub(".+_", "", Features.v)))
+MS2netColours <- ifelse(!is.na(netMatchIndx), "#D55E00", "#0072B2")
+vertexShapes <- ifelse(!is.na(netMatchIndx), 'circle', 'csquare')
+vertexSize <- rep(4, length(MS2netColours))
+nNodes <- length(V(netTmp))
+nEdges <- length(E(netTmp))
+}
+# met Id comments table
+if(any(dir() == 'metID_comments.csv')){
+metIDcomments <- read.csv('metID_comments.csv', header=T, stringsAsFactors = F)
+} else {
+metIDcomments <- data.frame(compSpectrum=Features.v, possible_identity=rep('', length(Features.v)), user_comments=rep('', length(Features.v)), stringsAsFactors = F)
+}

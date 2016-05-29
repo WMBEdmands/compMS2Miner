@@ -4,13 +4,15 @@
 \alias{runGitHubApp}
 \title{run github shiny modified from shiny and devtools}
 \usage{
-runGitHubApp(repo = NULL, subdir = NULL, auth_token = NULL,
-  browserLaunch = TRUE)
+runGitHubApp(repo = NULL, subdir = NULL, dirPath = NULL,
+  auth_token = NULL, browserLaunch = TRUE)
 }
 \arguments{
 \item{repo}{character github username and repository name. in the form "username/repositoryName"}
 
 \item{subdir}{character sub-directory of the repo containing the shiny and data.}
+
+\item{dirPath}{character full-path to a directory in which to save the contents of the zip file. If unsupplied shiny app will be opened from a temporary directory.}
 
 \item{auth_token}{character private repo authorization token.}
 
