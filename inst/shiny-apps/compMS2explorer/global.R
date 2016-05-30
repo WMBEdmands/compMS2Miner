@@ -121,8 +121,8 @@ nNodes <- length(V(netTmp))
 nEdges <- length(E(netTmp))
 }
 # met Id comments table
-if(any(dir() == 'metID_comments.csv')){
-metIDcomments <- read.csv('metID_comments.csv', header=T, stringsAsFactors = F)
+if(nrow(object@Comments) > 0){
+metIDcomments <- object@Comments
 } else {
 metIDcomments <- data.frame(compSpectrum=Features.v, possible_identity=rep('', length(Features.v)), user_comments=rep('', length(Features.v)), stringsAsFactors = F)
 }

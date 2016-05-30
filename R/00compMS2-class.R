@@ -24,7 +24,7 @@ setClass("CompMS2",
                         DBanno = "list",
                         BestAnno = "list",
                         subStrAnno = "data.frame",
-                        Comments = "list",
+                        Comments = "data.frame",
                         file.paths = "character",
                         Parameters = "data.frame",
                         couchDBconn = "list",
@@ -33,11 +33,11 @@ setClass("CompMS2",
 # CMS2object <- new("CompMS2")
 # CMS2object@compSpectra <- object@compSpectra
 # CMS2object@metaData  <- object@metaData
-# #CMS2object@network  <- object@network
+# CMS2object@network  <- object@network
 # CMS2object@DBanno  <- object@DBanno
 # CMS2object@BestAnno  <- object@BestAnno
 # CMS2object@subStrAnno  <- object@subStrAnno
-# CMS2object@Comments <- object@Comments
+# #CMS2object@Comments <- object@Comments
 # CMS2object@file.paths <- object@file.paths
 # CMS2object@Parameters <- object@Parameters
 # CMS2object@couchDBconn <- object@couchDBconn

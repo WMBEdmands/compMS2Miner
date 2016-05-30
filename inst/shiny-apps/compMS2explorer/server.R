@@ -9,21 +9,13 @@ shiny::shinyServer(function(input,  output, session){
   setHot = function(x) values[["hot"]] = x
   
   
-  output$hot = renderRHandsontable({
-    if (!is.null(input$hot)) {
-      metIDcomments = hot_to_r(input$hot)
-    } 
-    
-    setHot(metIDcomments)
-    rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
-      # hot_col('compSpectrum', readOnly = T) %>%
-      hot_table(highlightCol = TRUE, highlightRow = TRUE)
-  })
   # options(shiny.trace=T)
   observe({
     if(input$CloseAppBtn > 0){
-      write.csv(values[["hot"]], 'metID_comments.csv', row.names = F)
-      shiny::stopApp()
+      if(!is.null(values[["hot"]])){
+        object@Comments <- values[["hot"]]
+      }
+      shiny::stopApp(object)
     }
   })
   # feature selection shiny::reactive
@@ -334,6 +326,20 @@ shiny::shinyServer(function(input,  output, session){
             legend('topleft', c("currently selected spectrum (if present)", "MS2 matched EIC", "unmatched EIC", paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(21, 21, 21, NA), lty=c(NA, NA, NA, 1), lwd=c(1, 1, 1, 3),
                    col=c("black", "black", "black", 'gray33'), pt.bg=c("#E69F00" , "#D55E00", "#0072B2", "gray33"), pt.cex=4, cex=1.4, bg='gray79', ncol=1)#text.col='white', bty="n",
           }
+        })
+        
+        ##################################
+        ##### 11. metID comments table ###
+        ##################################
+        output$hot = renderRHandsontable({
+          if (!is.null(input$hot)) {
+            metIDcomments = hot_to_r(input$hot)
+          } 
+          
+          setHot(metIDcomments)
+          rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
+            # hot_col('compSpectrum', readOnly = T) %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
         })
         ###########################
         ##### 2. metadata table ###
@@ -667,5 +673,13 @@ shiny::shinyServer(function(input,  output, session){
   }
   }
   })
-  session$onSessionEnded(function(){stopApp()})
+  
+  session$onSessionEnded(function(){
+    observe({
+    if(!is.null(values[["hot"]])){
+    object@Comments <- values[["hot"]]
+    }
+    shiny::stopApp(object)})
+    })
+  
 }) # END compMS2server
