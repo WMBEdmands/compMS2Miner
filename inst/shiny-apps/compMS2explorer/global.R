@@ -1,6 +1,7 @@
 load(file='compMS2object.RData')
 library(igraph)
 library(rhandsontable)
+library(scales)
 
 composite_spectra <- object@compSpectra
 Features.v <- names(composite_spectra)
@@ -113,12 +114,23 @@ TotalCompSpectra <- length(Features.v)
 if(length(object@network) > 0){
 netTmp <- object@network$networkGraph
 layoutTmp <- object@network$layout
-netMatchIndx <- match(as.numeric(attr(V(netTmp), "names")), as.numeric(gsub(".+_", "", Features.v)))
+colnames(layoutTmp)[1:2] <- c('xvar', 'yvar')
+# rescale layout
+scaledLayout <- data.frame(layoutTmp, stringsAsFactors = F)
+scaledLayout$xvar <- scales::rescale(scaledLayout$xvar, c(-1, 1))
+scaledLayout$yvar <- scales::rescale(scaledLayout$yvar, c(-1, 1))
+scaledLayout$mzmed <- round(scaledLayout$mzmed, 4)
+scaledLayout$rtmed <- round(scaledLayout$rtmed, 4)
+netMatchIndx <- match(as.numeric(igraph::V(netTmp)$name), as.numeric(gsub(".+_", "", Features.v)))
+
 MS2netColours <- ifelse(!is.na(netMatchIndx), "#D55E00", "#0072B2")
-vertexShapes <- ifelse(!is.na(netMatchIndx), 'circle', 'csquare')
+vertexShapes <- rep('circle', length(MS2netColours))
 vertexSize <- rep(4, length(MS2netColours))
-nNodes <- length(V(netTmp))
-nEdges <- length(E(netTmp))
+verticesTmp <- igraph::V(netTmp)
+nNodes <- length(verticesTmp)
+nodesTmp <- igraph::E(netTmp)
+nEdges <- length(nodesTmp)
+
 }
 # met Id comments table
 if(nrow(object@Comments) > 0){

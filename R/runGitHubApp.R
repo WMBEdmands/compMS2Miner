@@ -43,5 +43,6 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, dirPath=NULL, auth_token=NULL, 
   }
   tmpAppDir <- tempfile(pattern='CompMS2miner')
   appPathTmp <- utils::unzip(pathTmp[tmpIndx], exdir=ifelse(is.null(dirPath), tmpAppDir, dirPath))
-  shiny::runApp(dirname(appPathTmp[1]), launch.browser = browserLaunch)
+  object <- shiny::runApp(dirname(appPathTmp[1]), launch.browser = browserLaunch)
+  return(object)
 } # end function

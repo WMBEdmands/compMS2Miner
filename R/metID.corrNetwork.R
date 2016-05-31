@@ -17,6 +17,7 @@
 #' corresponding correlation coefficents replaced with zero.
 #' @param maxNodes numeric above the maximum nodes the function will use the large graphing algorithm of \code{\link{igraph}}. See \code{\link{igraph::with_lgl}} else
 #' the function uses the  Fruchterman-Reingold layout algorithm. See \code{\link{igraph::with_fr}} 
+#' @param MS2only numeric 3 options (1-3) if 1 All EICs above corrThresh returned, if 2 only non-MS2 matched EICs which are first neighbours of at least one MS2-matched MS2 are returned, if 3 only MS2-matched EICs are returned (default = 1).
 #' 
 #' @return "CompMS2" class object with an additional network graph of any peakTable features above the correlation threshold.
 #' 
@@ -25,7 +26,7 @@ setGeneric("metID.corrNetwork", function(object, ...) standardGeneric("metID.cor
 
 setMethod("metID.corrNetwork", signature = "CompMS2", function(object, peakTable=NULL, obsNames=NULL, 
                           corrThresh=0.6, corrMethod="spearman", delta=0.05, 
-                          MTC="BH", maxNodes=300){
+                          MTC="BH", maxNodes=300, MS2only=1){
     # error handling
     stopifnot(!is.null(object))
     if(class(object) != "CompMS2"){
@@ -39,12 +40,21 @@ setMethod("metID.corrNetwork", signature = "CompMS2", function(object, peakTable
     if(!require(igraph)){
       stop('the igraph package must be installed to calculate the correlation network. Try install.packages("igraph")')
     }
+    if((MS2only %in% c(1:3)) == F){
+      stop('The MS2only argument must be one of 3 options: 1, 2 or 3.')
+    }
     # add parameters to object
     object@Parameters$corrThresh <- corrThresh
     object@Parameters$corrMethod <- corrMethod
     object@Parameters$deltaCorr <- delta
     object@Parameters$MTC <- MTC
     
+    if(MS2only == 3){
+      # subset to include MS2 matched
+      ms2MatchedEICs <- as.numeric(gsub('.+_', '', names(object@compSpectra)))
+      # subset peakTable to only include MS2 matched
+      peakTable <- peakTable[peakTable$EICno %in% ms2MatchedEICs, ]
+    }
     # match obsNames to peak table colnames
     obsIndx <- match(obsNames, colnames(peakTable))
     # if less than all matched then stop
@@ -106,7 +116,14 @@ setMethod("metID.corrNetwork", signature = "CompMS2", function(object, peakTable
     # noCorrFeatM[, 3] <- noCorrFeat
     # sif.df <- rbind(sif.df, noCorrFeatM)
     
-    netTmp <- igraph::graph(as.vector(t(sif.df[, c(1, 3)])))
+    netTmp <- igraph::graph(as.vector(t(sif.df[, c(3, 5)])))
+    # neighbours of MS2 matched
+    if(MS2only == 2){
+    eicsMS2 <- as.numeric(gsub('.+_', '', names(object@compSpectra))) 
+    eicsMS2 <- which(as.numeric(igraph::V(netTmp)$name) %in% eicsMS2)
+    adjVertTmp <- unlist(adjacent_vertices(netTmp, eicsMS2, mode='all'))
+    netTmp <- igraph::induced_subgraph(graph=netTmp, vids=unique(adjVertTmp))
+    }
     nNodes <- length(igraph::V(netTmp))
     if(nNodes <= maxNodes){
       message('less than ', maxNodes, ' nodes using Fruchterman-Reingold layout. see ?igraph::with_fr()\n')
@@ -120,8 +137,9 @@ setMethod("metID.corrNetwork", signature = "CompMS2", function(object, peakTable
     message(nNodes, 
             " nodes with ", length(igraph::E(netTmp)), " edges identified at a correlation threshold >= ", corrThresh, " (", corrMethod, ', p/q value <= ', delta, ', MTC: ', MTC, ')')
     flush.console()
-    
+    # add EIC no., mass and RT to layout
+    indxTmp <- match(as.numeric(igraph::V(netTmp)$name), peakTable[, 1])
+    layoutTmp <- cbind(layoutTmp, as.matrix(peakTable[indxTmp, 1:3]))
     object@network <- list(networkGraph=netTmp, layout=layoutTmp)
     return(object)
-   
 }) # end function

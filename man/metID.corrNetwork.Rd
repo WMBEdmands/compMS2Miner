@@ -29,6 +29,8 @@ corresponding correlation coefficents replaced with zero.}
 
 \item{maxNodes}{numeric above the maximum nodes the function will use the large graphing algorithm of \code{\link{igraph}}. See \code{\link{igraph::with_lgl}} else
 the function uses the  Fruchterman-Reingold layout algorithm. See \code{\link{igraph::with_fr}}}
+
+\item{MS2only}{numeric 3 options (1-3) if 1 All EICs above corrThresh returned, if 2 only non-MS2 matched EICs which are first neighbours of at least one MS2-matched MS2 are returned, if 3 only MS2-matched EICs are returned (default = 1).}
 }
 \value{
 "CompMS2" class object with an additional network graph of any peakTable features above the correlation threshold.

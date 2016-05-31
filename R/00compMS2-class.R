@@ -3,11 +3,8 @@
 #' The CompMS2 class matches MS1 data to MS2 precursors, extracts both MS1 and
 #' MS2 spectral data, noise filters and annotates both MS1 features and MS2
 #'  substructures.
-#'  
-#' This line and the next ones go into the details.
-#' This line thus appears in the details as well.
-#'
-#'@section Slots: 
+#' 
+#' @section Slots: 
 #'  \describe{
 #'    \item{\code{compSpectra}:}{list, containing data from compSpectra}
 #'    \item{\code{slot2}:}{Object of class \code{"character"}, containing data that needs to go in slot2.}

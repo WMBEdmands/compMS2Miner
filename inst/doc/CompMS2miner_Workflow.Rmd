@@ -15,16 +15,18 @@ can subsequently be visualized during any stage of the CompMS2miner
 processing workflow. Composite spectra can be denoised, ion signals grouped 
 and summed, substructure groups identified, common Phase II metabolites
 predicted, calculation of a correlation network and features matched to data bases monoisotopic mass data and insilico MS2 fragmentation data.
-The resulting data can then be readily curated by publishing as online shiny application on shinyapps.io, as a zip file which can be shared or by sending to a local or online
-couchDB database. 
+The resulting data can then be readily curated by publishing as online shiny application on shinyapps.io, as a zip file which can be shared or by sending to a local or online couchDB database. 
 
 At any stage during the compMS2 workflow a compMS2 class object can be visualized
 with a Shiny application *compMS2explorer*. Full usage of the *compMS2explorer* application functionality requires an internet connection.
-The end result of following the workflow within this document using the example data provided can be visualized using the function:
+The end result of following the workflow within this document using the example data provided can be visualized using the function, comments made in the metID comments
+tab can be saved on closing the application by assigning the compMS2explorer
+output to an object:
 
 ```{r, eval=FALSE}
 library(CompMS2miner)
-compMS2explorer(compMS2example)
+# assign any metabolite identification comments to a new "CompMS2" object
+compMS2example_commented <- compMS2explorer(compMS2example)
 ```
 The following example illustrates the CompMS2miner workflow:
 
@@ -132,19 +134,6 @@ if(!require(MetMSLine)){
 
 # zero fill
 peakTable <- zeroFill(peakTable, obsNames)
-# calculate coefficient of variation for Acetonitrile extraction replicates
-peakTable <- cvCalc(peakTable, obsNames[grep('ACN', obsNames)], thresh=Inf)
-# rename coeffVar column
-colnames(peakTable)[ncol(peakTable)] <- 'coeffVar_ACN'
-# calculate coefficient of variation for Methanol extraction replicates
-peakTable <- cvCalc(peakTable, obsNames[grep('MeOH', obsNames)], thresh=Inf)
-# rename coeffVar column
-colnames(peakTable)[ncol(peakTable)] <- 'coeffVar_MeOH'
-# all features less than 20% cv either ACN replicates or MeOH replicates
-peakTable <- peakTable[peakTable$coeffVar_ACN <= 20 | peakTable$coeffVar_MeOH <= 20, ]
-# deconvolute data with RamClust modified for MetMSLine
-wMeanTable <- ramClustMod(peakTable, obsNames)
-peakTable <- wMeanTable$wMeanPspec
 # log transform
 peakTable <- logTrans(peakTable, obsNames)
 
@@ -152,12 +141,9 @@ peakTable <- logTrans(peakTable, obsNames)
 ######### end MetMSLine pre-processing #################
 ########################################################
 
-# move eic nos to first column for corr network function
-peakTable <- cbind(peakTable$EICno, peakTable)
-
-# add correlation network using pre-processed peak table
-compMS2demo <- metID(compMS2demo, method='corrNetwork', peakTable, obsNames, 
-                           corrMethod='pearson', corrThresh=0.9, MTC='none')
+# add correlation network using pre-processed MS2 matched peak table
+compMS2demo <- metID(compMS2demo, method='corrNetwork', peakTable, obsNames,
+                     corrMethod='pearson', corrThresh=0.95, MTC='none', MS2only=3)
 
 ```
 

@@ -1,6 +1,7 @@
 ## ---- eval=FALSE---------------------------------------------------------
 #  library(CompMS2miner)
-#  compMS2explorer(compMS2example)
+#  # assign any metabolite identification comments to a new "CompMS2" object
+#  compMS2example_commented <- compMS2explorer(compMS2example)
 
 ## ---- include=F----------------------------------------------------------
 library(CompMS2miner)
@@ -86,19 +87,6 @@ if(!require(MetMSLine)){
 
 # zero fill
 peakTable <- zeroFill(peakTable, obsNames)
-# calculate coefficient of variation for Acetonitrile extraction replicates
-peakTable <- cvCalc(peakTable, obsNames[grep('ACN', obsNames)], thresh=Inf)
-# rename coeffVar column
-colnames(peakTable)[ncol(peakTable)] <- 'coeffVar_ACN'
-# calculate coefficient of variation for Methanol extraction replicates
-peakTable <- cvCalc(peakTable, obsNames[grep('MeOH', obsNames)], thresh=Inf)
-# rename coeffVar column
-colnames(peakTable)[ncol(peakTable)] <- 'coeffVar_MeOH'
-# all features less than 20% cv either ACN replicates or MeOH replicates
-peakTable <- peakTable[peakTable$coeffVar_ACN <= 20 | peakTable$coeffVar_MeOH <= 20, ]
-# deconvolute data with RamClust modified for MetMSLine
-wMeanTable <- ramClustMod(peakTable, obsNames)
-peakTable <- wMeanTable$wMeanPspec
 # log transform
 peakTable <- logTrans(peakTable, obsNames)
 
@@ -106,12 +94,9 @@ peakTable <- logTrans(peakTable, obsNames)
 ######### end MetMSLine pre-processing #################
 ########################################################
 
-# move eic nos to first column for corr network function
-peakTable <- cbind(peakTable$EICno, peakTable)
-
-# add correlation network using pre-processed peak table
-compMS2demo <- metID(compMS2demo, method='corrNetwork', peakTable, obsNames, 
-                           corrMethod='pearson', corrThresh=0.9, MTC='none')
+# add correlation network using pre-processed MS2 matched peak table
+compMS2demo <- metID(compMS2demo, method='corrNetwork', peakTable, obsNames,
+                     corrMethod='pearson', corrThresh=0.95, MTC='none', MS2only=3)
 
 
 ## ---- eval=FALSE, collapse=TRUE------------------------------------------

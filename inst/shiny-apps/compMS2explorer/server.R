@@ -9,7 +9,7 @@ shiny::shinyServer(function(input,  output, session){
   setHot = function(x) values[["hot"]] = x
   
   
-  # options(shiny.trace=T)
+  #options(shiny.trace=T)
   observe({
     if(input$CloseAppBtn > 0){
       if(!is.null(values[["hot"]])){
@@ -210,13 +210,40 @@ shiny::shinyServer(function(input,  output, session){
         ###########################
         
         plotDf <- reactive({
-          plotDfTmp <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)
-          colnames(plotDfTmp) <- gsub("\\.", "_", colnames(plotDfTmp))
-          plotDfTmp$Precursorfrag_diff <- as.numeric(plotDfTmp$Precursorfrag_diff)
-          plotDfTmp$Fragment_Assigned <- ifelse(apply(plotDfTmp[, c("Frag_ID", "Neutral_loss", "interfrag_loss")], 1, function(x) any(x!="")), "Fragment_identified", "No_Fragment_identified")
-          plotDfTmp <- plotDfTmp[, grepl('_SMILES', colnames(plotDfTmp))  ==  F, drop=F]
-          return(plotDfTmp)
+          MS2_data <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)
+          MS2_data[] <- lapply(MS2_data,  as.character)
+          if("interfrag.diff" %in% colnames(MS2_data)){
+            MS2_data[, c(1:5)] <- apply(MS2_data[, c(1:5)], 2, function(x) round(as.numeric(x), digits=4))
+            SMILESindx <- grep("SMILES$", colnames(MS2_data))
+            IDindx <- sapply(paste0(gsub("\\.SMILES", "", colnames(MS2_data)[SMILESindx]), "$"), grep, colnames(MS2_data))
+            
+            for(i in 1:ncol(MS2_data[, SMILESindx]))
+            { 
+              SMILESsubIndx <- which(MS2_data[, IDindx[i]]!="")
+              if(length(SMILESsubIndx)>0)
+              {
+                MS2_data[SMILESsubIndx, IDindx[i]] <- sapply(c(1:length(MS2_data[SMILESsubIndx, SMILESindx[i]])),  function(x){
+                  Smiles <- unlist(strsplit(MS2_data[SMILESsubIndx[x], SMILESindx[i]], ";"))
+                  SmilesInc <- which(Smiles!="")
+                  SMILEShtml <- unlist(strsplit(MS2_data[SMILESsubIndx[x], IDindx[i]], ";"))
+                  SMILEShtml[SmilesInc] <- paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", Smiles[SmilesInc], "/PNG", "' target='_blank'>", SMILEShtml[SmilesInc], "</a>")
+                  SMILEShtml <- paste(SMILEShtml, collapse=" ")
+                  return(SMILEShtml)
+                })
+              }
+            }
+            MS2_data <- MS2_data[, -SMILESindx, drop=F]
+          } else {
+            MS2_data[, c(1:2)] <- apply(MS2_data[, c(1:2)], 2, function(x) round(as.numeric(x), digits=4))
+            
+          }
+          colnames(MS2_data) <- gsub("\\.", "_", colnames(MS2_data))
+          MS2_data$Precursorfrag_diff <- as.numeric(MS2_data$Precursorfrag_diff)
+          MS2_data$Fragment_Assigned <- ifelse(apply(MS2_data[, c("Frag_ID", "Neutral_loss", "interfrag_loss")], 1, function(x) any(x!="")), "Fragment_identified", "No_Fragment_identified")
+          MS2_data <- MS2_data[, grepl('_SMILES', colnames(MS2_data))  ==  F, drop=F]
+          return(MS2_data)
         })
+        
         output$MS2_plot <- shiny::renderPlot({
          
               plotDfTmp <- plotDf()
@@ -243,11 +270,11 @@ shiny::shinyServer(function(input,  output, session){
           }
         })
         # ui tab 1 nearpoints plot click 
-        output$compMS2tableInfo <- renderPrint({
+        output$compMS2tableInfo <- DT::renderDataTable({
           plotDfTmp <- plotDf()
           
           brushedPoints(plotDfTmp, input$compMS2_brush, xvar = "mass", yvar = "intensity")
-        }, width = 280)
+        }, rownames=FALSE,  escape = F)
           
         ###########################
         ##### 9. overview plot ####
@@ -281,7 +308,7 @@ shiny::shinyServer(function(input,  output, session){
         
         
         # ui tab 9 nearpoints plot click 
-        output$overviewtableInfo <- renderPrint({
+        output$overviewtableInfo <- DT::renderDataTable({
           if(input$goButton){
             Featurenames <- shiny::isolate({Featureselection()})
           }
@@ -293,7 +320,7 @@ shiny::shinyServer(function(input,  output, session){
             subFeatTable <- allFeatTable  
           }
           
-          brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, width = 280)
+          brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, rownames=FALSE)
         
         ###########################
         ##### 10. network plot ####
@@ -301,8 +328,13 @@ shiny::shinyServer(function(input,  output, session){
         output$nNodesEdges <- shiny::renderText({
           paste0('nodes: ', nNodes, ' edges: ', nEdges, ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
         })
-        
-        output$network_plot <- shiny::renderPlot({
+      
+      output$networkTableBrush <- DT::renderDataTable({
+      bpDfTmp  <- brushedPoints(scaledLayout, input$network_brush, xvar='xvar', yvar='yvar')
+      bpDfTmp <- bpDfTmp[, 3:5]
+      }, rownames=FALSE)
+               
+      output$network_plot <- shiny::renderPlot({
           if(length(object@network) > 0){
             if(!is.null(input$network_brush)){
               xlimTmp <- c(input$network_brush$xmin, input$network_brush$xmax)
@@ -314,17 +346,34 @@ shiny::shinyServer(function(input,  output, session){
              
             vertexSizeSub <- vertexSize
             MS2netColsSub <- MS2netColours
+            vertexShapesSub <- vertexShapes
             selFeatIndx <- netMatchIndx %in% feat.indx
+            
             if(any(selFeatIndx)){
-            vertexSizeSub[selFeatIndx] <- 9
-            MS2netColsSub[selFeatIndx] <- "#E69F00"
+            vertexSizeSub[selFeatIndx] <- 6
+            MS2netColsSub[selFeatIndx] <- "#7CAE00"
+            # id first neighbours
+            neighSel <- neighbors(netTmp, which(selFeatIndx), mode='all')
+            MS2netColsSub[neighSel] <- "#7CAE00"
+            }
+            # highlight subset features as triangles
+            if(input$goButton){
+              Featurenames <- shiny::isolate({Featureselection()})
+            }
+            if(input$DBbutton){
+              Featurenames <- shiny::isolate({DBFeatureselection()})
+            }
+            subsetFeatures <- which(Features.v %in% Featurenames)
+            subsetFeatures <- netMatchIndx %in% subsetFeatures
+            if(any(subsetFeatures)){
+            vertexShapesSub[subsetFeatures] <- 'csquare'  
             }
             # black background igraph
             par(bg = "black")
-            
-            plot(netTmp, layout=layoutTmp, edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(netTmp)$name, vertex.size=vertexSizeSub, vertex.label.cex=1.3, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
-            legend('topleft', c("currently selected spectrum (if present)", "MS2 matched EIC", "unmatched EIC", paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(21, 21, 21, NA), lty=c(NA, NA, NA, 1), lwd=c(1, 1, 1, 3),
-                   col=c("black", "black", "black", 'gray33'), pt.bg=c("#E69F00" , "#D55E00", "#0072B2", "gray33"), pt.cex=4, cex=1.4, bg='gray79', ncol=1)#text.col='white', bty="n",
+             
+            plot(netTmp, layout=layoutTmp[, 1:2], edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(netTmp)$name, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.3, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+            legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", "unmatched EIC", paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(NA, 22, 21, 21, NA), lty=c(1, NA, NA, NA, 1), lwd=c(4, 1, 1, 1, 4),
+                   col=c("#7CAE00", "black", "black", "black", 'gray33'), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#0072B2", "gray33"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
           }
         })
         
@@ -373,36 +422,36 @@ shiny::shinyServer(function(input,  output, session){
         ##### 3. MS2 data table ###
         ###########################
         
-        output$MS2_data <- DT::renderDataTable({
-          MS2_data <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)
-          MS2_data[] <- lapply(MS2_data,  as.character)
-          if("interfrag.diff" %in% colnames(MS2_data)){
-            MS2_data[, c(1:5)] <- apply(MS2_data[, c(1:5)], 2, function(x) round(as.numeric(x), digits=4))
-            SMILESindx <- grep("SMILES$", colnames(MS2_data))
-            IDindx <- sapply(paste0(gsub("\\.SMILES", "", colnames(MS2_data)[SMILESindx]), "$"), grep, colnames(MS2_data))
-            
-            for(i in 1:ncol(MS2_data[, SMILESindx]))
-            { 
-              SMILESsubIndx <- which(MS2_data[, IDindx[i]]!="")
-              if(length(SMILESsubIndx)>0)
-              {
-                MS2_data[SMILESsubIndx, IDindx[i]] <- sapply(c(1:length(MS2_data[SMILESsubIndx, SMILESindx[i]])),  function(x){
-                  Smiles <- unlist(strsplit(MS2_data[SMILESsubIndx[x], SMILESindx[i]], ";"))
-                  SmilesInc <- which(Smiles!="")
-                  SMILEShtml <- unlist(strsplit(MS2_data[SMILESsubIndx[x], IDindx[i]], ";"))
-                  SMILEShtml[SmilesInc] <- paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", Smiles[SmilesInc], "/PNG", "' target='_blank'>", SMILEShtml[SmilesInc], "</a>")
-                  SMILEShtml <- paste(SMILEShtml, collapse=" ")
-                  return(SMILEShtml)
-                })
-              }
-            }
-            MS2_data <- MS2_data[, -SMILESindx, drop=F]
-          } else {
-            MS2_data[, c(1:2)] <- apply(MS2_data[, c(1:2)], 2, function(x) round(as.numeric(x), digits=4))
-            
-          }
-          return(MS2_data)    
-        },  options = list(pageLength = 25),  escape = F)
+#         output$MS2_data <- DT::renderDataTable({
+#           MS2_data <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)
+#           MS2_data[] <- lapply(MS2_data,  as.character)
+#           if("interfrag.diff" %in% colnames(MS2_data)){
+#             MS2_data[, c(1:5)] <- apply(MS2_data[, c(1:5)], 2, function(x) round(as.numeric(x), digits=4))
+#             SMILESindx <- grep("SMILES$", colnames(MS2_data))
+#             IDindx <- sapply(paste0(gsub("\\.SMILES", "", colnames(MS2_data)[SMILESindx]), "$"), grep, colnames(MS2_data))
+#             
+#             for(i in 1:ncol(MS2_data[, SMILESindx]))
+#             { 
+#               SMILESsubIndx <- which(MS2_data[, IDindx[i]]!="")
+#               if(length(SMILESsubIndx)>0)
+#               {
+#                 MS2_data[SMILESsubIndx, IDindx[i]] <- sapply(c(1:length(MS2_data[SMILESsubIndx, SMILESindx[i]])),  function(x){
+#                   Smiles <- unlist(strsplit(MS2_data[SMILESsubIndx[x], SMILESindx[i]], ";"))
+#                   SmilesInc <- which(Smiles!="")
+#                   SMILEShtml <- unlist(strsplit(MS2_data[SMILESsubIndx[x], IDindx[i]], ";"))
+#                   SMILEShtml[SmilesInc] <- paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", Smiles[SmilesInc], "/PNG", "' target='_blank'>", SMILEShtml[SmilesInc], "</a>")
+#                   SMILEShtml <- paste(SMILEShtml, collapse=" ")
+#                   return(SMILEShtml)
+#                 })
+#               }
+#             }
+#             MS2_data <- MS2_data[, -SMILESindx, drop=F]
+#           } else {
+#             MS2_data[, c(1:2)] <- apply(MS2_data[, c(1:2)], 2, function(x) round(as.numeric(x), digits=4))
+#             
+#           }
+#           return(MS2_data)    
+#         },  options = list(pageLength = 25),  escape = F)
         
         ###########################
         ##### 4. DB results #####
