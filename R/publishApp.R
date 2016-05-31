@@ -8,11 +8,14 @@
 #' @param appName character name for your new app (e.g. 'compMS2example').
 #' @param writeDir character full path to a directory to save the compMS2 results
 #' and the current shiny app to. This zip file can then be shared with others.
+#' @param addFiles character vector of full paths to files which will be included
+#' in the zip file or bundle to shinyapps.io. For example code used to generate 
+#' compMS2 results.
 #' @param ... further arguments to the \code{\link{deployApp}} function
 #' @export
-setGeneric("publishApp", function(object, appName=NULL, writeDir=NULL, ...) standardGeneric("publishApp"))
+setGeneric("publishApp", function(object, appName=NULL, writeDir=NULL, addFiles=NULL, ...) standardGeneric("publishApp"))
 
-setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL, ...){
+setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL,  writeDir=NULL, addFiles=NULL, ...){
   # error handling
   if(class(object) != "CompMS2"){
     stop("argument object is not a CompMS2 class object")
@@ -28,10 +31,20 @@ setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL, ..
     }
     
     appDir <- system.file("shiny-apps", "compMS2explorer", package = "CompMS2miner")
-    if (appDir == ""){
+    if(appDir == ""){
       stop('Could not find example directory. Try re-installing "CompMS2miner".', call. = FALSE)
     }
-        
+    
+    if(is.character(addFiles)){
+    message('moving the following additional files to the application bundle:\n',
+            paste0(basename(addFiles), '\n'))
+    flush.console
+    filesMoved <- file.copy(addFiles, appDir, overwrite = T)
+    if(any(filesMoved == F)){
+    stop('The file(s):\n', paste0(addFiles[filesMoved == F], '\n'), 'were not copied to the bundle please check the path is correct.\n')
+    }
+    }  
+    
     if(!is.null(writeDir)){
     # add readOnly = F to parameters when zipped so collaborators can create their own edits
     Parameters(object)$readOnly <- FALSE
@@ -42,6 +55,8 @@ setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL, ..
     dir.create(appDirWrite)
     # id shiny files and .RData
     shinyFilesTmp <- list.files(appDir, full.names = T)
+    # remove the dreaded desktop.ini
+    shinyFilesTmp <- shinyFilesTmp[grepl('desktop\\.ini$', shinyFilesTmp) == F]
     destZipFile <- paste0(appDirWrite, '/', appName, '.zip')
     fileAlreadyExists <- file.exists(destZipFile)
     if(fileAlreadyExists == T){
