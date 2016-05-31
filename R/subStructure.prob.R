@@ -24,18 +24,34 @@ setMethod("subStructure.prob", signature = "CompMS2", function(object){
     names_CompSpec <- names(compSpectra(object))
     substrBestIds <- lapply(c(1:length(compSpectra(object))), function(x){
       spec.df <- compSpectra(object)[[x]]
-      subStrTypes <- unlist(spec.df[, c("Frag.ID.type", "interfrag.loss.type", 
-                                        "Neutral.loss.type")])
-      # remove unannotated
-      subStrTypes <- subStrTypes[subStrTypes != ""]
-      if(length(subStrTypes) > 0){
-      # remove duplicates
-      subStrTypes <- unique(paste0(subStrTypes, 
-                                   gsub("[A-Za-z]|\\.", "", names(subStrTypes))))
+      arrIndxAnno <- which(spec.df[, c("Frag.ID.type", "interfrag.loss.type", 
+                                        "Neutral.loss.type")] != '', arr.ind = T)
       
-      # vector intensities
-      names(subStrTypes) <- spec.df$Rel_Intensity[as.numeric(gsub("[[:alpha:]]|[[:punct:]]|[[:space:]]", 
-                                                "", subStrTypes))]
+      if(nrow(arrIndxAnno) > 0){
+      subStrTypes <- spec.df[, c("Frag.ID.type", "interfrag.loss.type", 
+                                 "Neutral.loss.type")]
+      subStrTypes <- subStrTypes[arrIndxAnno]
+      names(subStrTypes) <- spec.df$Rel_Intensity[arrIndxAnno[, 1]]
+      relIntOrder <- order(spec.df$Rel_Intensity[arrIndxAnno[, 1]], decreasing = T)
+      fragNLtypes <- spec.df[, c("Frag.ID", "interfrag.loss", 
+                                 "Neutral.loss")]
+      fragNLnames <- colnames(fragNLtypes)[arrIndxAnno[, 2]]
+      fragNLtypes <- fragNLtypes[arrIndxAnno]
+      fragNLtypes <- paste0(fragNLnames, '_', fragNLtypes)
+      # order rel int
+      subStrTypes <- subStrTypes[relIntOrder]
+      fragNLtypes <- fragNLtypes[relIntOrder]
+      duplIndx <- duplicated(fragNLtypes) == F
+      subStrTypes <- subStrTypes[duplIndx]
+      # remove duplicates
+      # subStrTypes <- paste0(subStrTypes, ';;', 
+      #                              gsub("[A-Za-z]|\\.", "", names(subStrTypes)))
+      # duplIndx <- duplicated(subStrTypes) == F
+      # subStrTypes <- subStrTypes[duplIndx]
+      # fragNLTypes <- fragNLTypes[duplIndx]
+      # # vector intensities
+      # names(subStrTypes) <- spec.df$Rel_Intensity[as.numeric(gsub(".+;;", 
+      #                                           "", subStrTypes))]
       # unlist any multiple IDs
       subStrTypes <- unlist(strsplit(subStrTypes, ";"))
       # remove last character string split
@@ -44,10 +60,9 @@ setMethod("subStructure.prob", signature = "CompMS2", function(object){
                                              nchar(names(subStrTypes))- 1, nchar(names(subStrTypes))))
 #        <- Ints
       # sum rel intensities
-      subStrs.tmp <- gsub("[0-9]", "", subStrTypes)
-      subStrTypes <- tapply(as.numeric(names(subStrTypes)), subStrs.tmp, sum)
-      subStrs.tmp <- data.frame(table(subStrs.tmp), stringsAsFactors = F)
-     # subStrTypes <- subStrTypes / sum(spec.df$intensity) 
+      subStrs.tmp <- data.frame(table(subStrTypes), stringsAsFactors = F)
+      subStrTypes <- tapply(as.numeric(names(subStrTypes)), subStrTypes, sum)
+           # subStrTypes <- subStrTypes / sum(spec.df$intensity) 
       # summary results
       subStrTypes <- data.frame(compSpecName = rep(names_CompSpec[x], 
                                                    length(subStrTypes)),
@@ -55,7 +70,7 @@ setMethod("subStructure.prob", signature = "CompMS2", function(object){
                                 SumRelInt = subStrTypes,
                                 stringsAsFactors = F)
       subStrTypes <- merge(subStrTypes, subStrs.tmp, by.x = "SubStrType", 
-                           by.y = "subStrs.tmp")
+                           by.y = "subStrTypes")
       subStrTypes <- subStrTypes[order(subStrTypes$SumRelInt,
                                        decreasing = T), ]
       subStrTypes$nPeaks <- length(spec.df$intensity)
