@@ -416,7 +416,7 @@ shiny::shinyServer(function(input,  output, session){
             metadata.tmp.sub[grep(x,  names(metadata.tmp.sub))])
           row.names(metadata.tmp.sub) <- unique(row.names.tmp)
           return(metadata.tmp.sub)    
-        }, rownames=FALSE,  options = list(pageLength = 21))
+        },  options = list(pageLength = 21))
         
         ###########################
         ##### 3. MS2 data table ###
