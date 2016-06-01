@@ -21,7 +21,17 @@ setMethod("compMS2explorer", signature = "CompMS2", function(object, browserLaun
       }
     # add readOnly = F to parameters
     Parameters(object)$readOnly <- FALSE
-    save(object, file=paste0(appDir, '/compMS2object.RData'))  
-      shiny::runApp(appDir, display.mode = "normal", launch.browser = browserLaunch)
+    # create temporary directory to create zip
+    outDir <- tempfile(pattern = "CompMS2miner")
+    dir.create(outDir)
+    
+    # copy latest version of shiny app from package
+    filesMoved <- file.copy(paste0(appDir, c('/server.R', '/ui.R', '/global.R')), outDir, overwrite = T)
+    if(any(filesMoved == F)){
+      stop('The shiny-app file(s) were not copied to the bundle please check the CompMS2miner package is properly installed.\n')
+    }
+    
+    save(object, file=paste0(outDir, '/compMS2object.RData'))  
+      shiny::runApp(outDir, display.mode = "normal", launch.browser = browserLaunch)
     }
 }) # end function
