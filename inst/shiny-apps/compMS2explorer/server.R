@@ -416,7 +416,7 @@ shiny::shinyServer(function(input,  output, session){
             metadata.tmp.sub[grep(x,  names(metadata.tmp.sub))])
           row.names(metadata.tmp.sub) <- unique(row.names.tmp)
           return(metadata.tmp.sub)    
-        },  options = list(pageLength = 21))
+        }, rownames=FALSE,  options = list(pageLength = 21))
         
         ###########################
         ##### 3. MS2 data table ###
@@ -479,7 +479,7 @@ shiny::shinyServer(function(input,  output, session){
             DB.results$WebAddress <- NULL 
             DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")] <- lapply(DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")],  as.numeric)
             return(DB.results)
-          }},  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
+          }}, rownames=FALSE,  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
         
         ##############################
         ##### 5. Best annotations #####
@@ -513,7 +513,7 @@ shiny::shinyServer(function(input,  output, session){
             DB.results$WebAddress <- NULL 
             DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")] <- lapply(DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")],  as.numeric)
             return(DB.results)
-          }}},  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
+          }}}, rownames=FALSE,  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
         
         
         ############################################
@@ -528,7 +528,7 @@ shiny::shinyServer(function(input,  output, session){
           } else {
             SbStrResults <-  subStrAnno.df[subStrAnno.df$compSpecName %in% Features.v[feat.indx],  ,  drop = F]
             return(SbStrResults)
-          }},  escape=F,  options = list(pageLength = 8))
+          }}, rownames=FALSE,  escape=F,  options = list(pageLength = 8))
         
         
         ##ui for word cloud
