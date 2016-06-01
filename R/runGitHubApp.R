@@ -42,6 +42,9 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, dirPath=NULL, auth_token=NULL, 
     stop(subdir, ' sub-directory name not found please check and try again...')
   }
   tmpAppDir <- tempfile(pattern='CompMS2miner')
+  if(!is.null(dirPath)){
+  dirPath <- gsub("/$|\\\\$", '', dirPath)
+  }
   appPathTmp <- utils::unzip(pathTmp[tmpIndx], exdir=ifelse(is.null(dirPath), tmpAppDir, dirPath))
   object <- shiny::runApp(dirname(appPathTmp[1]), launch.browser = browserLaunch)
   return(object)
