@@ -136,5 +136,5 @@ nEdges <- length(nodesTmp)
 if(nrow(object@Comments) > 0){
 metIDcomments <- object@Comments
 } else {
-metIDcomments <- data.frame(compSpectrum=Features.v, possible_identity=rep('', length(Features.v)), user_comments=rep('', length(Features.v)), stringsAsFactors = F)
+metIDcomments <- data.frame(compSpectrum=Features.v, possible_identity=rep('', length(Features.v)), compound_class=rep('', length(Features.v)), user_comments=rep('', length(Features.v)), stringsAsFactors = F)
 }
