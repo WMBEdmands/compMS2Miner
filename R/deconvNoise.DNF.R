@@ -13,7 +13,7 @@
 #' until both the minimum DNF signal to noise ratio is exceeding and the number
 #' of peaks is lower than the maximum (default = 5).
 #' 
-#' @return noise filtered composite MS2 spectra.
+#' @return noise filtered MS2 spectra.
 #' @source Xu H. and Frietas M. "A Dynamic Noise Level Algorithm for Spectral 
 #' Screening of Peptide MS/MS Spectra" 2010 BMC Bioinformatics.
 #' @export 
@@ -29,7 +29,7 @@ setMethod("deconvNoise.DNF", signature = "CompMS2", function(object, DNF=2,
   } else {
     
     message(paste0("Applying dynamic noise filter to ", length(object@compSpectra),
-                   " composite spectra..."))
+                   " spectra..."))
     flush.console()
     
     if(object@Parameters$nCores > 0){
@@ -79,7 +79,7 @@ setMethod("deconvNoise.DNF", signature = "CompMS2", function(object, DNF=2,
     message("...done")
     flush.console()
     # number of comp spectra returned
-    message(sum(noiseIndx), " composite spectra contained more than or equal to ",
+    message(sum(noiseIndx), " spectra contained more than or equal to ",
             minPeaks," peaks following dynamic noise filtration")
     flush.console()
     # return noise filtered

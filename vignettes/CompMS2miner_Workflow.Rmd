@@ -144,14 +144,12 @@ peakTable <- logTrans(peakTable, obsNames)
 # add correlation network using pre-processed MS2 matched peak table
 compMS2demo <- metID(compMS2demo, method='corrNetwork', peakTable, obsNames,
                      corrMethod='pearson', corrThresh=0.95, MTC='none', MS2only=3)
-
 ```
 
-##6. Optional curate data in CouchDB/ publish results as a shiny App. 
+##6. Optional curate data  as zip file, in CouchDB and/or publish results as a shiny application. 
 CompMS2 class objects can be sent to either a local or online couchDB database.
 Furthermore, the results of the CompMS2miner workflow can be published on the 
-web as a shiny application to share metabolite identification information using 
-the publishApp function.
+web as a shiny application to share metabolite identification information or as a self-contained zip file using the publishApp function.
 
 ```{r, eval=FALSE, collapse=TRUE}
 # publish your app to shinyapps.io see ?publishApp for more details

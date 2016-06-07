@@ -4,7 +4,13 @@
 #' 
 #' @param object A "CompMS2" class object.  
 #' @param peakTable a data.frame in the form observation (samples) in columns and
-#' variables (Mass spectral signals) in rows. 
+#' variables (Mass spectral signals) in rows. The first 3 columns must consist of:
+#' \enumerate{
+#'  \item EIC number or unique peak identifier.
+#'  \item mass-to-charge ratio of peak group.
+#'  \item median/ peak apex retention time in seconds. 
+#'  }
+#' These columns are utilized in the final network visualization.
 #' @param obsNames character vector of observation (i.e. sample/ QC/ Blank) names to identify appropriate observation (sample) columns.
 #' @param corrThresh correlation coefficient threshold to group features within
 #' a retention time cluster.
@@ -121,7 +127,7 @@ setMethod("metID.corrNetwork", signature = "CompMS2", function(object, peakTable
     if(MS2only == 2){
     eicsMS2 <- as.numeric(gsub('.+_', '', names(object@compSpectra))) 
     eicsMS2 <- which(as.numeric(igraph::V(netTmp)$name) %in% eicsMS2)
-    adjVertTmp <- unlist(adjacent_vertices(netTmp, eicsMS2, mode='all'))
+    adjVertTmp <- c(eicsMS2, unlist(adjacent_vertices(netTmp, eicsMS2, mode='all')))
     netTmp <- igraph::induced_subgraph(graph=netTmp, vids=unique(adjVertTmp))
     }
     nNodes <- length(igraph::V(netTmp))

@@ -1,4 +1,4 @@
-#' Combine spectra peaks within a composite spectra
+#' Combine spectra peaks within individual spectra
 #' 
 #' @details group ions according to absolute m/z error. 
 #' The default parameters are suitable for a high-resolution Q-ToF.
@@ -7,10 +7,10 @@
 #' overall intensity of true ion signal across multiple scans and reduce the 
 #' contribution of noise within the spectrum. Calculation of the central tendency
 #' of each ion group serve to homogenize the random error and improve the mass
-#' accuracy of each composite spectrum peak.    
+#' accuracy of each spectrum peak.    
 #' 
-#' @param mzError interpeak absolute m/z error for composite spectra signal grouping.
-#' @param minPeaks Minimum number of peaks per composite spectrum. 
+#' @param mzError interpeak absolute m/z error for spectra signal grouping.
+#' @param minPeaks Minimum number of peaks per spectrum. 
 #' @param ... option arguments to be passed along.
 #' 
 #' @return A compMS2 object with ion grouped composite spectra.
@@ -26,7 +26,7 @@ setMethod("combineMS2.Ions", signature = "CompMS2", function(object,
   } else {
     
     message(paste0("Grouping ions in ", length(object@compSpectra),
-                   " composite spectra..."))
+                   " spectra..."))
     flush.console()
     
     if(object@Parameters$nCores > 0){
@@ -75,7 +75,7 @@ setMethod("combineMS2.Ions", signature = "CompMS2", function(object,
     message("...done")
     flush.console()
     # number of comp spectra returned
-    message(sum(groupIndx), " composite spectra contained more than or equal to ",
+    message(sum(groupIndx), " spectra contained more than or equal to ",
             minPeaks," peaks following ion grouping")
     flush.console()
     
@@ -84,10 +84,10 @@ setMethod("combineMS2.Ions", signature = "CompMS2", function(object,
     nInterFragless <- sapply(sign.group[groupIndx], function(x){
       intfrag.diff <- as.numeric(c(diff(x[, "mass"]), 0))
       length(which(intfrag.diff < 0.1))})
-      message("The range of interfragment differences less than 0.1 m/z in the composite spectra is ",
+      message("The range of interfragment differences less than 0.1 m/z in the spectra is ",
               paste(c("min :", " max :"), range(nInterFragless)), "\n")
       flush.console()
-      message("The average number of interfragment differences less than 0.1 m/z in the composite spectra is ",
+      message("The average number of interfragment differences less than 0.1 m/z in the spectra is ",
               round(mean(nInterFragless), digits=0), "\n")
     flush.console()
     

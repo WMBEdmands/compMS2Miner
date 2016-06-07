@@ -14,7 +14,7 @@ setMethod("combineMS2.Spectra", signature = "CompMS2", function(object,
     
     
     message(paste0("Combining ", length(object@compSpectra),
-                   " composite spectra by MS1 feature number..."))
+                   " spectra by MS1 feature number..."))
     flush.console()
     MSfeature.nums <- gsub(".+_", "", names(object@compSpectra))
     specGroups <-  tapply(object@compSpectra, as.factor(MSfeature.nums), function(x) rbind(x))

@@ -347,8 +347,18 @@ shiny::shinyServer(function(input,  output, session){
             vertexSizeSub <- vertexSize
             MS2netColsSub <- MS2netColours
             vertexShapesSub <- vertexShapes
-            selFeatIndx <- netMatchIndx %in% feat.indx
+            # if any commented then change colour
+            if (!is.null(input$hot)){
+              metIDcomments <- hot_to_r(input$hot)
+            } 
             
+            compMSCommented <- apply(metIDcomments[, 2:ncol(metIDcomments)], 1, function(x) any(x != '')) 
+            compMSCommented <- netMatchIndx %in% which(compMSCommented)
+            if(any(compMSCommented)){
+            MS2netColsSub[compMSCommented] <- "#C77CFF"  
+            }
+            # colour selected features
+            selFeatIndx <- netMatchIndx %in% feat.indx
             if(any(selFeatIndx)){
             vertexSizeSub[selFeatIndx] <- 6
             MS2netColsSub[selFeatIndx] <- "#7CAE00"
@@ -368,12 +378,13 @@ shiny::shinyServer(function(input,  output, session){
             if(any(subsetFeatures)){
             vertexShapesSub[subsetFeatures] <- 'csquare'  
             }
+           
             # black background igraph
             par(bg = "black")
              
-            plot(netTmp, layout=layoutTmp[, 1:2], edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(netTmp)$name, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.3, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
-            legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", "unmatched EIC", paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(NA, 22, 21, 21, NA), lty=c(1, NA, NA, NA, 1), lwd=c(4, 1, 1, 1, 4),
-                   col=c("#7CAE00", "black", "black", "black", 'gray33'), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#0072B2", "gray33"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
+            plot(netTmp, layout=layoutTmp[, 1:2], edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(netTmp)$name, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+            legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", "unmatched EIC", 'already commented', paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(NA, 22, 21, 21, 21, NA), lty=c(1, NA, NA, NA, NA, 1), lwd=c(4, 1, 1, 1, 1, 4),
+                   col=c("#7CAE00", "black", "black", "black", "black", 'gray33'), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#0072B2", "#C77CFF", "gray33"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
           }
         })
         

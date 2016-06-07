@@ -26,8 +26,7 @@ compMS2create <- function(MS2file = NULL, MS1features = NULL,
   flush.console()
   
   # cond if no MS2 level scans detected
-  if(all(file.info.df$MS.scanType == 1)) 
-  {
+  if(all(file.info.df$MS.scanType == 1)){
     # no MS2 level scans detected cond
     warning(paste0("No MS2 levels scans within ", MS2fileName, ",  check that the 
                    file has been converted to the mzXML format correctly."), 
@@ -43,14 +42,13 @@ compMS2create <- function(MS2file = NULL, MS1features = NULL,
     flush.console()
     # index ms2 scan and above TIC filter
     file.info.df$MS2TICfilt.indx <- (file.info.df$MS.scanType == 2 & 
-                                     file.info.df$TICaboveFilter == 1)*1
+                                     file.info.df$TICaboveFilter == 1) * 1
     nAboveTIC <- length(which(file.info.df$MS2TICfilt.indx == 1))
     message(paste0(nAboveTIC, " MS2 spectra were above the TIC filter of ", 
                    TICfilter))
     flush.console()
-    
-    if(length(nAboveTIC) == 0) # cond if no scan above the TIC filter
-    { 
+    # cond if no scan above the TIC filter
+    if(length(nAboveTIC) == 0){ 
       warning(paste0("No MS2 levels scans above TIC filter of ", TICfilter, " in ", 
                      MS2fileName, ",  reduce the TIC filter parameter or check that 
                      the file has been converted to the mzXML format correctly."), 
@@ -63,7 +61,7 @@ compMS2create <- function(MS2file = NULL, MS1features = NULL,
       message("matching MS1 peak table to precursors of MS2 spectra...")
       flush.console()
       # mapply MS1 feature match
-      MS1MS2match <- mapply(CompMS2miner:::MS1MatchSpectra, EIC=MS1features[, 1], 
+      MS1MS2match <- mapply(MS1MatchSpectra, EIC=MS1features[, 1], 
                             mz=MS1features[, 2], RT=MS1features[, 3], 
                             precursorPpm=precursorPpm, ret=ret, 
                             MoreArgs=list(file.info.df=file.info.df, 
