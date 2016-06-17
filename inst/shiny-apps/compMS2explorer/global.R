@@ -111,27 +111,44 @@ subStrAnno.inputs <- unique(subStrAnno.df$SubStrType)
 TotalFeatures <- length(unique(gsub(".+_", "", Features.v)))
 TotalCompSpectra <- length(Features.v)
 # network graph
-if(length(object@network) > 0){
-netTmp <- object@network$networkGraph
-layoutTmp <- object@network$layout
-colnames(layoutTmp)[1:2] <- c('xvar', 'yvar')
+if(!is.null(object@network$corrNetworkGraph)){
+corrNetTmp <- object@network$corrNetworkGraph
+corrLayoutTmp <- object@network$corrLayout
+colnames(corrLayoutTmp)[1:2] <- c('xvar', 'yvar')
 # rescale layout
-scaledLayout <- data.frame(layoutTmp, stringsAsFactors = F)
-scaledLayout$xvar <- scales::rescale(scaledLayout$xvar, c(-1, 1))
-scaledLayout$yvar <- scales::rescale(scaledLayout$yvar, c(-1, 1))
-scaledLayout$mzmed <- round(scaledLayout$mzmed, 4)
-scaledLayout$rtmed <- round(scaledLayout$rtmed, 4)
-netMatchIndx <- match(as.numeric(igraph::V(netTmp)$name), as.numeric(gsub(".+_", "", Features.v)))
+corrScaledLayout <- data.frame(corrLayoutTmp, stringsAsFactors = F)
+corrScaledLayout$xvar <- scales::rescale(corrScaledLayout$xvar, c(-1, 1))
+corrScaledLayout$yvar <- scales::rescale(corrScaledLayout$yvar, c(-1, 1))
+corrScaledLayout$mzmed <- round(corrScaledLayout$mzmed, 4)
+corrScaledLayout$rtmed <- round(corrScaledLayout$rtmed, 4)
+corrNetMatchIndx <- match(as.numeric(igraph::V(corrNetTmp)$name), as.numeric(gsub(".+_", "", Features.v)))
+# add possible substructure column
+corrScaledLayout <- cbind(corrScaledLayout, possible_substructures=allFeatTable[corrNetMatchIndx[!is.na(corrNetMatchIndx)], 'possible substructure'])
 
-MS2netColours <- ifelse(!is.na(netMatchIndx), "#D55E00", "#0072B2")
-vertexShapes <- rep('circle', length(MS2netColours))
-vertexSize <- rep(4, length(MS2netColours))
-verticesTmp <- igraph::V(netTmp)
-nNodes <- length(verticesTmp)
-nodesTmp <- igraph::E(netTmp)
-nEdges <- length(nodesTmp)
+igraph::V(corrNetTmp)$MS2netColours <- ifelse(!is.na(corrNetMatchIndx), "#D55E00", "#0072B2")
+igraph::V(corrNetTmp)$vertexShapes <- rep('circle', length(corrNetMatchIndx))
+igraph::V(corrNetTmp)$vertexSize <- rep(4, length(corrNetMatchIndx))
 
 }
+# spectral similarity
+if(!is.null(object@network$specSimGraph)){
+  specSimNetTmp <- object@network$specSimGraph
+  specSimLayoutTmp <- object@network$specSimLayout
+  colnames(specSimLayoutTmp)[1:2] <- c('xvar', 'yvar')
+  # rescale layout
+ specSimScaledLayout <- data.frame(specSimLayoutTmp, stringsAsFactors = F)
+ specSimScaledLayout$xvar <- scales::rescale(specSimScaledLayout$xvar, c(-1, 1))
+ specSimScaledLayout$yvar <- scales::rescale(specSimScaledLayout$yvar, c(-1, 1))
+ specSimScaledLayout$name <- igraph::V(specSimNetTmp)$name
+ # specSimScaledLayout$mzmed <- round(specSimScaledLayout$mzmed, 4)
+ # specSimScaledLayout$rtmed <- round(specSimScaledLayout$rtmed, 4)
+  specSimMatchIndx <- match(igraph::V(specSimNetTmp)$name, Features.v)
+  specSimScaledLayout <- cbind(specSimScaledLayout, allFeatTable[specSimMatchIndx, c('mass', 'rt', 'possible substructure')]) 
+  igraph::V(specSimNetTmp)$MS2netColours <- ifelse(!is.na(specSimMatchIndx), "#D55E00", "#0072B2")
+  igraph::V(specSimNetTmp)$vertexShapes <- rep('circle', length(specSimMatchIndx))
+  igraph::V(specSimNetTmp)$vertexSize <- rep(4, length(specSimMatchIndx))
+}
+
 # met Id comments table
 if(nrow(object@Comments) > 0){
 metIDcomments <- object@Comments

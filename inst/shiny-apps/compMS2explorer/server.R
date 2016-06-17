@@ -174,8 +174,7 @@ shiny::shinyServer(function(input,  output, session){
     output$matchSummary <- shiny::renderTable({
       Featurenames <- shiny::isolate({DBFeatureselection()})
       if(Featurenames[1]!="No MS2 features found"){
-        matchSummary <- data.frame(nMatches=length(unique(gsub(".+_", "", Featurenames))), 
-                                 nCompositeSpectra=length(Featurenames))
+        matchSummary <- data.frame(nMatches=length(unique(gsub(".+_", "", Featurenames))), nCompositeSpectra=length(Featurenames))
         return(matchSummary)
       } else {
         return()
@@ -322,48 +321,49 @@ shiny::shinyServer(function(input,  output, session){
           
           brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, rownames=FALSE)
         
-        ###########################
-        ##### 10. network plot ####
-        ########################### 
-        output$nNodesEdges <- shiny::renderText({
-          paste0('nodes: ', nNodes, ' edges: ', nEdges, ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
+        #######################################
+        ##### 10. correlation network plot ####
+        ####################################### 
+        output$corrNodesEdges <- shiny::renderText({
+          paste0('nodes: ', length(igraph::V(corrNetTmp)), ' edges: ', length(igraph::E(corrNetTmp)), ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
         })
       
-      output$networkTableBrush <- DT::renderDataTable({
-      bpDfTmp  <- brushedPoints(scaledLayout, input$network_brush, xvar='xvar', yvar='yvar')
-      bpDfTmp <- bpDfTmp[, 3:5]
-      }, rownames=FALSE)
+      output$corrNetworkTableBrush <- DT::renderDataTable({
+      bpDfTmp  <- brushedPoints(corrScaledLayout, input$corr_network_brush, xvar='xvar', yvar='yvar')
+      bpDfTmp <- bpDfTmp[, 3:6]
+      }, rownames=FALSE, options = list(pageLength = 20))
                
-      output$network_plot <- shiny::renderPlot({
+      output$corr_network_plot <- shiny::renderPlot({
           if(length(object@network) > 0){
-            if(!is.null(input$network_brush)){
-              xlimTmp <- c(input$network_brush$xmin, input$network_brush$xmax)
-              ylimTmp <- c(input$network_brush$ymin, input$network_brush$ymax)
+            if(!is.null(input$corr_network_brush)){
+              xlimTmp <- c(input$corr_network_brush$xmin, input$corr_network_brush$xmax)
+              ylimTmp <- c(input$corr_network_brush$ymin, input$corr_network_brush$ymax)
             } else {
               xlimTmp <- c(-1, 1)
               ylimTmp <- c(-1, 1)
             } 
              
-            vertexSizeSub <- vertexSize
-            MS2netColsSub <- MS2netColours
-            vertexShapesSub <- vertexShapes
+            vertexSizeSub <- igraph::V(corrNetTmp)$vertexSize
+            MS2netColsSub <- igraph::V(corrNetTmp)$MS2netColours
+            vertexShapesSub <- igraph::V(corrNetTmp)$vertexShapes
             # if any commented then change colour
-            if (!is.null(input$hot)){
+            if(!is.null(input$hot)){
               metIDcomments <- hot_to_r(input$hot)
             } 
             
-            compMSCommented <- apply(metIDcomments[, 2:ncol(metIDcomments)], 1, function(x) any(x != '')) 
-            compMSCommented <- netMatchIndx %in% which(compMSCommented)
+            compMSCommented <- apply(metIDcomments[, 3:ncol(metIDcomments)], 1, function(x) any(x != '')) 
+            corrNetMatchCommented <- match(paste0('CC_', igraph::V(corrNetTmp)$name), metIDcomments$compSpectrum)
+            compMSCommented <- corrNetMatchCommented %in% which(compMSCommented)
             if(any(compMSCommented)){
             MS2netColsSub[compMSCommented] <- "#C77CFF"  
             }
             # colour selected features
-            selFeatIndx <- netMatchIndx %in% feat.indx
+            selFeatIndx <- corrNetMatchIndx %in% feat.indx
             if(any(selFeatIndx)){
             vertexSizeSub[selFeatIndx] <- 6
             MS2netColsSub[selFeatIndx] <- "#7CAE00"
             # id first neighbours
-            neighSel <- neighbors(netTmp, which(selFeatIndx), mode='all')
+            neighSel <- neighbors(corrNetTmp, which(selFeatIndx), mode='all')
             MS2netColsSub[neighSel] <- "#7CAE00"
             }
             # highlight subset features as triangles
@@ -374,7 +374,7 @@ shiny::shinyServer(function(input,  output, session){
               Featurenames <- shiny::isolate({DBFeatureselection()})
             }
             subsetFeatures <- which(Features.v %in% Featurenames)
-            subsetFeatures <- netMatchIndx %in% subsetFeatures
+            subsetFeatures <- corrNetMatchIndx %in% subsetFeatures
             if(any(subsetFeatures)){
             vertexShapesSub[subsetFeatures] <- 'csquare'  
             }
@@ -382,12 +382,79 @@ shiny::shinyServer(function(input,  output, session){
             # black background igraph
             par(bg = "black")
              
-            plot(netTmp, layout=layoutTmp[, 1:2], edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(netTmp)$name, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+            plot(corrNetTmp, layout=corrLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(corrNetTmp)$name, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
             legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", "unmatched EIC", 'already commented', paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(NA, 22, 21, 21, 21, NA), lty=c(1, NA, NA, NA, NA, 1), lwd=c(4, 1, 1, 1, 1, 4),
                    col=c("#7CAE00", "black", "black", "black", "black", 'gray33'), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#0072B2", "#C77CFF", "gray33"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
           }
         })
         
+      ###############################################
+      ##### 12. spectral similarity network plot ####
+      ############################################### 
+      output$specSimNodesEdges <- shiny::renderText({
+        paste0('nodes: ', length(igraph::V(specSimNetTmp)), ' edges: ', length(igraph::E(specSimNetTmp)), ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
+      })
+      
+      output$specSimNetworkTableBrush <- DT::renderDataTable({
+        bpDfTmp  <- brushedPoints(specSimScaledLayout, input$specSim_network_brush, xvar='xvar', yvar='yvar')
+        bpDfTmp <- bpDfTmp[, 3:6, drop=F]
+      }, rownames=FALSE, options = list(pageLength = 20))
+      
+      output$specSim_network_plot <- shiny::renderPlot({
+        if(length(object@network) > 0){
+          if(!is.null(input$specSim_network_brush)){
+            xlimTmp <- c(input$specSim_network_brush$xmin, input$specSim_network_brush$xmax)
+            ylimTmp <- c(input$specSim_network_brush$ymin, input$specSim_network_brush$ymax)
+          } else {
+            xlimTmp <- c(-1, 1)
+            ylimTmp <- c(-1, 1)
+          } 
+          
+          vertexSizeSub <- igraph::V(specSimNetTmp)$vertexSize
+          MS2netColsSub <- igraph::V(specSimNetTmp)$MS2netColours
+          vertexShapesSub <- igraph::V(specSimNetTmp)$vertexShapes
+          # if any commented then change colour
+          if (!is.null(input$hot)){
+            metIDcomments <- hot_to_r(input$hot)
+          } 
+          
+          compMSCommented <- apply(metIDcomments[, 3:ncol(metIDcomments)], 1, function(x) any(x != '')) 
+          specSimMatchCommented <- match(igraph::V(specSimNetTmp)$name, metIDcomments$compSpectrum)
+          compMSCommented <- specSimMatchCommented %in% which(compMSCommented)
+          if(any(compMSCommented)){
+            MS2netColsSub[compMSCommented] <- "#C77CFF"  
+          }
+          # colour selected features
+          selFeatIndx <- specSimMatchIndx %in% feat.indx
+          if(any(selFeatIndx)){
+            vertexSizeSub[selFeatIndx] <- 6
+            MS2netColsSub[selFeatIndx] <- "#7CAE00"
+            # id first neighbours
+            neighSel <- neighbors(specSimNetTmp, which(selFeatIndx), mode='all')
+            MS2netColsSub[neighSel] <- "#7CAE00"
+          }
+          # highlight subset features as triangles
+          if(input$goButton){
+            Featurenames <- shiny::isolate({Featureselection()})
+          }
+          if(input$DBbutton){
+            Featurenames <- shiny::isolate({DBFeatureselection()})
+          }
+          subsetFeatures <- which(Features.v %in% Featurenames)
+          subsetFeatures <- specSimMatchIndx %in% subsetFeatures
+          if(any(subsetFeatures)){
+            vertexShapesSub[subsetFeatures] <- 'csquare'  
+          }
+          
+          # black background igraph
+          par(bg = "black")
+          
+          plot(specSimNetTmp, layout=specSimLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color=igraph::E(specSimNetTmp)$color, vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=gsub('CC_', '', V(specSimNetTmp)$name), vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+          legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", 'already commented', paste0('edge fragment ions (dot product >= ', round(object@Parameters$minDotProdThresh, 2), ')'), paste0('edge neutral losses (dot product >= ', round(object@Parameters$minDotProdThresh, 2), ')')), pch=c(NA, 22, 21, 21, NA, NA), lty=c(1, NA, NA, NA, 1, 1), lwd=c(4, 1, 1, 1, 4, 4),
+                 col=c("#7CAE00", "black", "black", "black", "#CC79A7", "#56B4E9"), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#C77CFF", "#CC79A7", "#56B4E9"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
+        }
+      })
+      
         ##################################
         ##### 11. metID comments table ###
         ##################################
@@ -396,6 +463,22 @@ shiny::shinyServer(function(input,  output, session){
             metIDcomments = hot_to_r(input$hot)
           } 
           
+          if(input$goButton){
+            Featurenames <- shiny::isolate({Featureselection()})
+          }
+          if(input$DBbutton){
+            Featurenames <- shiny::isolate({DBFeatureselection()})
+          }
+          currSubset <- metIDcomments$compSpectrum %in% Featurenames
+          currSubset <- ifelse(currSubset, 'Yes', 'No')
+          metIDcomments$currently_subset <- currSubset
+          metIDcomments <- metIDcomments[, c("compSpectrum", 'currently_subset', "possible_identity", "compound_class", "user_comments")]
+          # order by currently subset
+          metIDcomments <- metIDcomments[order(currSubset, decreasing = T), , drop=F]
+          if(all(currSubset == 'Yes')){
+          # resort to Features.v order
+          metIDcomments <- metIDcomments[order(as.numeric(row.names(metIDcomments))), ]  
+          }
           setHot(metIDcomments)
           rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
             # hot_col('compSpectrum', readOnly = T) %>%
@@ -653,8 +736,7 @@ shiny::shinyServer(function(input,  output, session){
         #####################################
         
         output$MetFragTable <- shiny::renderTable({
-          if(length(tmp.metFrag)  ==  0)
-          {
+          if(length(tmp.metFrag)  ==  0){
             metFrag.df.tmp <- "metID.MetFrag function has not yet been run"
             metFrag.df.tmp <- data.frame(metFrag.df.tmp)
             colnames(metFrag.df.tmp) <- "Result"
@@ -737,7 +819,10 @@ shiny::shinyServer(function(input,  output, session){
   session$onSessionEnded(function(){
     observe({
     if(!is.null(values[["hot"]])){
-    object@Comments <- values[["hot"]]
+    metIDcomments  <- values[["hot"]]
+    metIDcomments$currently_subset <- NULL
+    metIDcomments <- metIDcomments[order(as.numeric(row.names(metIDcomments))), ]
+    object@Comments <- metIDcomments
     }
     shiny::stopApp(object)})
     })

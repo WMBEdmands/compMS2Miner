@@ -34,6 +34,10 @@
 #' 
 #' 7. Correlation network from a peak table. This function calculates a correlation matrix from the peak areas/ height sample columns and creates a prefuse force directed correlation network that can then be visualized in the \code{\link{compMS2explorer}} application. \code{\link{metID.corrNetwork}}
 #' 
+#' 8. Spectral similarity network. Inter-spectrum spectral similarity scores (dot product) are calculated. Both fragment ion and precursor - fragment neutral loss
+#' pattern similarity scores are calculated and used to identify clusters of spectra with similar fragmentation/neutral loss patterns. A spectral similarity network is then calculated based on a minimum dot product score (minDotProdThresh, default = 0.8).
+#' The resulting network can then be visualized in the \code{\link{compMS2explorer}} application. \code{\link{metID.specSimNetwork}}.
+#' 
 #' @return A compMS2 object with various metabolite identification information.
 #' @seealso \code{\link{metID.dbAnnotate}}, \code{\link{metID.dbProb}}, 
 #' \code{\link{metID.predSMILES}}, 
@@ -46,7 +50,7 @@ setMethod("metID", signature = "CompMS2", function(object, method="dbAnnotate",
                                                     ...) {
   
   method <- match.arg(method, c("dbAnnotate", "dbProb", "predSMILES", 
-                                "LogDChemAxon", "metFrag", "CFM", "chemSim", "corrNetwork"))
+                                "LogDChemAxon", "metFrag", "CFM", "chemSim", "corrNetwork", 'specSimNetwork'))
   method <- paste("metID", method, sep=".")
   invisible(do.call(method, alist(object, ...)))
 }) 

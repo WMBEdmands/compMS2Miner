@@ -146,6 +146,7 @@ setMethod("metID.corrNetwork", signature = "CompMS2", function(object, peakTable
     # add EIC no., mass and RT to layout
     indxTmp <- match(as.numeric(igraph::V(netTmp)$name), peakTable[, 1])
     layoutTmp <- cbind(layoutTmp, as.matrix(peakTable[indxTmp, 1:3]))
-    object@network <- list(networkGraph=netTmp, layout=layoutTmp)
+    object@network$corrNetworkGraph <- netTmp
+    object@network$corrLayout <- layoutTmp
     return(object)
 }) # end function
