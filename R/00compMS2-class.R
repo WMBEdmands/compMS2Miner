@@ -21,6 +21,7 @@ setClass("CompMS2",
                         DBanno = "list",
                         BestAnno = "list",
                         subStrAnno = "data.frame",
+                        spectralDB = 'list',
                         Comments = "data.frame",
                         file.paths = "character",
                         Parameters = "data.frame",
@@ -34,7 +35,7 @@ setClass("CompMS2",
 # CMS2object@DBanno  <- object@DBanno
 # CMS2object@BestAnno  <- object@BestAnno
 # CMS2object@subStrAnno  <- object@subStrAnno
-# #CMS2object@Comments <- object@Comments
+# CMS2object@Comments <- object@Comments
 # CMS2object@file.paths <- object@file.paths
 # CMS2object@Parameters <- object@Parameters
 # CMS2object@couchDBconn <- object@couchDBconn

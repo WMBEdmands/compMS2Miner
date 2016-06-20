@@ -1,7 +1,7 @@
 load(file='compMS2object.RData')
-library(igraph)
-library(rhandsontable)
-library(scales)
+suppressWarnings(suppressMessages(library(igraph)))
+suppressWarnings(suppressMessages(library(rhandsontable)))
+suppressWarnings(suppressMessages(library(scales)))
 
 composite_spectra <- object@compSpectra
 Features.v <- names(composite_spectra)
@@ -154,4 +154,13 @@ if(nrow(object@Comments) > 0){
 metIDcomments <- object@Comments
 } else {
 metIDcomments <- data.frame(compSpectrum=Features.v, possible_identity=rep('', length(Features.v)), compound_class=rep('', length(Features.v)), user_comments=rep('', length(Features.v)), stringsAsFactors = F)
+}
+
+# spectral database indx
+if(length(object@spectralDB) > 0){
+indxSpectralDb <- sapply(object@spectralDB, length) > 0
+indxSpectralDb <- which(indxSpectralDb[EICorderIndx])
+specDBmatches <- object@spectralDB[EICorderIndx]
+} else {
+
 }

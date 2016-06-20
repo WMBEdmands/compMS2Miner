@@ -42,7 +42,8 @@
 #' @seealso \code{\link{metID.dbAnnotate}}, \code{\link{metID.dbProb}}, 
 #' \code{\link{metID.predSMILES}}, 
 #' \code{\link{metID.LogDChemAxon}}, \code{\link{metID.metFrag}}, 
-#' \code{\link{metID.chemSim}}, \code{\link{metID.corrNetwork}} 
+#' \code{\link{metID.chemSim}}, \code{\link{metID.corrNetwork}},
+#' \code{\link{metID.specSimNetwork}}, \code{\link{metID.matchSpectralDB}} 
 #' @export
 setGeneric("metID", function(object, ...) standardGeneric("metID"))
 
@@ -50,7 +51,7 @@ setMethod("metID", signature = "CompMS2", function(object, method="dbAnnotate",
                                                     ...) {
   
   method <- match.arg(method, c("dbAnnotate", "dbProb", "predSMILES", 
-                                "LogDChemAxon", "metFrag", "CFM", "chemSim", "corrNetwork", 'specSimNetwork'))
+                                "LogDChemAxon", "metFrag", "CFM", "chemSim", "corrNetwork", 'specSimNetwork', 'matchSpectralDB'))
   method <- paste("metID", method, sep=".")
   invisible(do.call(method, alist(object, ...)))
 }) 

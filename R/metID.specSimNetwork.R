@@ -1,9 +1,9 @@
 #' CompMS2 spectral similarity network generation
 #' 
-#' @description generates a dot product spectral similarity network from the MS/MS fragmentation data. The resulting spectral similarity network can then be viewed in compMS2explorer. Utilizes the \link{\code{graph}} function of the \link{\code{igraph}} package.
+#' @description generates a dot product spectral similarity network from the MS/MS fragmentation data. The resulting spectral similarity network can then be viewed in compMS2explorer. Utilizes the \code{\link{graph}} function of the \code{\link{igraph}} package.
 #' 
 #' @param object A "CompMS2" class object.  
-#' @param minDotProdThresh minimum dot product spectral similarity score (default = 0.7).
+#' @param minDotProdThresh minimum dot product spectral similarity score (default = 0.8).
 #' @return "CompMS2" class object with an additional network graph of any peakTable features above the correlation threshold.
 #' 
 #' @export

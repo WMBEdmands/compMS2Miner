@@ -23,6 +23,10 @@ shiny::shinyServer(function(input,  output, session){
     if(input$goButton == 0){ 
       return() } else if (input$goButton > 0){
         
+        if(input$specDBMatch == T){
+          FeaturesIndx <- rep(F, length(Features.v))
+          FeaturesIndx[indxSpectralDb] <- T
+        } else {
         FeaturesIndx <- rep(T, nrow(SubStr_types))
         NoFeaturesIndx <- rep(F, nrow(SubStr_types))
         if(any(input$NotSubStrTypes != "")){
@@ -62,9 +66,9 @@ shiny::shinyServer(function(input,  output, session){
         FeaturesIndx <-  RT.v < (as.numeric(input$retentionTime) + as.numeric(input$RTtolerance))  & RT.v > (as.numeric(input$retentionTime) - as.numeric(input$RTtolerance)) & FeaturesIndx 
         }
         }
-        
+      } 
         Feature.v.sub <- Features.v[FeaturesIndx]
-        
+       
         if(length(Feature.v.sub) == 0){
           return("No MS2 features found")
         } else {
@@ -240,6 +244,23 @@ shiny::shinyServer(function(input,  output, session){
           MS2_data$Precursorfrag_diff <- as.numeric(MS2_data$Precursorfrag_diff)
           MS2_data$Fragment_Assigned <- ifelse(apply(MS2_data[, c("Frag_ID", "Neutral_loss", "interfrag_loss")], 1, function(x) any(x!="")), "Fragment_identified", "No_Fragment_identified")
           MS2_data <- MS2_data[, grepl('_SMILES', colnames(MS2_data))  ==  F, drop=F]
+          # if spectral DB matches
+          if(feat.indx %in% indxSpectralDb){
+          if(!is.null(input$spectralDBtable_rows_selected)){
+            specDBtableTmp <- specDBmatches[[feat.indx]]
+            indxTmp <- duplicated(specDBtableTmp$dbSpectra[, 'compound_msp']) == F
+            indivDBentries <- specDBtableTmp$dbSpectra[indxTmp, ]
+            
+            selectedDBentry <- indivDBentries[input$spectralDBtable_rows_selected, 'compound_msp']
+          dbMassIntensities <- specDBtableTmp$dbSpectra[specDBtableTmp$dbSpectra[, 'compound_msp'] %in% selectedDBentry, 1:2]
+          dbMassIntensities <- apply(dbMassIntensities, 2, as.numeric)
+          colnames(dbMassIntensities) <- c('mass', 'intensity')
+          dbMassIntensities <- cbind(dbMassIntensities, Rel_Intensity=-(dbMassIntensities[, 'intensity']/max(dbMassIntensities[, 'intensity']) * 100), dbData=rep(1, nrow(dbMassIntensities)))
+          MS2_data$dbData <- 0
+          MS2_data <- rbind(MS2_data[, c('mass', 'Rel_Intensity', 'dbData')],
+                            dbMassIntensities[, c('mass', 'Rel_Intensity', 'dbData')])
+            }
+          }
           return(MS2_data)
         })
         
@@ -249,15 +270,40 @@ shiny::shinyServer(function(input,  output, session){
               if(!is.null(input$compMS2_brush)){
                 xlimTmp <- c(input$compMS2_brush$xmin, input$compMS2_brush$xmax)
                 ylimTmp <- c(input$compMS2_brush$ymin, input$compMS2_brush$ymax)
+              } else if('dbData' %in% colnames(plotDfTmp)){
+                xlimTmp <- c(0, max(plotDfTmp$mass) * 1.1)
+                ylimTmp <- c(-100, max(plotDfTmp$Rel_Intensity))  
               } else {
                 xlimTmp <- c(0, max(plotDfTmp$mass) * 1.1)
                 ylimTmp <- c(0, max(plotDfTmp$intensity))
               }
               
+              if('dbData' %in% colnames(plotDfTmp)){
+                colsTmp <- ifelse(plotDfTmp[, 'dbData'] == 1, "#009E73", '#000000')
+                plot(plotDfTmp[, c('mass', 'Rel_Intensity')], xlim=xlimTmp, ylim=ylimTmp, yaxt='n', ylab='relative intensity',
+                     type='h', col=colsTmp, cex.axis=1.5, cex.lab=1.5)
+                axis(2, at=seq(-100, 100, 20), labels=c(abs(seq(-100, -20, 20)), seq(0, 100, 20)), las=2, cex.axis=1.3)
+                abline(h=0)
+                legend('topright', c("composite spectrum", 'database spectrum'), lty=c(1, 1), lwd=c(4, 4), col=c('#000000', "#009E73"), pt.cex=4, cex=1.8, ncol=1)
+              } else {
               plot(plotDfTmp[, c('mass', 'intensity')], xlim=xlimTmp, ylim=ylimTmp,
                    type='h', col=ifelse(plotDfTmp$Fragment_Assigned  ==  'Fragment_identified', 'red', 'black'), cex.axis=1.5, cex.lab=1.5)
-        
+              }
           })
+        
+        # spectral db table
+        output$spectralDBtable <- DT::renderDataTable({
+          if(feat.indx %in% indxSpectralDb){
+          specDBtableTmp <- specDBmatches[[feat.indx]]
+          indxTmp <- duplicated(specDBtableTmp$dbSpectra[, 'compound_msp']) == F
+          dbSpectraTmp <- do.call(rbind, strsplit(specDBtableTmp$dbSpectra[indxTmp, 'compound_msp'], '__'))
+          dbSpectraTmp <- cbind(dbSpectraTmp, round(as.numeric(specDBtableTmp$dbSpectra[indxTmp, 'dotProductScore']), 2))
+          colnames(dbSpectraTmp) <- c('compound', 'mspFile', 'dotProdScore')
+          return(dbSpectraTmp)
+          } else {
+          return(data.frame(spectral_database_match='no spectral database match'))  
+          }
+        }, selection='single', rownames=FALSE)
         
         
         # ui tab 1 text plot hover and main plot

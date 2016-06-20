@@ -57,6 +57,7 @@ The resulting network can then be visualized in the \code{\link{compMS2explorer}
 \code{\link{metID.dbAnnotate}}, \code{\link{metID.dbProb}}, 
 \code{\link{metID.predSMILES}}, 
 \code{\link{metID.LogDChemAxon}}, \code{\link{metID.metFrag}}, 
-\code{\link{metID.chemSim}}, \code{\link{metID.corrNetwork}}
+\code{\link{metID.chemSim}}, \code{\link{metID.corrNetwork}},
+\code{\link{metID.specSimNetwork}}, \code{\link{metID.matchSpectralDB}}
 }
 

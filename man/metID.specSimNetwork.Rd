@@ -9,12 +9,12 @@ metID.specSimNetwork(object, ...)
 \arguments{
 \item{object}{A "CompMS2" class object.}
 
-\item{minDotProdThresh}{minimum dot product spectral similarity score (default = 0.7).}
+\item{minDotProdThresh}{minimum dot product spectral similarity score (default = 0.8).}
 }
 \value{
 "CompMS2" class object with an additional network graph of any peakTable features above the correlation threshold.
 }
 \description{
-generates a dot product spectral similarity network from the MS/MS fragmentation data. The resulting spectral similarity network can then be viewed in compMS2explorer. Utilizes the \link{\code{graph}} function of the \link{\code{igraph}} package.
+generates a dot product spectral similarity network from the MS/MS fragmentation data. The resulting spectral similarity network can then be viewed in compMS2explorer. Utilizes the \code{\link{graph}} function of the \code{\link{igraph}} package.
 }
 
