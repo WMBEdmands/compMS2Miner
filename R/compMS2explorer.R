@@ -24,9 +24,11 @@ setMethod("compMS2explorer", signature = "CompMS2", function(object, browserLaun
     # create temporary directory to create zip
     outDir <- tempfile(pattern = "CompMS2miner")
     dir.create(outDir)
-    
+    wwwOutDir <- paste0(outDir, '/www')
+    dir.create(wwwOutDir)
     # copy latest version of shiny app from package
     filesMoved <- file.copy(paste0(appDir, c('/server.R', '/ui.R', '/global.R')), outDir, overwrite = T)
+    filesMoved <- c(filesMoved, file.copy(paste0(appDir, c('/www/CompMS2minerLogo.png', '/www/dynamicNoiseFilterVideo.mp4')), wwwOutDir, overwrite = T))
     if(any(filesMoved == F)){
       stop('The shiny-app file(s) were not copied to the bundle please check the CompMS2miner package is properly installed.\n')
     }
