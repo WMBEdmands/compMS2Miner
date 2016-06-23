@@ -1,4 +1,6 @@
 load(file='compMS2object.RData')
+
+suppressWarnings(suppressMessages(library(CompMS2miner)))
 suppressWarnings(suppressMessages(library(igraph)))
 suppressWarnings(suppressMessages(library(rhandsontable)))
 suppressWarnings(suppressMessages(library(scales)))

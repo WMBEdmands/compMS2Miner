@@ -1,4 +1,4 @@
-# library(CompMS2miner)
+library(CompMS2miner)
 library(shiny)
 library(igraph)
 library(rhandsontable)
