@@ -123,7 +123,8 @@ corrScaledLayout$mzmed <- round(corrScaledLayout$mzmed, 4)
 corrScaledLayout$rtmed <- round(corrScaledLayout$rtmed, 4)
 corrNetMatchIndx <- match(as.numeric(igraph::V(corrNetTmp)$name), as.numeric(gsub(".+_", "", Features.v)))
 # add possible substructure column
-corrScaledLayout <- cbind(corrScaledLayout, possible_substructures=allFeatTable[corrNetMatchIndx[!is.na(corrNetMatchIndx)], 'possible substructure'])
+possible_substructures <- ifelse(!is.na(corrNetMatchIndx), allFeatTable[corrNetMatchIndx[!is.na(corrNetMatchIndx)], 'possible substructure'], 'no composite spectrum')
+corrScaledLayout <- cbind(corrScaledLayout, possible_substructures)
 
 igraph::V(corrNetTmp)$MS2netColours <- ifelse(!is.na(corrNetMatchIndx), "#D55E00", "#0072B2")
 igraph::V(corrNetTmp)$vertexShapes <- rep('circle', length(corrNetMatchIndx))
@@ -162,5 +163,5 @@ indxSpectralDb <- sapply(object@spectralDB, length) > 0
 indxSpectralDb <- which(indxSpectralDb[EICorderIndx])
 specDBmatches <- object@spectralDB[EICorderIndx]
 } else {
-
+indxSpectralDb <- as.numeric() 
 }

@@ -1,6 +1,6 @@
 ## ---- eval=FALSE---------------------------------------------------------
 #  library(CompMS2miner)
-#  # assign any metabolite identification comments to a new "CompMS2" object
+#  # assign any metabolite identification comments to a new or the same "CompMS2" object
 #  compMS2example_commented <- compMS2explorer(compMS2example)
 
 ## ---- include=F----------------------------------------------------------
@@ -24,7 +24,7 @@ peakTable <- read.csv(MS1features_example, header=TRUE, stringsAsFactors=FALSE)
 # create compMS2 object
 compMS2demo <- compMS2(MS1features = peakTable,
                        mzXMLdir = mzXmlDir_example, nCores=nCores,
-                       mode = "pos", precursorPpm = 10, ret = 10, 
+                       mode = "pos", precursorPpm = 10, ret = 20, 
                        TICfilter = 10000)
 
 # View summary of compMS2 class object at any time 
@@ -67,6 +67,19 @@ compMS2demo <- metID(compMS2demo, "dbAnnotate")
 # select most probable annotations based on substructures detected
 compMS2demo <- metID(compMS2demo, "dbProb")
 
+## ----eval=F--------------------------------------------------------------
+#  # match composite spectra to spectral databases as .msp files (e.g. lipidBlast, source http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp)
+#  compMS2demo <- metID(compMS2demo, 'matchSpectralDB',
+#                       mspFile='http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp')
+#  # massBank .msp
+#  compMS2demo <- metID(compMS2demo, 'matchSpectralDB',
+#                       mspFile='http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/MassBank_MSMS_Pos_Rev173_vs1.msp')
+#  
+#  # ReSpect .msp
+#  compMS2demo <- metID(compMS2demo, 'matchSpectralDB',
+#                       mspFile='http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/Respect_20120925_ESI_Positive_MSMS.msp')
+#  
+
 ## ---- eval=FALSE, collapse=TRUE------------------------------------------
 #  # predict Phase II metabolites from SMILES codes
 #  compMS2demo <- metID(compMS2demo, "predSMILES")
@@ -75,6 +88,8 @@ compMS2demo <- metID(compMS2demo, "dbProb")
 #  compMS2demo <- metID(compMS2demo, "metFrag")
 
 ## ---- collapse=TRUE------------------------------------------------------
+# calculate spectral similarity network (dot product >= 0.8 default)
+compMS2demo <- metID(compMS2demo, 'specSimNetwork')
 ##############################################################
 ### data pre-processing MS1features with MetMSLine package ###
 ##############################################################
@@ -98,11 +113,13 @@ peakTable <- logTrans(peakTable, obsNames)
 compMS2demo <- metID(compMS2demo, method='corrNetwork', peakTable, obsNames,
                      corrMethod='pearson', corrThresh=0.95, MTC='none', MS2only=3)
 
-
 ## ---- eval=FALSE, collapse=TRUE------------------------------------------
 #  # publish your app to shinyapps.io see ?publishApp for more details
 #  # you may need to install the rsconnect and shinyapps packages and also sign up for a shinyapps.io account if you don't have one.
 #  # quick guide here for setting up your account: http://shiny.rstudio.com/articles/shinyapps.html
 #  publishApp(compMS2demo, appName='compMS2demo')
 #  
+
+## ------------------------------------------------------------------------
+sessionInfo()
 

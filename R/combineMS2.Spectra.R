@@ -1,12 +1,12 @@
 #' combine ions across spectra matched to the same MS1 feature
-#' @param mzError interpeak absolute m/z error for composite spectra signal grouping
-#' @param minPeaks Minimum number of peaks per composite spectrum 
+#' @param mzError interpeak absolute m/z error for composite spectra signal grouping (default = 0.01)
+#' @param minPeaks Minimum number of peaks per composite spectrum (default = 3)
 #' @export
 setGeneric("combineMS2.Spectra", function(object, ...) standardGeneric("combineMS2.Spectra"))
 
 setMethod("combineMS2.Spectra", signature = "CompMS2", function(object, 
-                                                                mzError=0.001, 
-                                                                minPeaks = 5){
+                                                                mzError=0.01, 
+                                                                minPeaks = 3){
   # error handling
   if(class(object) != "CompMS2"){
     stop("argument object is not an CompMS2 class object")

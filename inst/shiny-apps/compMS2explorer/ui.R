@@ -1,10 +1,10 @@
-library(CompMS2miner)
+# library(CompMS2miner)
 library(shiny)
 library(igraph)
 library(rhandsontable)
 
 shiny::shinyUI(shiny::fluidPage(
-  shiny::titlePanel("Composite MS2 Explorer "), 
+  shiny::titlePanel(title='Composite MS2 Explorer'), 
   shiny::fluidRow(shiny::column(width=2, 
                                 shiny::h4(shiny::tags$b("Search Options:")),
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
@@ -80,8 +80,8 @@ shiny::shinyUI(shiny::fluidPage(
                                                           shiny::fluidRow(splitLayout(cellWidths = c('55%', '45%'), shiny::plotOutput("MS2_plot", width = "800px",  height = "600px", brush = 'compMS2_brush', hover='compMS2_hover'), DT::dataTableOutput('spectralDBtable'))),
                                                           shiny::fluidRow(DT::dataTableOutput("compMS2tableInfo"))),
                                           shiny::tabPanel('Overview plot', 
-                                                          shiny::plotOutput("overview_plot", width = "1000px",  height = "600px", brush = 'overview_brush'), 
-                                                          DT::dataTableOutput("overviewtableInfo")),
+                                                          shiny::fluidRow(shiny::plotOutput("overview_plot", width = "1000px",  height = "600px", brush = 'overview_brush')), 
+                                                          shiny::fluidRow(DT::dataTableOutput("overviewtableInfo"))),
                                           shiny::tabPanel('Correlation network plot', shiny::verbatimTextOutput("corrNodesEdges"), splitLayout(cellWidths = c('70%', '30%'), shiny::plotOutput("corr_network_plot", height = "800px", brush = 'corr_network_brush'), DT::dataTableOutput("corrNetworkTableBrush"))), 
                                           shiny::tabPanel('Spectral similarity network plot', shiny::verbatimTextOutput("specSimNodesEdges"), splitLayout(cellWidths = c('70%', '30%'), shiny::plotOutput("specSim_network_plot", height = "800px", brush = 'specSim_network_brush'), DT::dataTableOutput("specSimNetworkTableBrush"))), 
 #                                           # shiny::tabPanel("Composite MS2 plot", rCharts::chartOutput("Raw_data_plot", "PolyCharts")), #, #plotOutput("MS2_plot", width = "800px",  height = "600px")),  
@@ -95,9 +95,10 @@ shiny::shinyUI(shiny::fluidPage(
                                           #                                   tabPanel("Best candidates", dataTableOutput("BestCandidate")), 
                                           shiny::tabPanel("PubMed Word Cloud",  shiny::uiOutput("wordCloudSelect"),  shiny::uiOutput("nPMIDAbstracts"),  shiny::verbatimTextOutput("WordCloudText"), 
                                                           shiny::uiOutput("nRandomArticles"),  shiny::tableOutput(outputId="WordCloudTable"),  shiny::plotOutput("WordCloud", width = "800px",  height = "600px")), 
-                                          shiny::tabPanel("MetFrag results",  shiny::tableOutput(outputId="MetFragTable"))#, 
-                                          # 
-                                          # shiny::tabPanel("Substructure type table"), #, tableOutput(outputId="SubStr_type")), 
+                                          shiny::tabPanel("MetFrag results",  shiny::tableOutput(outputId="MetFragTable")), 
+                                           shiny::tabPanel("dynamic noise filter video", #t, 
+                                                           shiny::fluidRow(tags$img(src='CompMS2minerLogo.png', height=121, width=324)),
+                                                           shiny::fluidRow(tags$video(src='dynamicNoiseFilterVideo.mp4', type='video/mp4', controls='controls'))) #, tableOutput(outputId="SubStr_type")), 
                                           # shiny::tabPanel("InterFeature Correlation"), #, chartOutput("InterFeatureCorr", "morris")), #uiOutput("CorrCoefMin"), 
                                           # shiny::tabPanel("Chemical Similarity Scores"), #uiOutput("Compound"), uiOutput("IntraInter"), chartOutput("ChemicalSimilarity", "morris")), 
                                           # shiny::tabPanel("Comments"), #,  shiny::uiOutput("CommentSectionHeader"),  shiny::uiOutput("UserComments"))#, uiOutput("CommentButtonUI")

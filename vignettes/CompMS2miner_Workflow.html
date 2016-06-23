@@ -12,7 +12,7 @@
 
 <meta name="author" content="WMB Edmands" />
 
-<meta name="date" content="2016-05-31" />
+<meta name="date" content="2016-06-22" />
 
 <title>CompMS2miner_Workflow</title>
 
@@ -70,14 +70,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">CompMS2miner_Workflow</h1>
 <h4 class="author"><em>WMB Edmands</em></h4>
-<h4 class="date"><em>May 31, 2016</em></h4>
+<h4 class="date"><em>June 22, 2016</em></h4>
 
 
 
 <p>Matches MS1 features to MS2 spectra (.mzXML) files based on a mass-to-charge and retention time tolerance. Composite spectra and other data can subsequently be visualized during any stage of the CompMS2miner processing workflow. Composite spectra can be denoised, ion signals grouped and summed, substructure groups identified, common Phase II metabolites predicted, calculation of a correlation network and features matched to data bases monoisotopic mass data and insilico MS2 fragmentation data. The resulting data can then be readily curated by publishing as online shiny application on shinyapps.io, as a zip file which can be shared or by sending to a local or online couchDB database.</p>
 <p>At any stage during the compMS2 workflow a compMS2 class object can be visualized with a Shiny application <em>compMS2explorer</em>. Full usage of the <em>compMS2explorer</em> application functionality requires an internet connection. The end result of following the workflow within this document using the example data provided can be visualized using the function, comments made in the metID comments tab can be saved on closing the application by assigning the compMS2explorer output to an object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(CompMS2miner)
-<span class="co"># assign any metabolite identification comments to a new &quot;CompMS2&quot; object</span>
+<span class="co"># assign any metabolite identification comments to a new or the same &quot;CompMS2&quot; object</span>
 compMS2example_commented &lt;-<span class="st"> </span><span class="kw">compMS2explorer</span>(compMS2example)</code></pre></div>
 <p>The following example illustrates the CompMS2miner workflow:</p>
 <div id="construct-compms2-class-object." class="section level2">
@@ -100,9 +100,15 @@ peakTable &lt;-<span class="st"> </span><span class="kw">read.csv</span>(MS1feat
 <span class="co"># create compMS2 object</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">compMS2</span>(<span class="dt">MS1features =</span> peakTable,
                        <span class="dt">mzXMLdir =</span> mzXmlDir_example, <span class="dt">nCores=</span>nCores,
-                       <span class="dt">mode =</span> <span class="st">&quot;pos&quot;</span>, <span class="dt">precursorPpm =</span> <span class="dv">10</span>, <span class="dt">ret =</span> <span class="dv">10</span>, 
+                       <span class="dt">mode =</span> <span class="st">&quot;pos&quot;</span>, <span class="dt">precursorPpm =</span> <span class="dv">10</span>, <span class="dt">ret =</span> <span class="dv">20</span>, 
                        <span class="dt">TICfilter =</span> <span class="dv">10000</span>)
 ## creating compMS2 object in positive ionisation mode
+## Loading required package: foreach
+## foreach: simple, scalable parallel programming from Revolution Analytics
+## Use Revolution R for scalability, fault tolerance and more.
+## http://www.revolutionanalytics.com
+## Loading required package: Rcpp
+## Loading required package: shiny
 ## 2 MS2 (.mzXML) files were detected within the directory...
 ## Starting SNOW cluster with 8 local sockets...
 ## matching MS1 peak table features to the following MS2 files:
@@ -115,101 +121,95 @@ compMS2demo &lt;-<span class="st"> </span><span class="kw">compMS2</span>(<span 
 compMS2demo
 ## A &quot;CompMS2&quot; class object derived from 2 MS2 files 
 ## 
-## 163 MS1 features were matched to 1784 MS2 precursor scans
-## containing 220161 ion features
+## 202 MS1 features were matched to 2514 MS2 precursor scans
+## containing 323968 ion features
 ## 
-## Average ppm match accuracy: 1.77 
+## Average ppm match accuracy: 1.979 
 ## with a ppm mass accuracy tolerance of (+/-) 10 
 ## 
-## Average retention time match accuracy: 3.93 seconds
-## with a retention time tolerance of (+/-) 10  seconds
+## Average retention time match accuracy: 6.85 seconds
+## with a retention time tolerance of (+/-) 20  seconds
 ## 
-## Memory usage: 4.57 MB</code></pre></div>
+## Memory usage: 6.53 MB</code></pre></div>
 </div>
 <div id="dynamic-noise-filtration." class="section level2">
 <h2>2. Dynamic noise filtration.</h2>
 <p>filter variable noise from the data using a dynamic noise filter.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># dynamic noise filter</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">deconvNoise</span>(compMS2demo, <span class="st">&quot;DNF&quot;</span>)
-## Applying dynamic noise filter to 257 composite spectra...
+## Applying dynamic noise filter to 327 spectra...
 ## Starting SNOW cluster with 8 local sockets...
 ## ...done
-## 256 composite spectra contained more than or equal to 5 peaks following dynamic noise filtration
+## 326 spectra contained more than or equal to 3 peaks following dynamic noise filtration
 <span class="co"># View summary of compMS2 class object at any time </span>
 compMS2demo 
 ## A &quot;CompMS2&quot; class object derived from 2 MS2 files 
 ## 
-## 163 MS1 features were matched to 1782 MS2 precursor scans
-## containing 5030 ion features
+## 202 MS1 features were matched to 2512 MS2 precursor scans
+## containing 6425 ion features
 ## 
-## Average ppm match accuracy: 1.775 
+## Average ppm match accuracy: 1.983 
 ## with a ppm mass accuracy tolerance of (+/-) 10 
 ## 
-## Average retention time match accuracy: 3.94 seconds
-## with a retention time tolerance of (+/-) 10  seconds
+## Average retention time match accuracy: 6.87 seconds
+## with a retention time tolerance of (+/-) 20  seconds
 ## 
-## Memory usage: 1.33 MB</code></pre></div>
+## Memory usage: 1.74 MB</code></pre></div>
 </div>
 <div id="intra-spectrum-ion-grouping-and-inter-ms2-file-spectra-grouping-with-signal-summing." class="section level2">
 <h2>3. Intra-spectrum ion grouping and inter-MS2 file spectra grouping with signal summing.</h2>
 <p>group and sum ions from different scans and then combine summed ion composite spectra across multiple files. This create a single composite spectra for each MS1 EIC matched to MS2 precursor scans.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># intra-spectrum ion grouping and signal summing</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">combineMS2</span>(compMS2demo, <span class="st">&quot;Ions&quot;</span>)
-## Grouping ions in 256 composite spectra...
+## Grouping ions in 326 spectra...
 ## Starting SNOW cluster with 8 local sockets...
 ## ...done
-## 250 composite spectra contained more than or equal to 5 peaks following ion grouping
-## The range of interfragment differences less than 0.1 m/z in the composite spectra is min : 1 max : 12
-## The average number of interfragment differences less than 0.1 m/z in the composite spectra is 5
-## Warning in .local(object, ...): The average number of interfragment
-## differences less than 0.1 m/z is greater than 2: please consider increasing
-## the mzError parameter above 0.001
+## 311 spectra contained more than or equal to 3 peaks following ion grouping
+## The range of interfragment differences less than 0.1 m/z in the spectra is min : 1 max : 4
+## The average number of interfragment differences less than 0.1 m/z in the spectra is 1
 <span class="co"># View summary of compMS2 class object at any time </span>
 compMS2demo
 ## A &quot;CompMS2&quot; class object derived from 2 MS2 files 
 ## 
-## 162 MS1 features were matched to 1738 MS2 precursor scans
-## containing 2820 ion features
+## 198 MS1 features were matched to 2347 MS2 precursor scans
+## containing 2166 ion features
 ## 
-## Average ppm match accuracy: 1.789 
+## Average ppm match accuracy: 1.997 
 ## with a ppm mass accuracy tolerance of (+/-) 10 
 ## 
-## Average retention time match accuracy: 3.93 seconds
-## with a retention time tolerance of (+/-) 10  seconds
+## Average retention time match accuracy: 6.83 seconds
+## with a retention time tolerance of (+/-) 20  seconds
 ## 
-## Memory usage: 1.64 MB
+## Memory usage: 1.9 MB
 <span class="co">#inter spectrum ion grouping and signal summing</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">combineMS2</span>(compMS2demo, <span class="st">&quot;Spectra&quot;</span>) 
-## Combining 250 composite spectra by MS1 feature number...
+## Combining 311 spectra by MS1 feature number...
 ## Starting SNOW cluster with 8 local sockets...
 ## ...done
-## 162 composite spectra contained more than or equal to 5 peaks following ion grouping
-## The range of interfragment differences less than 0.1 m/z in the composite spectra is min : 1 max : 14
-## The average number of interfragment differences less than 0.1 m/z in the composite spectra is 6
-## Warning in .local(object, ...): The average number of interfragment
-## differences less than 0.1 m/z is greater than 2: please consider increasing
-## the mzError parameter above 0.001
+## 198 composite spectra contained more than or equal to 3 peaks following ion grouping
+## The range of interfragment differences less than 0.1 m/z in the composite spectra is min : 1 max : 5
+## The average number of interfragment differences less than 0.1 m/z in the composite spectra is 1
 <span class="co"># View summary of compMS2 class object at any time </span>
 compMS2demo
 ## A &quot;CompMS2&quot; class object derived from 2 MS2 files 
 ## 
-## 162 MS1 features were matched to 1738 MS2 precursor scans
-## containing 2304 ion features
+## 198 MS1 features were matched to 2347 MS2 precursor scans
+## containing 1576 ion features
 ## 
-## Average ppm match accuracy: 1.817 
+## Average ppm match accuracy: 2.084 
 ## with a ppm mass accuracy tolerance of (+/-) 10 
 ## 
-## Average retention time match accuracy: 3.77 seconds
-## with a retention time tolerance of (+/-) 10  seconds
+## Average retention time match accuracy: 6.83 seconds
+## with a retention time tolerance of (+/-) 20  seconds
 ## 
-## Memory usage: 1.57 MB</code></pre></div>
+## Memory usage: 1.83 MB</code></pre></div>
 </div>
 <div id="possible-substructure-identification." class="section level2">
 <h2>4. Possible substructure identification.</h2>
 <p>Characteristic neutral losses/ fragments of electrospray adducts and metabolites from literature sources (?Substructure_masses for details).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># annotate substructures</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">subStructure</span>(compMS2demo, <span class="st">&quot;Annotate&quot;</span>)
-## matching Precursor to fragment and interfragment neutral losses and fragments in 162 composite spectra
+## matching Precursor to fragment and interfragment neutral losses and fragments in 198 composite spectra
 <span class="co"># identify most probable substructure annotation based on total relative intensity</span>
 <span class="co"># explained</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">subStructure</span>(compMS2demo, <span class="st">&quot;prob&quot;</span>)
@@ -217,18 +217,28 @@ compMS2demo &lt;-<span class="st"> </span><span class="kw">subStructure</span>(c
 <span class="co"># summary of most probable substructure annotation</span>
 mostProbSubStr &lt;-<span class="st"> </span><span class="kw">subStructure</span>(compMS2demo, <span class="st">&quot;probSummary&quot;</span>)
 ## Substructure annotation summary : 
-## 162 composite spectra 
-## 151 substructures identified above minimum sum relative intensity of 30 
+## 198 composite spectra 
+## 183 substructures identified above minimum sum relative intensity of 30 
 ## 
 ## SubStr.table
-##              phosphatidylcholine            methionine side chain 
-##                               81                               32 
-##                     polysiloxane                        phthalate 
-##                               32                                3 
-## nitroaromatics, hydroxyaldehydes                    nitrotoluenes 
-##                                1                                1 
-##                        triazines 
-##                                1</code></pre></div>
+##                                      phosphatidylcholine 
+##                                                       99 
+##                                    methionine side chain 
+##                                                       43 
+##                                             polysiloxane 
+##                                                       30 
+##                                                phthalate 
+##                                                        4 
+##                       carboxylic acids, aldehydes, ester 
+##                                                        2 
+##                         nitroaromatics, hydroxyaldehydes 
+##                                                        2 
+## aromatic n-methylamines, methoxy derivative, tert. butyl 
+##                                                        1 
+##                                            methyl esters 
+##                                                        1 
+##                                                triazines 
+##                                                        1</code></pre></div>
 </div>
 <div id="metabolite-identification-methods." class="section level2">
 <h2>5. Metabolite identification methods.</h2>
@@ -237,18 +247,43 @@ mostProbSubStr &lt;-<span class="st"> </span><span class="kw">subStructure</span
 <span class="co">#is HMDB, also DrugBank, T3DB and ReSpect databases can also be queried).</span>
 <span class="co">#Warning: this may take 2-3 mins as large number of query masses</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">&quot;dbAnnotate&quot;</span>)
-## matching 162 unknowns to 8,902,538 possible ESI artefacts and substructure mass shifts...
+## matching 198 unknowns to 8,902,538 possible ESI artefacts and substructure mass shifts...
 
 <span class="co"># select most probable annotations based on substructures detected</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">&quot;dbProb&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># match composite spectra to spectral databases as .msp files (e.g. lipidBlast, source http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp)</span>
+compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">'matchSpectralDB'</span>,
+                     <span class="dt">mspFile=</span><span class="st">'http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp'</span>)
+<span class="co"># massBank .msp</span>
+compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">'matchSpectralDB'</span>,
+                     <span class="dt">mspFile=</span><span class="st">'http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/MassBank_MSMS_Pos_Rev173_vs1.msp'</span>)
+
+<span class="co"># ReSpect .msp</span>
+compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">'matchSpectralDB'</span>, 
+                     <span class="dt">mspFile=</span><span class="st">'http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/Respect_20120925_ESI_Positive_MSMS.msp'</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># predict Phase II metabolites from SMILES codes</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">&quot;predSMILES&quot;</span>)
 
 <span class="co"># metFrag insilico fragmentation.</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">&quot;metFrag&quot;</span>)</code></pre></div>
-<div id="metmsline-data-preprocessing-and-correlation-network-calculation." class="section level3">
-<h3>MetMSLine data-preprocessing and correlation network calculation.</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##############################################################
+<div id="spectral-similarity-network-metmsline-data-preprocessing-and-correlation-network-calculation." class="section level3">
+<h3>spectral similarity network, MetMSLine data-preprocessing and correlation network calculation.</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate spectral similarity network (dot product &gt;= 0.8 default)</span>
+compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="st">'specSimNetwork'</span>)
+## Loading required package: igraph
+## 
+## Attaching package: 'igraph'
+## The following objects are masked from 'package:stats':
+## 
+##     decompose, spectrum
+## The following object is masked from 'package:base':
+## 
+##     union
+## 184 nodes with 2430 edges identified at a spectral similarity (dot product score) &gt;= 0.8
+## Of the edges:
+## 2271 were based on a shared ion fragment pattern
+## 159 were based on a shared neutral loss pattern
+##############################################################
 ### data pre-processing MS1features with MetMSLine package ###
 ##############################################################
 
@@ -257,6 +292,27 @@ if(!<span class="kw">require</span>(MetMSLine)){
   devtools::<span class="kw">install_github</span>(<span class="st">'WMBEdmands/MetMSLine'</span>)
   <span class="kw">require</span>(MetMSLine)
 }
+## Loading required package: MetMSLine
+## Loading required package: tcltk2
+## Loading required package: tcltk
+## 
+## Attaching package: 'tcltk2'
+## The following object is masked from 'package:shiny':
+## 
+##     tag
+## Loading required package: zoo
+## 
+## Attaching package: 'zoo'
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+## Loading required package: fpc
+## Loading required package: fastcluster
+## 
+## Attaching package: 'fastcluster'
+## The following object is masked from 'package:stats':
+## 
+##     hclust
 
 <span class="co"># zero fill</span>
 peakTable &lt;-<span class="st"> </span><span class="kw">zeroFill</span>(peakTable, obsNames)
@@ -272,18 +328,59 @@ peakTable &lt;-<span class="st"> </span><span class="kw">logTrans</span>(peakTab
 <span class="co"># add correlation network using pre-processed MS2 matched peak table</span>
 compMS2demo &lt;-<span class="st"> </span><span class="kw">metID</span>(compMS2demo, <span class="dt">method=</span><span class="st">'corrNetwork'</span>, peakTable, obsNames,
                      <span class="dt">corrMethod=</span><span class="st">'pearson'</span>, <span class="dt">corrThresh=</span><span class="fl">0.95</span>, <span class="dt">MTC=</span><span class="st">'none'</span>, <span class="dt">MS2only=</span><span class="dv">3</span>)
-## Calculating correlation matrix for 162 features
+## Calculating correlation matrix for 198 features
 ## less than 300 nodes using Fruchterman-Reingold layout. see ?igraph::with_fr()
-## 124 nodes with 446 edges identified at a correlation threshold &gt;= 0.95 (pearson, p/q value &lt;= 0.05, MTC: none)</code></pre></div>
+## 141 nodes with 595 edges identified at a correlation threshold &gt;= 0.95 (pearson, p/q value &lt;= 0.05, MTC: none)</code></pre></div>
 </div>
 </div>
-<div id="optional-curate-data-in-couchdb-publish-results-as-a-shiny-app." class="section level2">
-<h2>6. Optional curate data in CouchDB/ publish results as a shiny App.</h2>
-<p>CompMS2 class objects can be sent to either a local or online couchDB database. Furthermore, the results of the CompMS2miner workflow can be published on the web as a shiny application to share metabolite identification information using the publishApp function.</p>
+<div id="optional-curate-data-as-zip-file-in-couchdb-andor-publish-results-as-a-shiny-application." class="section level2">
+<h2>6. Optional curate data as zip file, in CouchDB and/or publish results as a shiny application.</h2>
+<p>CompMS2 class objects can be sent to either a local or online couchDB database. Furthermore, the results of the CompMS2miner workflow can be published on the web as a shiny application to share metabolite identification information or as a self-contained zip file using the publishApp function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># publish your app to shinyapps.io see ?publishApp for more details</span>
 <span class="co"># you may need to install the rsconnect and shinyapps packages and also sign up for a shinyapps.io account if you don't have one.</span>
 <span class="co"># quick guide here for setting up your account: http://shiny.rstudio.com/articles/shinyapps.html</span>
 <span class="kw">publishApp</span>(compMS2demo, <span class="dt">appName=</span><span class="st">'compMS2demo'</span>)</code></pre></div>
+</div>
+<div id="sessioninfo" class="section level1">
+<h1>sessionInfo</h1>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
+<pre><code>## R version 3.3.0 (2016-05-03)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 7 x64 (build 7601) Service Pack 1
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] tcltk     stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
+## 
+## other attached packages:
+##  [1] MetMSLine_1.0.0    fastcluster_1.1.20 fpc_2.1-10        
+##  [4] zoo_1.7-13         tcltk2_1.2-11      igraph_1.0.1      
+##  [7] shiny_0.13.2       Rcpp_0.12.5        foreach_1.4.3     
+## [10] CompMS2miner_1.2.1 devtools_1.11.1   
+## 
+## loaded via a namespace (and not attached):
+##  [1] DEoptimR_1.0-4    compiler_3.3.0    formatR_1.4      
+##  [4] plyr_1.8.4        class_7.3-14      prabclus_2.2-6   
+##  [7] iterators_1.0.8   tools_3.3.0       digest_0.6.9     
+## [10] mclust_5.2        evaluate_0.9      memoise_1.0.0    
+## [13] lattice_0.20-33   doSNOW_1.0.14     yaml_2.1.13      
+## [16] parallel_3.3.0    mvtnorm_1.0-5     trimcluster_0.1-2
+## [19] withr_1.0.1       stringr_1.0.0     knitr_1.13       
+## [22] cluster_2.0.4     diptest_0.75-7    nnet_7.3-12      
+## [25] stats4_3.3.0      grid_3.3.0        robustbase_0.92-5
+## [28] R6_2.1.2          snow_0.4-1        flexmix_2.3-13   
+## [31] rmarkdown_0.9.6   kernlab_0.9-24    reshape2_1.4.1   
+## [34] magrittr_1.5      modeltools_0.2-21 codetools_0.2-14 
+## [37] htmltools_0.3.5   MASS_7.3-45       rsconnect_0.4.3  
+## [40] mime_0.4          xtable_1.8-2      httpuv_1.3.3     
+## [43] stringi_1.1.1</code></pre>
 </div>
 
 

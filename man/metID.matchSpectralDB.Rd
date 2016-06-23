@@ -14,12 +14,14 @@ metID.matchSpectralDB(object, ...)
 
 \item{minDBDotProdThresh}{minimum dot product spectral similarity score (default = 0.8).}
 
-\item{deltaMassAbsMS1}{numeric minimum delta mass accuracy between database (.msp)
+\item{ppmMS1}{numeric minimum mass accuracy (ppm) between database (.msp)
 precursor masses and the CompMS2 composite spectrum MS1 m/z. 
 Dot products will only be calculated for database entries within this mass 
-accuracy threshold (default=0.01).}
+accuracy threshold (default=10ppm).}
 
-\item{deltaMassAbsMS2}{numeric bin size for between database (.msp) fragment masses and the CompMS2 composite spectrum fragment ions (default = 0.1).}
+\item{binSizeMS2}{numeric bin size for between database (.msp) fragment masses and the CompMS2 composite spectrum fragment ions (default = 0.1).}
+
+\item{minPropEx}{numeric (0-1) minimum proportion of total signal explained by the reference spectrum. If the minimum dot product score is not satisfied then a spectra which is above the minimum proportion explained will be matched. This is incorporated as remaining background signals can affect the dot product score (default = 0.6).}
 }
 \value{
 "CompMS2" class object with any database matches above the minimum dot product score.

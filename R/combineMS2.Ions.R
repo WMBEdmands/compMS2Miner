@@ -9,8 +9,8 @@
 #' of each ion group serve to homogenize the random error and improve the mass
 #' accuracy of each spectrum peak.    
 #' 
-#' @param mzError interpeak absolute m/z error for spectra signal grouping.
-#' @param minPeaks Minimum number of peaks per spectrum. 
+#' @param mzError interpeak absolute m/z error for spectra signal grouping (default = 0.01).
+#' @param minPeaks Minimum number of peaks per spectrum (default = 3). 
 #' @param ... option arguments to be passed along.
 #' 
 #' @return A compMS2 object with ion grouped composite spectra.
@@ -18,8 +18,8 @@
 setGeneric("combineMS2.Ions", function(object, ...) standardGeneric("combineMS2.Ions"))
 
 setMethod("combineMS2.Ions", signature = "CompMS2", function(object, 
-                                                             mzError=0.001, 
-                                                             minPeaks=5){
+                                                             mzError=0.01, 
+                                                             minPeaks=3){
   # error handling
   if(class(object) != "CompMS2"){
     stop("argument object is not an CompMS2 class object")

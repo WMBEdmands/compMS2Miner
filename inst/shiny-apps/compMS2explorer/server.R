@@ -1,4 +1,4 @@
-library(CompMS2miner)
+# library(CompMS2miner)
 library(shiny)
 library(igraph)
 library(rhandsontable)
@@ -249,11 +249,14 @@ shiny::shinyServer(function(input,  output, session){
           if(!is.null(input$spectralDBtable_rows_selected)){
             specDBtableTmp <- specDBmatches[[feat.indx]]
             indxTmp <- duplicated(specDBtableTmp$dbSpectra[, 'compound_msp']) == F
-            indivDBentries <- specDBtableTmp$dbSpectra[indxTmp, ]
+            indivDBentries <- specDBtableTmp$dbSpectra[indxTmp, , drop=F]
             
-            selectedDBentry <- indivDBentries[input$spectralDBtable_rows_selected, 'compound_msp']
-          dbMassIntensities <- specDBtableTmp$dbSpectra[specDBtableTmp$dbSpectra[, 'compound_msp'] %in% selectedDBentry, 1:2]
+            selectedDBentry <- indivDBentries[input$spectralDBtable_rows_selected, 'compound_msp', drop=F]
+          dbMassIntensities <- specDBtableTmp$dbSpectra[specDBtableTmp$dbSpectra[, 'compound_msp'] %in% selectedDBentry, 1:2, drop=F]
           dbMassIntensities <- apply(dbMassIntensities, 2, as.numeric)
+          if(!is.matrix(dbMassIntensities)){
+            dbMassIntensities <- matrix(dbMassIntensities, ncol=2, byrow=T)
+          }
           colnames(dbMassIntensities) <- c('mass', 'intensity')
           dbMassIntensities <- cbind(dbMassIntensities, Rel_Intensity=-(dbMassIntensities[, 'intensity']/max(dbMassIntensities[, 'intensity']) * 100), dbData=rep(1, nrow(dbMassIntensities)))
           MS2_data$dbData <- 0
@@ -280,7 +283,7 @@ shiny::shinyServer(function(input,  output, session){
               
               if('dbData' %in% colnames(plotDfTmp)){
                 colsTmp <- ifelse(plotDfTmp[, 'dbData'] == 1, "#009E73", '#000000')
-                plot(plotDfTmp[, c('mass', 'Rel_Intensity')], xlim=xlimTmp, ylim=ylimTmp, yaxt='n', ylab='relative intensity',
+                plot(plotDfTmp[, c('mass', 'Rel_Intensity'), drop=F], xlim=xlimTmp, ylim=ylimTmp, yaxt='n', ylab='relative intensity',
                      type='h', col=colsTmp, cex.axis=1.5, cex.lab=1.5)
                 axis(2, at=seq(-100, 100, 20), labels=c(abs(seq(-100, -20, 20)), seq(0, 100, 20)), las=2, cex.axis=1.3)
                 abline(h=0)
@@ -346,9 +349,21 @@ shiny::shinyServer(function(input,  output, session){
           subFeatTable <- allFeatTable  
           }
           colsTmp <- rep("darkblue", nrow(subFeatTable))
+          # if any commented then change colour
+          if (!is.null(input$hot)){
+            metIDcomments <- hot_to_r(input$hot)
+          } 
+          
+          compMSCommented <- apply(metIDcomments[, 3:ncol(metIDcomments)], 1, function(x) any(x != '')) 
+          overviewMatchCommented <- match(subFeatTable$specNames, metIDcomments$compSpectrum)
+          compMSCommented <- overviewMatchCommented %in% which(compMSCommented)
+          colsTmp[compMSCommented] <- "#C77CFF"  
           selectedFeat <- allFeatTable$specNames[feat.indx]
           colsTmp[subFeatTable$specNames %in% selectedFeat] <- 'red'
           with(subFeatTable, symbols(x=rt, y=mass, circles=precursorInt_group, inches=1/8, bg=colsTmp, fg=NULL, ylab='m/z', xlab='retentionTime', cex.axis=1.5, cex.lab=1.5, ylim = ylimTmp, xlim = xlimTmp))
+          legend('topleft', c('already commented', 'currently selected'),
+                 pch=c(NA, NA), lty=c(1, 1), lwd=c(4, 4),
+                 col=c("#C77CFF", 'red'), cex=1.4, ncol=1)
       })
         
         
@@ -525,6 +540,8 @@ shiny::shinyServer(function(input,  output, session){
           # resort to Features.v order
           metIDcomments <- metIDcomments[order(as.numeric(row.names(metIDcomments))), ]  
           }
+          # currently selected to top of table
+          metIDcomments <- metIDcomments[order(metIDcomments$compSpectrum %in% Features.v[feat.indx], decreasing = T), ]
           setHot(metIDcomments)
           rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
             # hot_col('compSpectrum', readOnly = T) %>%

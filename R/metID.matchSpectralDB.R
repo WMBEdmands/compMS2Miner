@@ -4,18 +4,18 @@
 #' @param mspFile character string to an online or local .msp spectrum database file.
 #' (default = "http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp")
 #' @param minDBDotProdThresh minimum dot product spectral similarity score (default = 0.8).
-#' @param deltaMassAbsMS1 numeric minimum delta mass accuracy between database (.msp)
+#' @param ppmMS1 numeric minimum mass accuracy (ppm) between database (.msp)
 #'  precursor masses and the CompMS2 composite spectrum MS1 m/z. 
 #'  Dot products will only be calculated for database entries within this mass 
-#'  accuracy threshold (default=0.01).
-#' @param deltaMassAbsMS2 numeric bin size for between database (.msp) fragment masses and the CompMS2 composite spectrum fragment ions (default = 0.1). 
-
+#'  accuracy threshold (default=10ppm).
+#' @param binSizeMS2 numeric bin size for between database (.msp) fragment masses and the CompMS2 composite spectrum fragment ions (default = 0.1). 
+#' @param minPropEx numeric (0-1) minimum proportion of total signal explained by the reference spectrum. If the minimum dot product score is not satisfied then a spectra which is above the minimum proportion explained will be matched. This is incorporated as remaining background signals can affect the dot product score (default = 0.6).
 #' @return "CompMS2" class object with any database matches above the minimum dot product score. 
 #' 
 #' @export
 setGeneric("metID.matchSpectralDB", function(object, ...) standardGeneric("metID.matchSpectralDB"))
 
-setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFile='http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp', minDBDotProdThresh=0.8, deltaMassAbsMS1=0.01, deltaMassAbsMS2=0.1){
+setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFile='http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp', minDBDotProdThresh=0.8, ppmMS1=10, binSizeMS2=0.1, minPropEx=0.6){
     # error handling
     stopifnot(!is.null(object))
     if(class(object) != "CompMS2"){
@@ -23,7 +23,9 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
     }
   # add parameters to object
   object@Parameters$minDBDotProdThresh <- minDBDotProdThresh
-  object@Parameters$deltaMassAbsMS1 <- deltaMassAbsMS1
+  object@Parameters$ppmMS1 <- ppmMS1
+  object@Parameters$binSizeMS2 <- binSizeMS2
+  object@Parameters$minPropEx <- minPropEx
   # empty results list if necessary
   if(length(object@spectralDB) == 0){
   object@spectralDB <- vector('list', length(object@compSpectra))  
@@ -59,7 +61,7 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
   DBdf <- cbind(mass=massesTmp, Rel_Intensity=relIntTmp)
   dbNamesTmp <- paste0('DB_', row.names(DBdf))
   message('\ncalculating spectral similarities (dot product >= ', round(minDBDotProdThresh, 1),
-          ') between database and composite spectra...\n')
+          ' or minimum proportion of spectrum explained >=', minPropEx, ') between database and composite spectra...\n')
   flush.console()
   # all constituent spectra
   pb <- txtProgressBar(max=length(object@compSpectra), style = 3)
@@ -69,7 +71,7 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
     massIntTmp <- object@compSpectra[[i]][, c('mass', 'Rel_Intensity')]
     ms1MzIndx <- grep('MS1_mz', names(object@metaData[[i]]), ignore.case=T)
     ms1MzTmp <- unlist(object@metaData[[i]][ms1MzIndx])[1]
-    dbMatchMasses <- which(abs(DBprecursorMasses - ms1MzTmp) <= deltaMassAbsMS1)
+    dbMatchMasses <- which(abs(((ms1MzTmp - DBprecursorMasses)/ ms1MzTmp) * 1E06) <= ppmMS1)
     if(length(dbMatchMasses) == 0){
     noMatchesV <- c(noMatchesV, i)  
     next
@@ -81,8 +83,8 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
     specNamesVecTmp <- c(rep('DB_0', nrow(massIntTmp)), dbNamesTmp[indxTmp])
     # padded integer labels
     
-    labelsTmp <- paste0('(', seq(deltaMassAbsMS2, (1000 - deltaMassAbsMS2), deltaMassAbsMS2), ',', seq((2 * deltaMassAbsMS2), 1000, deltaMassAbsMS2), ']')
-    massBinsIndivTmp <- cut(spectrumDBTmp[, 1], breaks=seq(deltaMassAbsMS2, 1000, deltaMassAbsMS2), labels=labelsTmp)   
+    labelsTmp <- paste0('(', seq(binSizeMS2, (1000 - binSizeMS2), binSizeMS2), ',', seq((2 * binSizeMS2), 1000, binSizeMS2), ']')
+    massBinsIndivTmp <- cut(spectrumDBTmp[, 1], breaks=seq(binSizeMS2, 1000, binSizeMS2), labels=labelsTmp)   
     # empty bins
     indivSpecVec <- tapply(spectrumDBTmp[, 2], paste0(specNamesVecTmp, massBinsIndivTmp), sum)
     # identify any absent bins
@@ -90,9 +92,15 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
     # add absent bins as zeros
     allBinsTmp <- rep(0, length(allBinNames))
     names(allBinsTmp) <- allBinNames
-    allBinsTmp[which(allBinNames %in% names(indivSpecVec))] <- indivSpecVec
+    # ensure indivSpecVec is in right order
+    allBinsTmp[match(names(indivSpecVec), allBinNames)] <- indivSpecVec
     
     indivSpecMat <- matrix(allBinsTmp, byrow=F, nrow=length(labelsTmp))
+    # proportion explained
+    propTicEx <- apply(indivSpecMat, 2, function(x){ 
+      tmpIndx <- x > 0 
+      compSpecIndxTmp <- indivSpecMat[, 1] > 0
+      return(sum(indivSpecMat[tmpIndx & compSpecIndxTmp, 1])/ sum(indivSpecMat[compSpecIndxTmp, 1]))})
     # mean all pairwise dotproducts
     # dotProdMat <- t(indivSpecMat) %*% indivSpecMat
     dotProdMat <- crossprod(indivSpecMat)
@@ -101,16 +109,19 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
     
     dotProdsTmp <- dotProdMat / (sqrtMatrixTmp * diag(sqrtMatrixTmp))
     # first column is the spectrum dot prods
-    dotProdIndx <- dotProdsTmp[, 1] >= minDBDotProdThresh
-    dotProdsTmp <- dotProdsTmp[dotProdIndx, , drop=F]
+    matchIndxTmp <- dotProdsTmp[, 1] >= minDBDotProdThresh | propTicEx >= minPropEx
+    dotProdsTmp <- dotProdsTmp[matchIndxTmp, , drop=F]
+    propTicEx <- propTicEx[matchIndxTmp]
     dotProdsTmp <- dotProdsTmp[-1, 1]
+    propTicEx <- propTicEx[-1]
+    
     if(length(dotProdsTmp) > 0){
-      DBmatchesTmp <- dbMatchMasses[dotProdIndx[-1]]
+      DBmatchesTmp <- dbMatchMasses[matchIndxTmp[-1]]
       dupIndx <- duplicated(DBmatchesTmp) == F
       DBmatchesTmp <- DBmatchesTmp[dupIndx]
       dotProdsTmp <- dotProdsTmp[dupIndx]
       indxTmp <- rownames(DBdf) %in% DBmatchesTmp
-      dbMassesInt <- DBdf[indxTmp, ]
+      dbMassesInt <- DBdf[indxTmp, , drop=F]
       indxTmp <- gsub('_.+', '', names(entryInfo)) %in% DBmatchesTmp
       entryInfoTmp <- split(entryInfo[indxTmp], gsub('_.+', '', names(entryInfo[indxTmp])))
       compound_msp <- entryInfo[indxTmp][grep('_NAME', names(entryInfo[indxTmp]), ignore.case = T)]
@@ -120,7 +131,8 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
       compound_msp <- unlist(mapply(rep, compound_msp, each=table(row.names(dbMassesInt)), SIMPLIFY = F))
       
       dotProdsTmp <- unlist(mapply(rep, dotProdsTmp, each=table(row.names(dbMassesInt)), SIMPLIFY = F))
-      dbMassesInt <- cbind(dbMassesInt, compound_msp, dotProductScore=dotProdsTmp)
+      propTicEx <- unlist(mapply(rep, propTicEx, each=table(row.names(dbMassesInt)), SIMPLIFY = F))
+      dbMassesInt <- cbind(dbMassesInt, compound_msp, dotProductScore=dotProdsTmp, propTIC_explained=propTicEx)
       if(length(object@spectralDB[[i]]) > 0){
       object@spectralDB[[i]]$dbSpectra <- rbind(object@spectralDB[[i]]$dbSpectra, 
                                                 dbMassesInt)
@@ -137,10 +149,9 @@ setMethod("metID.matchSpectralDB", signature = "CompMS2", function(object, mspFi
   # set the difference between those with any previous matches and new no matches vector
   noMatchesV <- setdiff(noMatchesV, which(sapply(object@spectralDB, length) > 0))
   
-  message('\n', length(noMatchesV), ' composite spectra (', 
-          round((length(noMatchesV)/length(object@compSpectra)) * 100, 1), 
-          '%) with no spectral database matches:\n\n',
-          paste0(names(object@compSpectra)[noMatchesV], ', '), '\n')
+  message('\n', length(object@compSpectra)-length(noMatchesV), ' composite spectra (', 
+          round(((length(object@compSpectra)-length(noMatchesV))/length(object@compSpectra)) * 100, 1), 
+          '%) currently matched to spectral databases\n')
   flush.console()
   return(object)
 }) # end function

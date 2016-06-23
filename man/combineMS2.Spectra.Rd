@@ -7,9 +7,9 @@
 combineMS2.Spectra(object, ...)
 }
 \arguments{
-\item{mzError}{interpeak absolute m/z error for composite spectra signal grouping}
+\item{mzError}{interpeak absolute m/z error for composite spectra signal grouping (default = 0.01)}
 
-\item{minPeaks}{Minimum number of peaks per composite spectrum}
+\item{minPeaks}{Minimum number of peaks per composite spectrum (default = 3)}
 }
 \description{
 combine ions across spectra matched to the same MS1 feature

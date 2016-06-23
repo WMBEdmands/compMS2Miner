@@ -9,9 +9,9 @@ combineMS2.Ions(object, ...)
 \arguments{
 \item{...}{option arguments to be passed along.}
 
-\item{mzError}{interpeak absolute m/z error for spectra signal grouping.}
+\item{mzError}{interpeak absolute m/z error for spectra signal grouping (default = 0.01).}
 
-\item{minPeaks}{Minimum number of peaks per spectrum.}
+\item{minPeaks}{Minimum number of peaks per spectrum (default = 3).}
 }
 \value{
 A compMS2 object with ion grouped composite spectra.

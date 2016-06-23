@@ -20,7 +20,7 @@
 setGeneric("deconvNoise.DNF", function(object, ...) standardGeneric("deconvNoise.DNF"))
 
 setMethod("deconvNoise.DNF", signature = "CompMS2", function(object, DNF=2, 
-                                                             minPeaks=5,
+                                                             minPeaks=3,
                                                              maxPeaks=20,
                                                              minInt=250){
   # error handling

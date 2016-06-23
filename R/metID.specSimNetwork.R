@@ -61,11 +61,16 @@ setMethod("metID.specSimNetwork", signature = "CompMS2", function(object, minDot
     # all constituent spectra
     allSpecTmp <- do.call(rbind, lapply(object@compSpectra, function(x){
       #massIntTmp <- x[, c('mass', 'intensity')]
-      preFragIntTmp <- x[, c('Precursorfrag.diff', 'intensity')]
+      preFragIntTmp <- x[, c('Precursorfrag.diff', 'intensity'), drop=F]
       preFragIntTmp[, 1] <- as.numeric(preFragIntTmp[, 1])
       preFragIntTmp <- preFragIntTmp[preFragIntTmp[, 1] > 2, , drop=F]
-      # colnames(preFragIntTmp)[1] <- 'mass'
+      if(nrow(preFragIntTmp) == 0){
+      preFragIntTmp <- data.frame(Precursorfrag.diff=2, intensity=1, stringsAsFactors = F)  
+      }
+      # preFragIntTmp <- cbind(preFragIntTmp, name=names(object@compSpectra)[x])
       return(preFragIntTmp)
+      # }
+      # colnames(preFragIntTmp)[1] <- 'mass'
     }))
     specNamesVecTmp <- gsub('\\..+', '', row.names(allSpecTmp))
     # allSpecTmp <- cbind(allSpecTmp, specNamesVecTmp)
