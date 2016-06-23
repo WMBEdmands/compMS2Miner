@@ -34,13 +34,6 @@ Imports:
     tcltk2,
     igraph,
     rhandsontable
-License: GPL (>= 2) + file LICENSE
-BugReports: https://github.com/WMBEdmands/CompMS2miner/issues/new
-URL: dx.doi.org/10.5281/zenodo.50590 (stable release v1.0.0)
-#biocViews: MassSpectrometry, Metabolomics
-LazyData: true
-LazyLoad: true
-RoxygenNote: 5.0.1
 Suggests:
     knitr,
     rmarkdown,
@@ -49,4 +42,10 @@ Suggests:
     rsconnect,
     shinyapps, 
     devtools
+License: GPL (>= 2) + file LICENSE
+BugReports: https://github.com/WMBEdmands/CompMS2miner/issues/new
+URL: dx.doi.org/10.5281/zenodo.50590 (stable release v1.0.0)
+LazyData: true
+LazyLoad: true
+RoxygenNote: 5.0.1
 VignetteBuilder: knitr
