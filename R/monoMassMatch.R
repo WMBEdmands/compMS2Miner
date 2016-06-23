@@ -224,7 +224,7 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL,
                       double ppm, double mill) {
                       int n = unknowns.size();
                       for(int i = 0; i < n; ++i) {
-                      Res[i] = metMassesNames[metMasses < unknowns[i] + (unknowns[i] / mill) * ppm & metMasses > unknowns[i] - (unknowns[i] / mill) * ppm];
+                      Res[i] = metMassesNames[(metMasses < unknowns[i] + (unknowns[i] / mill) * ppm) & (metMasses > unknowns[i] - (unknowns[i] / mill) * ppm)];
                       
                       }
                       return Res;

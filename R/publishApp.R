@@ -51,8 +51,8 @@ setMethod("publishApp", signature = "CompMS2", function(object, appName=NULL,  w
     }
     }  
     # copy latest version of shiny app from package
-    filesMoved <- file.copy(paste0(appDir, c('/server.R', '/ui.R', '/global.R')), outDir, overwrite = T)
-    filesMoved <- c(filesMoved, file.copy(paste0(appDir, c('/www/CompMS2minerLogo.png', '/www/dynamicNoiseFilterVideo.mp4')), wwwOutDir, overwrite = T))
+    filesMoved <- file.copy(dir(appDir, full.names = T, pattern = '\\.R$'), outDir, overwrite = T)
+    filesMoved <- c(filesMoved, file.copy(dir(paste0(appDir, '/www'), full.names = T, pattern = '\\.mp4$|\\.png$'), wwwOutDir, overwrite = T))
     if(any(filesMoved == F)){
       stop('The shiny-app file(s) were not copied to the bundle please check the CompMS2miner package is properly installed.\n')
     }

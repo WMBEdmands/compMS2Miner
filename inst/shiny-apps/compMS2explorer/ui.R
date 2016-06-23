@@ -6,7 +6,7 @@ library(rhandsontable)
 shiny::shinyUI(shiny::fluidPage(
   shiny::titlePanel(title='Composite MS2 Explorer'), 
   shiny::fluidRow(shiny::column(width=2, 
-                                shiny::tags$img(src='CompMS2minerLogo.png', height=121, width=324),
+                                a(shiny::tags$img(src='CompMS2minerLogoTutorial.png', height=121, width=324), href=' http://htmlpreview.github.com/?https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/vignettes/CompMS2miner_Workflow.html', target="_blank"),
                                 shiny::h4(shiny::tags$b("Search Options:")),
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
                                 shiny::checkboxInput("specDBMatch", "spectral database matches", value=FALSE),
@@ -97,7 +97,8 @@ shiny::shinyUI(shiny::fluidPage(
                                                           shiny::uiOutput("nRandomArticles"),  shiny::tableOutput(outputId="WordCloudTable"),  shiny::plotOutput("WordCloud", width = "800px",  height = "600px")), 
                                           shiny::tabPanel("MetFrag results",  shiny::tableOutput(outputId="MetFragTable")), 
                                            shiny::tabPanel("dynamic noise filter video", #t, 
-                                                           shiny::fluidRow(tags$img(src='CompMS2minerLogo.png', height=121, width=324)),
+                                                           shiny::fluidRow(
+                                                                                                                         tags$img(src='CompMS2minerLogo.png', height=121, width=324)),
                                                            shiny::fluidRow(tags$video(src='dynamicNoiseFilterVideo.mp4', type='video/mp4', controls='controls'))) #, tableOutput(outputId="SubStr_type")), 
                                           # shiny::tabPanel("InterFeature Correlation"), #, chartOutput("InterFeatureCorr", "morris")), #uiOutput("CorrCoefMin"), 
                                           # shiny::tabPanel("Chemical Similarity Scores"), #uiOutput("Compound"), uiOutput("IntraInter"), chartOutput("ChemicalSimilarity", "morris")), 

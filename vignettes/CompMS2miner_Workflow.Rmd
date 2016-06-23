@@ -6,7 +6,7 @@ output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{CompMS2miner_Workflow}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 Matches MS1 features to MS2 spectra (.mzXML) files based on a 
@@ -33,6 +33,8 @@ The following example illustrates the CompMS2miner workflow:
 ## 1. construct compMS2 class object.
 From MS2 data (in the .mzXML file format) and an MS1feature table. The compMS2 object can also be constructed in as a parallel computation in the case of large peak tables and/ or larger numbers of MS2 data files.
 ```{r, include=F}
+library(knitr)
+opts_knit$set(progress=FALSE)
 library(CompMS2miner)
 ```
 ```{r, collapse=TRUE}
@@ -112,7 +114,7 @@ compMS2demo <- metID(compMS2demo, "dbAnnotate")
 compMS2demo <- metID(compMS2demo, "dbProb")
 ```
 
-```{r eval=F}
+```{r, eval=FALSE, collapse=TRUE}
 # match composite spectra to spectral databases as .msp files (e.g. lipidBlast, source http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp)
 compMS2demo <- metID(compMS2demo, 'matchSpectralDB',
                      mspFile='http://prime.psc.riken.jp/Metabolomics_Software/MS-DIAL/LipidBlast_Posi_Plasma_vs2.msp')
