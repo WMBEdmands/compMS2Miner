@@ -6,6 +6,7 @@ library(rhandsontable)
 shiny::shinyUI(shiny::fluidPage(
   shiny::titlePanel(title='Composite MS2 Explorer'), 
   shiny::fluidRow(shiny::column(width=2, 
+                                shiny::tags$img(src='CompMS2minerLogo.png', height=121, width=324),
                                 shiny::h4(shiny::tags$b("Search Options:")),
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
                                 shiny::checkboxInput("specDBMatch", "spectral database matches", value=FALSE),
@@ -25,7 +26,6 @@ shiny::shinyUI(shiny::fluidPage(
                                 shiny::selectInput("NotSubStrTypes", label=shiny::tags$b("substructure types to exclude (multiple combinations) :"), choices=c(" ", SubStrType.inputs), multiple=T), 
                                 shiny::selectInput("subStrAnnoTypes", label=shiny::tags$b("substructure type annotation (multiple combinations) :"), choices=c(" ", subStrAnno.inputs), multiple=T), 
                                 shiny::numericInput("subStrAnnoThresh", label=shiny::tags$b("summed relative intensity threshold (substructure type). "), value=10, min=0, max=1000, step=1),
-                                shiny::h4(shiny::tags$b('Search CompMS2 results:')),
                                 shiny::actionButton("goButton", "Search")
                                 
                                 #selectInput("Possible_contaminants", label=tags$b("Possible contaminant/false positive annotations to exclude (name_frequency) :"), choices=c(" ", as.character(AnnoFreq$name)), multiple=T), 
