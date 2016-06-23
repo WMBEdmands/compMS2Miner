@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>CompMS2miner by WMBEdmands</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>CompMS2miner</h1>
+        <p>metabolite identification R-package for metabolomic high-resolution LC-MS datasets.</p>
+
+        <p class="view"><a href="https://github.com/WMBEdmands/CompMS2miner">View the Project on GitHub <small>WMBEdmands/CompMS2miner</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/WMBEdmands/CompMS2miner/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/WMBEdmands/CompMS2miner/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/WMBEdmands/CompMS2miner">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogo.png?token=AEhLqFJ1XT2XEii5PHex0YBQQiGJ4gLDks5XdHu0wA%3D%3D" alt="CompMS2miner_logo"></p>
+
+<p>CompMS2miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.</p>
+
+<p><a href="https://zenodo.org/badge/latestdoi/21719/WMBEdmands/CompMS2miner"><img src="https://zenodo.org/badge/21719/WMBEdmands/CompMS2miner.svg" alt="DOI"></a> latest stable release v1.0.0 (archived on zenodo).</p>
+
+<h1>
+<a id="purpose" class="anchor" href="#purpose" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Purpose</h1>
+
+<p>A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-hrMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output peak tables to full metabolite identification.</p>
+
+<p>CompMS2miner is a package in the R programming language and was developed to facilitate rapid, comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. CompMS2miner matches unknown mass spectral features to precursor MS/MS scans, dynamically filters variable noise, generates composite mass spectra by multiple scan signal summation, interprets possible substructures from a literature curated database, annotates unknown masses from several metabolomic databases, performs crude prediction of mammalian biotransformation metabolites and provides wrapper functions for pre-existing insilico fragmentation software (<a href="http://msbi.ipb-halle.de/MetFrag/">http://msbi.ipb-halle.de/MetFrag/</a>).</p>
+
+<p>Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application <em>Composite MS2 Explorer</em> developed with the R shiny package.</p>
+
+<p>An example <em>Composite MS2 Explorer</em> application created using the internal package data is hosted on the shinyapps.io site here: </p>
+
+<p><a href="http://bit.ly/28QOxj6"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/screenshotCompMS2explorer_260_120.png" alt="compMS2example"></a>. </p>
+
+<p>Upon completion of the CompMS2miner workflow the application can be easily published to the shinyapps.io site using the CompMS2miner function <code>publishApp</code>.</p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>install directly from github using the devtools package. First install devtools,
+instructions can be found here: <a href="https://github.com/hadley/devtools">https://github.com/hadley/devtools</a></p>
+
+<div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">devtools</span>)
+
+install_github(<span class="pl-s"><span class="pl-pds">'</span>WMBEdmands/CompMS2miner<span class="pl-pds">'</span></span>)</pre></div>
+
+<h1>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting started</h1>
+
+<p>After CompMS2miner is installed begin by reading the package vignette <em>"CompMS2miner_Workflow"</em>
+Just type <code>vignette('CompMS2miner_Workflow')</code> to view the pdf of the workflow.</p>
+
+<p>Example data illustrating CompMS2miner is provided consisting of a peak-picker output table of nano-flow LC-hrMS metabolomic dataset of human blood samples and data-dependent MS/MS data files, which is also made available as external example data within the CompMS2miner package. A example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.</p>
+
+<h1>
+<a id="licence" class="anchor" href="#licence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>licence</h1>
+
+<p>The CompMS2miner package is licenced under the GPLv2 + the licence file (<a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a>).</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/WMBEdmands">WMBEdmands</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
