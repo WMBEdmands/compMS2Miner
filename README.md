@@ -2,7 +2,7 @@
 
 CompMS2miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.
 
-![DOI](https://zenodo.org/badge/21719/WMBEdmands/CompMS2miner.svg)](https://zenodo.org/badge/latestdoi/21719/WMBEdmands/CompMS2miner) latest stable release v1.0.0 (archived on zenodo).
+[![DOI](https://zenodo.org/badge/21719/WMBEdmands/CompMS2miner.svg)](https://zenodo.org/badge/latestdoi/21719/WMBEdmands/CompMS2miner) latest stable release v1.0.0 (archived on zenodo).
 
 Purpose
 ========
@@ -13,7 +13,7 @@ CompMS2miner is a package in the R programming language and was developed to fac
 Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application *Composite MS2 Explorer* developed with the R shiny package.
 
 An example *Composite MS2 Explorer* application created using the internal package data is hosted on the shinyapps.io site here: 
-![compMS2example](https://www.rstudio.com/wp-content/uploads/2014/03/blue-125.png)](http://bit.ly/28QOxj6). 
+[![compMS2example](https://www.rstudio.com/wp-content/uploads/2014/03/blue-125.png)](http://bit.ly/28QOxj6). 
 
 Upon completion of the CompMS2miner workflow the application can be easily published to the shinyapps.io site using the CompMS2miner function ```publishApp```.
 
