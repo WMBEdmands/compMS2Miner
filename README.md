@@ -11,7 +11,7 @@ A long-standing challenge of untargeted metabolomic profiling by liquid-chromato
 
 CompMS2miner is a package in the R programming language and was developed to facilitate rapid, comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. 
 
-Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application *Composite MS2 Explorer* developed with the R shiny package.
+Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package.
 
 Installation
 ==============
@@ -34,7 +34,7 @@ Getting started
 ===============
 
 After CompMS2miner is installed begin by reading the package vignette *"CompMS2miner_Workflow"*
-Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow.
+Just type ```{r} vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow.
 
 Example data illustrating CompMS2miner is provided consisting of a peak-picker output table of nano-flow LC-hrMS metabolomic dataset of human blood samples and data-dependent MS/MS data files, which is also made available as external example data within the CompMS2miner package. A example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
 
