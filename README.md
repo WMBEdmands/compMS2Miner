@@ -15,7 +15,7 @@ Data curation, visualization and sharing is made possible at any stage of the Co
 
 An example *Composite MS2 Explorer* application created using the internal package data is hosted on the shinyapps.io site here: 
 
-[![compMS2example](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/screenshotCompMS2explorer_260_120.png)](http://bit.ly/28QOxj6). 
+<a href="http://bit.ly/28QOxj6" target="blank"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/screenshotCompMS2explorer_260_120.png"/></a> 
 
 Upon completion of the CompMS2miner workflow the application can be easily published to the shinyapps.io site using the CompMS2miner function ```publishApp```.
 
