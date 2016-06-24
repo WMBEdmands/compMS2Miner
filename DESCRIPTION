@@ -1,4 +1,5 @@
 Package: CompMS2miner
+Type: Package
 Title: metabolite identification workflow for metabolomic
     high-resolution LC-MS datasets
 Version: 1.2.3
@@ -42,10 +43,11 @@ Suggests:
     rsconnect,
     shinyapps, 
     devtools
-License: GPL (>= 2) + file LICENSE
 BugReports: https://github.com/WMBEdmands/CompMS2miner/issues/new
 URL: dx.doi.org/10.5281/zenodo.50590 (stable release v1.0.0)
 LazyData: true
 LazyLoad: true
-RoxygenNote: 5.0.1
 VignetteBuilder: knitr
+License: GPL (>= 2) + file LICENSE
+RoxygenNote: 5.0.1
+
