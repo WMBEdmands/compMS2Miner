@@ -2,7 +2,8 @@
 
 CompMS2miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.
 
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56320.svg)](http://dx.doi.org/10.5281/zenodo.56320){:target="_blank"} latest stable release v1.2.3 (archived on zenodo).
+<a href="http://dx.doi.org/10.5281/zenodo.56320" target="_blank"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.56320.svg" /></a> 
+latest stable release v1.2.3 (archived on zenodo).
 
 Purpose
 ========
