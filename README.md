@@ -34,7 +34,7 @@ Getting started
 ===============
 
 After CompMS2miner is installed begin by reading the package vignette *"CompMS2miner_Workflow"*
-Just type ```{r} vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow.
+Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow.
 
 Example data illustrating CompMS2miner is provided consisting of a peak-picker output table of nano-flow LC-hrMS metabolomic dataset of human blood samples and data-dependent MS/MS data files, which is also made available as external example data within the CompMS2miner package. A example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
 
@@ -58,7 +58,7 @@ An example **Composite MS2 Explorer** application created using the example data
 
 <a href="http://bit.ly/28QOxj6" target="blank"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"/></a> 
 
-Upon completion of the CompMS2miner workflow it is intended that the user publishes the **Composite MS2 Explorer** application  to the shinyapps.io site. Using the CompMS2miner function ```publishApp``` the application can be publically deployed and explored by other invesigators and all of the now readOnly interactive table comments can be viewed. The user is still able to redeploy the application to the shinyapps.io site if necessary. 
+Upon completion of the CompMS2miner workflow it is intended that the user publishes the **Composite MS2 Explorer** application  to the shinyapps.io site. Using the CompMS2miner function ```publishApp``` the application can be publically deployed and explored by other invesigators and all of the now readOnly interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary. 
 
 This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.
 
