@@ -1,4 +1,4 @@
-[![CompMS2miner_logo](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/CompMS2minerLogoExApp.png)](http://bit.ly/28QOxj6)
+[![CompMS2miner_logo](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoExApp.png)](http://bit.ly/28QOxj6)
 
 CompMS2miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.
 
@@ -56,7 +56,7 @@ The CompMS2miner structured workflow performs the following:
 
 An example **Composite MS2 Explorer** application created using the example data (within extdata of the package) is hosted on the shinyapps.io site here: 
 
-<a href="http://bit.ly/28QOxj6" target="blank"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/screenshotCompMS2explorer_260_120.png"/></a> 
+<a href="http://bit.ly/28QOxj6" target="blank"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"/></a> 
 
 Upon completion of the CompMS2miner workflow it is intended that the user publishes the **Composite MS2 Explorer** application  to the shinyapps.io site. Using the CompMS2miner function ```publishApp``` the application can be publically deployed and explored by other invesigators and all of the now readOnly interactive table comments can be viewed. The user is still able to redeploy the application to the shinyapps.io site if necessary. 
 
