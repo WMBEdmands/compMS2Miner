@@ -26,7 +26,7 @@ instructions can be found here: https://github.com/hadley/devtools
 ```{r}
 library(devtools)
 
-install_github('WMBEdmands/CompMS2miner')
+install_github('WMBEdmands/CompMS2miner', build_vignettes=TRUE)
 ```
 
 Getting started
