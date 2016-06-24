@@ -46,7 +46,7 @@ The CompMS2miner structured workflow performs the following (v1.2.3, 2016/06/23)
 * matches spectral databases such as massbank in the NIST msp text database format. ```metID(method='matchSpectralDB')```
 * performs crude prediction of mammalian biotransformation metabolites. ```metID(method='predSMILES')```
 * calculates correlation and spectral similarity networks which can be visualized in the shiny interface. ```metID(method='corrNetwork')``` and ```metID(method='specSimNetwork')```
-* provides wrapper functions for pre-existing insilico fragmentation software (http://msbi.ipb-halle.de/MetFrag/). ```metID(method='metFrag')```
+* provides wrapper functions for pre-existing *in silico* fragmentation software (http://msbi.ipb-halle.de/MetFrag/). ```metID(method='metFrag')```
 * an interactive table to record a user's decision making process or any confirmation (e.g. database entries or literature DOIs). ```compMS2explorer()``` or ```runGitHubApp()```
 * The CompMS2explorer app can be very rapidly published to the shinyapps.io hosting site after setting up an account. ```publishApp()```
 
