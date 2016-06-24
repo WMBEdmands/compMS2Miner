@@ -6,7 +6,7 @@ library(rhandsontable)
 shiny::shinyUI(shiny::fluidPage(
   shiny::titlePanel(title='Composite MS2 Explorer'), 
   shiny::fluidRow(shiny::column(width=2, 
-                                a(shiny::tags$img(src='CompMS2minerLogoTutorial.png', height=121, width=324), href=' http://htmlpreview.github.com/?https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/vignettes/CompMS2miner_Workflow.html', target="_blank"),
+                                a(shiny::tags$img(src='CompMS2minerLogoTutorial.png', height=121, width=324), href='http://bit.ly/28T06oN', target="_blank"),
                                 shiny::h4(shiny::tags$b("Search Options:")),
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
                                 shiny::checkboxInput("specDBMatch", "spectral database matches", value=FALSE),
