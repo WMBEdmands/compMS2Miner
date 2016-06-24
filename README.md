@@ -5,16 +5,14 @@ CompMS2miner is an R package for total metabolome identification of metabolomic 
 <a href="http://dx.doi.org/10.5281/zenodo.56320" target="blank"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.56320.svg"/></a> 
 latest stable release v1.2.3 (archived on zenodo).
 
-Purpose
-========
+#Purpose
 A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-hrMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output peak tables to full metabolite identification.
 
-CompMS2miner is a package in the R programming language and was developed to facilitate rapid, comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. 
+CompMS2miner is a package in the R programming language developed comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. CompMS2miner brings together many useful metabolite identification tools (see [Features](#Features) section below) and is modular and therefore fully extensible. 
 
 Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package.
 
-Installation
-==============
+#Installation
 
 Download the latest release tar ball and install package locally
 
@@ -30,16 +28,14 @@ library(devtools)
 install_github('WMBEdmands/CompMS2miner', build_vignettes=TRUE)
 ```
 
-Getting started
-===============
+#Getting started
 
 After CompMS2miner is installed begin by reading the package vignette *"CompMS2miner_Workflow"*
 Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow.
 
 Example data illustrating CompMS2miner is provided consisting of a peak-picker output table of nano-flow LC-hrMS metabolomic dataset of human blood samples and data-dependent MS/MS data files, which is also made available as external example data within the CompMS2miner package. A example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
 
-Features
-========
+#Features
 
 The CompMS2miner structured workflow performs the following: 
 * matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2()```
@@ -62,7 +58,6 @@ Upon completion of the CompMS2miner workflow it is intended that the user publis
 
 This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.
 
-licence
-=============
+#Licence
 The CompMS2miner package is licenced under the GPLv2 + the licence file (http://www.gnu.org/licenses/gpl.html).
 
