@@ -40,16 +40,16 @@ latest stable release v1.2.3 (archived on zenodo).</p>
 
 <p>A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-hrMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output peak tables to full metabolite identification.</p>
 
-<p>CompMS2miner is a package in the R programming language and was developed to facilitate rapid, comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. </p>
+<p>CompMS2miner is a package in the R programming language developed comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. CompMS2miner brings together many useful metabolite identification tools (see <a href="#features">Features</a> section below) and is modular and therefore fully extensible. </p>
 
-<p>Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application <em>Composite MS2 Explorer</em> developed with the R shiny package.</p>
+<p>Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application <strong>Composite MS2 Explorer</strong> developed with the R shiny package.</p>
 
 <h1>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
 
-<p>Download the latest release tar ball and install package locally</p>
+<p>Download the latest stable release tar ball and install package locally</p>
 
-<div class="highlight highlight-source-r"><pre>install.package(<span class="pl-s"><span class="pl-pds">'</span>your_downloads_directory/CompMS2miner_vLatestVersion.tar.gz<span class="pl-pds">'</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>source<span class="pl-pds">'</span></span>)</pre></div>
+<div class="highlight highlight-source-r"><pre>install.package(<span class="pl-s"><span class="pl-pds">'</span>CompMS2miner_v1.2.3.tar.gz<span class="pl-pds">'</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>source<span class="pl-pds">'</span></span>)</pre></div>
 
 <p>Or install the development version directly from github using the devtools package. First install devtools,
 instructions can be found here: <a href="https://github.com/hadley/devtools">https://github.com/hadley/devtools</a></p>
@@ -69,7 +69,7 @@ Just type <code>vignette('CompMS2miner_Workflow')</code> to view the pdf of the 
 <h1>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h1>
 
-<p>The CompMS2miner structured workflow performs the following: </p>
+<p>The CompMS2miner structured workflow performs the following (v1.2.3, 2016/06/23): </p>
 
 <ul>
 <li>matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. <code>compMS2()</code>
@@ -100,12 +100,12 @@ Just type <code>vignette('CompMS2miner_Workflow')</code> to view the pdf of the 
 
 <p><a href="http://bit.ly/28QOxj6"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"></a> </p>
 
-<p>Upon completion of the CompMS2miner workflow it is intended that the user publishes the <strong>Composite MS2 Explorer</strong> application  to the shinyapps.io site. Using the CompMS2miner function <code>publishApp</code> the application can be publically deployed and explored by other invesigators and all of the now readOnly interactive table comments can be viewed. The user is still able to redeploy the application to the shinyapps.io site if necessary. </p>
+<p>Upon completion of the CompMS2miner workflow it is intended that the user publishes the <strong>Composite MS2 Explorer</strong> application  to the shinyapps.io site or as a self-contained zip file that can easily viewed by others. Using the CompMS2miner function <code>publishApp()</code> the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained <em>Composite MS2 Explorer</em> app should be viewable in perpetuity.</p>
 
 <p>This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.</p>
 
 <h1>
-<a id="licence" class="anchor" href="#licence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>licence</h1>
+<a id="licence" class="anchor" href="#licence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Licence</h1>
 
 <p>The CompMS2miner package is licenced under the GPLv2 + the licence file (<a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a>).</p>
       </section>
