@@ -17,7 +17,7 @@ Data curation, visualization and sharing is made possible at any stage of the Co
 Download the latest stable release tar ball and install package locally
 
 ```{r}
-install.package('CompMS2miner_vLatestVersion.tar.gz', repos=NULL, type='source')
+install.package('CompMS2miner_v1.2.3.tar.gz', repos=NULL, type='source')
 ```
 Or install the development version directly from github using the devtools package. First install devtools,
 instructions can be found here: https://github.com/hadley/devtools
