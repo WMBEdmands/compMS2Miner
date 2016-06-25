@@ -14,14 +14,20 @@ Data curation, visualization and sharing is made possible at any stage of the Co
 
 #Installation
 
-Download the latest stable release tar ball and install package locally
-
+1. You may need to install all package dependencies from CRAN and BioConductor
+```{r}
+install.packages(c('foreach', 'Rcpp', 'shiny', 'couchDB', 'fastcluster', 'data.table', 'doSNOW', 'DT', 'RcppEigen', 'reshape2', 'rjson', 'tcltk2', 'igraph', 'rhandsontable', 'rsconnect', 'shinyapps'))
+ 
+source("https://bioconductor.org/biocLite.R")
+biocLite(c('mzR', 'ChemmineR', 'ChemmineOB'))
+```
+2. Download the latest stable release tar ball/zip and install package locally
 ```{r}
 install.package('CompMS2miner_v1.2.3.tar.gz', repos=NULL, type='source')
 ```
-Or install the development version directly from github using the devtools package. First install devtools,
+-Or- 
+3. install the development version directly from github using the devtools package. First install devtools,
 instructions can be found here: https://github.com/hadley/devtools
-
 ```{r}
 library(devtools)
 
