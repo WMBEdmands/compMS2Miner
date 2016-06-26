@@ -14,12 +14,14 @@ Data curation, visualization and sharing is made possible at any stage of the Co
 
 #Installation
 
-1. install the latest development version and all package dependencies in one-line of code directly from github using the devtools package. First ensure devtools is installed, instructions can be found here: https://github.com/hadley/devtools
+**1.** install the latest development version and all package dependencies in one-line of code directly from github using the devtools package. First ensure devtools is installed, instructions can be found here: https://github.com/hadley/devtools
 ```{r}
 devtools::install_github('WMBEdmands/CompMS2miner', dependencies=c("Depends", "Imports", "Suggests"), build_vignettes=TRUE)
 ```
--Or-
-2. You may need to install all package dependencies from CRAN and BioConductor and then download the latest stable release tar ball/zip and install package locally.
+
+**-Or-**
+
+**2.** You may need to install all package dependencies from CRAN and BioConductor and then download the latest stable release tar ball/zip and install package locally.
 ```{r}
 install.packages(c('foreach', 'Rcpp', 'shiny', 'couchDB', 'fastcluster', 'data.table', 'doSNOW', 'DT', 'RcppEigen', 'reshape2', 'rjson', 'tcltk2', 'igraph', 'rhandsontable', 'rsconnect', 'shinyapps'))
  
