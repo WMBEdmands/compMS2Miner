@@ -34,7 +34,7 @@ install.package('CompMS2miner_v1.2.3.tar.gz', repos=NULL, type='source')
 #Getting started
 
 After CompMS2miner is installed begin by reading the package vignette *"CompMS2miner_Workflow"*
-Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow. Or see view html version of the vignette on the web by clicking the image below:
+Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow. Or view an html version of the vignette on the web by clicking the image below:
 
 [![CompMS2miner_logo](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png)](http://bit.ly/28T06oN)
 
