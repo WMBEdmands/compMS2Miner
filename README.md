@@ -34,7 +34,9 @@ install.package('CompMS2miner_v1.2.3.tar.gz', repos=NULL, type='source')
 #Getting started
 
 After CompMS2miner is installed begin by reading the package vignette *"CompMS2miner_Workflow"*
-Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow.
+Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflow. Or see view html version of the vignette on the web by clicking the image below:
+
+[![CompMS2miner_logo](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png)](http://bit.ly/28T06oN)
 
 Example data illustrating CompMS2miner is provided consisting of a peak-picker output table of nano-flow LC-hrMS metabolomic dataset of human blood samples and data-dependent MS/MS data files, which is also made available as external example data within the CompMS2miner package. A example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
 
