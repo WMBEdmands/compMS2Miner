@@ -48,27 +48,21 @@ latest stable release v1.2.3 (archived on zenodo).</p>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
 
 <ol>
-<li>You may need to install all package dependencies from CRAN and BioConductor</li>
+<li>install the latest development version and all package dependencies in one-line of code directly from github using the devtools package. First ensure devtools is installed, instructions can be found here: <a href="https://github.com/hadley/devtools">https://github.com/hadley/devtools</a>
+</li>
 </ol>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-e">devtools</span><span class="pl-k">::</span>install_github(<span class="pl-s"><span class="pl-pds">'</span>WMBEdmands/CompMS2miner<span class="pl-pds">'</span></span>, <span class="pl-v">dependencies</span><span class="pl-k">=</span>c(<span class="pl-s"><span class="pl-pds">"</span>Depends<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Imports<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Suggests<span class="pl-pds">"</span></span>), <span class="pl-v">build_vignettes</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)</pre></div>
+
+<p>-Or-
+2. You may need to install all package dependencies from CRAN and BioConductor and then download the latest stable release tar ball/zip and install package locally.</p>
 
 <div class="highlight highlight-source-r"><pre>install.packages(c(<span class="pl-s"><span class="pl-pds">'</span>foreach<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Rcpp<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>shiny<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>couchDB<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>fastcluster<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>data.table<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>doSNOW<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>DT<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>RcppEigen<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>reshape2<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>rjson<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>tcltk2<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>igraph<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>rhandsontable<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>rsconnect<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>shinyapps<span class="pl-pds">'</span></span>))
 
 source(<span class="pl-s"><span class="pl-pds">"</span>https://bioconductor.org/biocLite.R<span class="pl-pds">"</span></span>)
-biocLite(c(<span class="pl-s"><span class="pl-pds">'</span>mzR<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>ChemmineR<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>ChemmineOB<span class="pl-pds">'</span></span>))</pre></div>
+biocLite(c(<span class="pl-s"><span class="pl-pds">'</span>mzR<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>ChemmineR<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>ChemmineOB<span class="pl-pds">'</span></span>))
 
-<ol>
-<li>Download the latest stable release tar ball/zip and install package locally</li>
-</ol>
-
-<div class="highlight highlight-source-r"><pre>install.package(<span class="pl-s"><span class="pl-pds">'</span>CompMS2miner_v1.2.3.tar.gz<span class="pl-pds">'</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>source<span class="pl-pds">'</span></span>)</pre></div>
-
-<p>-Or- 
-3. install the development version directly from github using the devtools package. First install devtools,
-instructions can be found here: <a href="https://github.com/hadley/devtools">https://github.com/hadley/devtools</a></p>
-
-<div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">devtools</span>)
-
-install_github(<span class="pl-s"><span class="pl-pds">'</span>WMBEdmands/CompMS2miner<span class="pl-pds">'</span></span>, <span class="pl-v">build_vignettes</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)</pre></div>
+install.package(<span class="pl-s"><span class="pl-pds">'</span>CompMS2miner_v1.2.3.tar.gz<span class="pl-pds">'</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>source<span class="pl-pds">'</span></span>)</pre></div>
 
 <h1>
 <a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting started</h1>
