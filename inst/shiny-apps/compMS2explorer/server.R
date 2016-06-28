@@ -802,6 +802,7 @@ shiny::shinyServer(function(input,  output, session){
         ####################################
         
         output$WordCloud <- shiny::renderPlot({
+        if(!is.null(input$pubMedSearchButton)){ 
         if(input$pubMedSearchButton == 0){ 
          return() } else if(input$pubMedSearchButton > 0){
         ClAbs <- shiny::isolate(pubMedMine()[[1]])
@@ -809,13 +810,15 @@ shiny::shinyServer(function(input,  output, session){
           PubMedWordcloud::plotWordCloud(ClAbs,  min.freq=1,  max.words=100,  rot.per=0)     } else {
           suppressWarnings(PubMedWordcloud::plotWordCloud(ClAbs, max.words=100, scale=c(4, 0.5)))
           }
-          }})
+        }
+        }})
         
         ###########################################
         ##### 7. PubMed random article table  #####
         ###########################################
         
         output$WordCloudTable <- DT::renderDataTable({
+          if(!is.null(input$pubMedSearchButton)){ 
           if(input$pubMedSearchButton == 0){ 
             wordCloudDf <- data.frame("No Search of PubMed performed")
             colnames(wordCloudDf) <- input$FeatureNames
@@ -830,6 +833,10 @@ shiny::shinyServer(function(input,  output, session){
               htmlUrlOnly <- wordCloudDf[, 'htmlUrl', drop=F]
               colnames(htmlUrlOnly) <- colnames(wordCloudDf)[1]
               return(htmlUrlOnly)
+             }} else {
+               wordCloudDf <- data.frame("No Search of PubMed performed")
+               colnames(wordCloudDf) <- input$FeatureNames
+               return(wordCloudDf)   
              }}, escape=F,  options = list(pageLength = 10))
           # ,  sanitize.text.function = function(x) x)
         
