@@ -1,13 +1,13 @@
 library(CompMS2miner)
+library(DT)
 library(shiny)
 library(igraph)
 library(rhandsontable)
 
 shiny::shinyServer(function(input,  output, session){
   # comment lines below if action button is used to commit changes
-  values = reactiveValues()
-  setHot = function(x) values[["hot"]] = x
-  
+  values <- reactiveValues()
+  setHot <- function(x) values[["hot"]] = x
   
   #options(shiny.trace=T)
   observe({
@@ -220,11 +220,9 @@ shiny::shinyServer(function(input,  output, session){
             SMILESindx <- grep("SMILES$", colnames(MS2_data))
             IDindx <- sapply(paste0(gsub("\\.SMILES", "", colnames(MS2_data)[SMILESindx]), "$"), grep, colnames(MS2_data))
             
-            for(i in 1:ncol(MS2_data[, SMILESindx]))
-            { 
+            for(i in 1:ncol(MS2_data[, SMILESindx])){ 
               SMILESsubIndx <- which(MS2_data[, IDindx[i]]!="")
-              if(length(SMILESsubIndx)>0)
-              {
+              if(length(SMILESsubIndx)>0){
                 MS2_data[SMILESsubIndx, IDindx[i]] <- sapply(c(1:length(MS2_data[SMILESsubIndx, SMILESindx[i]])),  function(x){
                   Smiles <- unlist(strsplit(MS2_data[SMILESsubIndx[x], SMILESindx[i]], ";"))
                   SmilesInc <- which(Smiles!="")
@@ -238,7 +236,6 @@ shiny::shinyServer(function(input,  output, session){
             MS2_data <- MS2_data[, -SMILESindx, drop=F]
           } else {
             MS2_data[, c(1:2)] <- apply(MS2_data[, c(1:2)], 2, function(x) round(as.numeric(x), digits=4))
-            
           }
           colnames(MS2_data) <- gsub("\\.", "_", colnames(MS2_data))
           MS2_data$Precursorfrag_diff <- as.numeric(MS2_data$Precursorfrag_diff)
@@ -246,12 +243,10 @@ shiny::shinyServer(function(input,  output, session){
           MS2_data <- MS2_data[, grepl('_SMILES', colnames(MS2_data))  ==  F, drop=F]
           # if spectral DB matches
           if(feat.indx %in% indxSpectralDb){
-          if(!is.null(input$spectralDBtable_rows_selected)){
+          if(is.numeric(input$spectralDBtable_rows_selected)){
             specDBtableTmp <- specDBmatches[[feat.indx]]
-            indxTmp <- duplicated(specDBtableTmp$dbSpectra[, 'compound_msp']) == F
-            indivDBentries <- specDBtableTmp$dbSpectra[indxTmp, , drop=F]
-            
-            selectedDBentry <- indivDBentries[input$spectralDBtable_rows_selected, 'compound_msp', drop=F]
+            selectedDBentry <- unique(specDBtableTmp$dbSpectra[, 'compound_msp'])[input$spectralDBtable_rows_selected]
+           
           dbMassIntensities <- specDBtableTmp$dbSpectra[specDBtableTmp$dbSpectra[, 'compound_msp'] %in% selectedDBentry, 1:2, drop=F]
           dbMassIntensities <- apply(dbMassIntensities, 2, as.numeric)
           if(!is.matrix(dbMassIntensities)){
