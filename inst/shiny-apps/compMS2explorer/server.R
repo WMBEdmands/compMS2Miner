@@ -318,9 +318,16 @@ shiny::shinyServer(function(input,  output, session){
             if(is.numeric(input$spectralDBtable_rows_selected)){
               specDBtableTmp <- specDBmatches[[feat.indx]]
               selectedDBentry <- unique(specDBtableTmp$dbSpectra[, 'compound_msp'])[input$spectralDBtable_rows_selected]
-              dbInfoDfTmp <- as.data.frame(specDBtableTmp[[2]][[which(names(specDBtableTmp[[2]]) %in% selectedDBentry)]], stringsAsFactors = F)
+              indxTmp <- which(names(specDBtableTmp[[2]]) %in% selectedDBentry)
+              if(length(indxTmp) > 1){
+              dbInfoDfTmp <- do.call(cbind, specDBtableTmp[[2]][indxTmp])  
+              dbInfoDfTmp <- cbind(row.names(dbInfoDfTmp), dbInfoDfTmp)
+              colnames(dbInfoDfTmp)[1] <- 'EntryNo_EntryName'
+              } else {
+              dbInfoDfTmp <- as.data.frame(specDBtableTmp[[2]][[]], stringsAsFactors = F)
               dbInfoDfTmp <- cbind(row.names(dbInfoDfTmp), dbInfoDfTmp[, 1])
               colnames(dbInfoDfTmp) <- c('EntryNo_EntryName', 'Information')
+              }
               return(dbInfoDfTmp)
           } else {
           plotDfTmp <- plotDf()  
