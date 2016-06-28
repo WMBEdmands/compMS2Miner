@@ -324,7 +324,7 @@ shiny::shinyServer(function(input,  output, session){
               dbInfoDfTmp <- cbind(row.names(dbInfoDfTmp), dbInfoDfTmp)
               colnames(dbInfoDfTmp)[1] <- 'EntryNo_EntryName'
               } else {
-              dbInfoDfTmp <- as.data.frame(specDBtableTmp[[2]][[]], stringsAsFactors = F)
+              dbInfoDfTmp <- as.data.frame(specDBtableTmp[[2]][[indxTmp]], stringsAsFactors = F)
               dbInfoDfTmp <- cbind(row.names(dbInfoDfTmp), dbInfoDfTmp[, 1])
               colnames(dbInfoDfTmp) <- c('EntryNo_EntryName', 'Information')
               }
