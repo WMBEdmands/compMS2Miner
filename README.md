@@ -2,8 +2,8 @@
 
 CompMS2miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.
 
-<a href="http://dx.doi.org/10.5281/zenodo.56320" target="blank"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.56320.svg"/></a> 
-latest stable release v1.2.3 (archived on zenodo).
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56582.svg)](http://dx.doi.org/10.5281/zenodo.56582)
+latest stable release v1.2.5 (archived on zenodo).
 
 #Purpose
 A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-hrMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output peak tables to full metabolite identification.
