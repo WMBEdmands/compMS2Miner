@@ -26,7 +26,7 @@ Imports:
     fastcluster,
     data.table,
     doSNOW,
-    DT,
+    DT (>= 0.1.45),
     methods,
     parallel,
     RcppEigen,
