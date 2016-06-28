@@ -42,7 +42,7 @@ Example data illustrating CompMS2miner is provided consisting of a peak-picker o
 
 #Features
 
-The CompMS2miner structured workflow performs the following (v1.2.3, 2016/06/23): 
+The CompMS2miner structured workflow performs the following (v1.2.5, 2016/06/28): 
 * matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2()```
 * dynamically filters variable noise. ```deconvNoise()```
 * generates composite mass spectra by multiple scan signal summation. ```combineIons()```
