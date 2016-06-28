@@ -64,5 +64,5 @@ Upon completion of the CompMS2miner workflow it is intended that the user publis
 This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.
 
 #Licence
-The CompMS2miner package is licenced under the GPLv2 + the licence file (http://www.gnu.org/licenses/gpl.html).
+The CompMS2miner package is licenced under the GPLv3 (http://www.gnu.org/licenses/gpl.html).
 
