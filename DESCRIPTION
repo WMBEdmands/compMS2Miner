@@ -51,6 +51,6 @@ URL: dx.doi.org/10.5281/zenodo.50590 (stable release v1.0.0)
 LazyData: true
 LazyLoad: true
 VignetteBuilder: knitr
-License: GPL (>= 2) + file LICENSE
+License: GPL (>= 3) 
 RoxygenNote: 5.0.1
 
