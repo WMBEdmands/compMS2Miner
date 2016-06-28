@@ -295,8 +295,8 @@ shiny::shinyServer(function(input,  output, session){
           specDBtableTmp <- specDBmatches[[feat.indx]]
           indxTmp <- duplicated(specDBtableTmp$dbSpectra[, 'compound_msp']) == F
           dbSpectraTmp <- do.call(rbind, strsplit(specDBtableTmp$dbSpectra[indxTmp, 'compound_msp'], '__'))
-          dbSpectraTmp <- cbind(dbSpectraTmp, round(as.numeric(specDBtableTmp$dbSpectra[indxTmp, 'dotProductScore']), 2))
-          colnames(dbSpectraTmp) <- c('compound', 'mspFile', 'dotProdScore')
+          dbSpectraTmp <- cbind(dbSpectraTmp, round(as.numeric(specDBtableTmp$dbSpectra[indxTmp, 'dotProductScore']), 2), round(as.numeric(specDBtableTmp$dbSpectra[indxTmp, 'propTIC_explained']), 2))
+          colnames(dbSpectraTmp) <- c('compound', 'mspFile', 'dotProdScore', 'propTIC_explained')
           return(dbSpectraTmp)
           } else {
           return(data.frame(spectral_database_match='no spectral database match'))  
@@ -314,16 +314,28 @@ shiny::shinyServer(function(input,  output, session){
         })
         # ui tab 1 nearpoints plot click 
         output$compMS2tableInfo <- DT::renderDataTable({
-          plotDfTmp <- plotDf()
-          
+          if(feat.indx %in% indxSpectralDb){
+            if(is.numeric(input$spectralDBtable_rows_selected)){
+              specDBtableTmp <- specDBmatches[[feat.indx]]
+              selectedDBentry <- unique(specDBtableTmp$dbSpectra[, 'compound_msp'])[input$spectralDBtable_rows_selected]
+              dbInfoDfTmp <- as.data.frame(specDBtableTmp[[2]][[which(names(specDBtableTmp[[2]]) %in% selectedDBentry)]], stringsAsFactors = F)
+              dbInfoDfTmp <- cbind(row.names(dbInfoDfTmp), dbInfoDfTmp[, 1])
+              colnames(dbInfoDfTmp) <- c('EntryNo_EntryName', 'Information')
+              return(dbInfoDfTmp)
+          } else {
+          plotDfTmp <- plotDf()  
+          brushedPoints(plotDfTmp, input$compMS2_brush, xvar = "mass", yvar = "intensity")  
+          }
+          } else {
+          plotDfTmp <- plotDf()  
           brushedPoints(plotDfTmp, input$compMS2_brush, xvar = "mass", yvar = "intensity")
+          }
         }, rownames=FALSE,  escape = F)
           
         ###########################
         ##### 9. overview plot ####
         ########################### 
       
-       
         output$overview_plot <- shiny::renderPlot({
           
           if(!is.null(input$overview_brush)){

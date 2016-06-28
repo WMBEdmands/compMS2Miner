@@ -78,10 +78,9 @@ shiny::shinyUI(shiny::fluidPage(
                 ), 
    shiny::column(width=8, 
                 shiny::conditionalPanel(condition="input.tabbedPanelButton >'0' & input.FeatureNames!='No MS2 features found'", 
-                shiny::tabsetPanel(
-                                          shiny::tabPanel('Composite MS2 plot', 
-                                                          shiny::fluidRow(shiny::verbatimTextOutput("compMS2Hover")),   
-                                                          shiny::fluidRow(splitLayout(cellWidths = c('55%', '45%'), shiny::plotOutput("MS2_plot", width = "800px",  height = "600px", brush = 'compMS2_brush', hover='compMS2_hover'), DT::dataTableOutput('spectralDBtable'))),
+                shiny::tabsetPanel(shiny::tabPanel('Composite MS2 plot',
+                                                   shiny::fluidRow(shiny::verbatimTextOutput("compMS2Hover")),
+                                                   shiny::fluidRow(splitLayout(cellWidths = c('55%', '45%'), shiny::plotOutput("MS2_plot", width = "800px",  height = "600px", brush = 'compMS2_brush', hover='compMS2_hover'), DT::dataTableOutput('spectralDBtable'))),
                                                           shiny::fluidRow(DT::dataTableOutput("compMS2tableInfo"))),
                                           shiny::tabPanel('Overview plot', 
                                                           shiny::fluidRow(shiny::plotOutput("overview_plot", width = "1000px",  height = "600px", brush = 'overview_brush')), 
