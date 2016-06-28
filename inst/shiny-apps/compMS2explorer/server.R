@@ -686,113 +686,177 @@ shiny::shinyServer(function(input,  output, session){
             SbStrResults <-  subStrAnno.df[subStrAnno.df$compSpecName %in% Features.v[feat.indx],  ,  drop = F]
             return(SbStrResults)
           }}, rownames=FALSE,  escape=F,  options = list(pageLength = 8))
+        # text entry for custom searches
+        output$customPubMedSearch <- shiny::renderUI({
+          shiny::textInput('customPubMedSearch', 'Enter custom search text:')
+        })
+        #ui for max number of HMDB abstracts to return
+        output$nPMIDAbstracts <- shiny::renderUI({
+          shiny::numericInput('nPMIDAbstracts', 'Number of PubMed abstracts used to calculate word cloud (max = 10000) : ',  value=100, min=10, max=10000, step=10)
+        }) 
+        # #ui for max number of random articles to return
+        # output$nRandomArticles <- shiny::renderUI({
+        #   shiny::numericInput('nRandomArticles', 'Number of randomly selected abstracts to display (max = 20) : ',  value=5, min=1, max=20, step=1)
+        # }) 
         
-        
-        ##ui for word cloud
+        ##ui for word cloud drop-down
         output$wordCloudSelect <- renderUI({
           if(length(object@DBanno)  ==  0){
             DBmatches <- "metID.dbAnnotate function has not yet been run/ No matches to DB"
           } else {
             DBmatches <- tmp.DBanno.res[[feat.indx]]$DBname
-            shiny::selectizeInput('wordCloudSelect', 'DB match name : ',  choices = DBmatches)
+            shiny::selectizeInput('wordCloudSelect', 'Or DB annotation match name : ',  choices = DBmatches)  
           }}) 
+        # actionButton to start pubmed search
+        output$pubMedSearchButton <- shiny::renderUI({
+          shiny::actionButton('pubMedSearchButton', 'Search PubMed')
+        })
         
-        #ui for max number of HMDB abstracts to return
-        output$nPMIDAbstracts <- shiny::renderUI({
-          shiny::numericInput('nPMIDAbstracts', 'Number of PubMed abstracts used to calculate word cloud (max = 10000) : ',  value=100, min=10, max=10000, step=10)
-        }) 
-        #ui for max number of random articles to return
-        output$nRandomArticles <- shiny::renderUI({
-          shiny::numericInput('nRandomArticles', 'Number of randomly selected abstracts to display (max = 20) : ',  value=5, min=1, max=20, step=1)
-        }) 
         ###word cloud text output  
         output$WordCloudText <- shiny::renderText({"If a large number of abstracts (>100) from PubMed are returned the word cloud will take longer to update or may fail to load...Please Wait"})
         
+        # mine PubMed reactive
+        pubMedMine <- reactive({
+          if(length(object@DBanno)  ==  0){
+            ClAbs <- data.frame(word="metID.dbAnnotate function not run",  freq=1)
+            wordCloudDf <- data.frame("No PMIDs returned")
+            colnames(wordCloudDf) <- input$FeatureNames
+            PMIDs <- 'none'
+            names(PMIDs) <-  ifelse(searchTerm == '', 'noSearchTerm', searchTerm)
+            Abs <- 'none'
+          } else if (nrow(tmp.DBanno.res[[feat.indx]])   ==  0){
+            ClAbs <- data.frame(word="No matches to DB",  freq=1)
+            wordCloudDf <- data.frame("No PMIDs returned")
+            colnames(wordCloudDf) <- input$FeatureNames
+            PMIDs <- 'none'
+            names(PMIDs) <-  ifelse(searchTerm == '', 'noSearchTerm', searchTerm)
+            Abs <- 'none'
+          } else {
+            
+            if(input$customPubMedSearch == ''){
+              #subset -1 to remove count value obtained from eutils XML file
+              PMIDs <- PMIDsearch(keys=input$wordCloudSelect,  n=99999)
+              Count <- PMIDs[1]
+              PMIDs <- PMIDs[-1]
+              searchTerm <- input$wordCloudSelect
+              } else {
+              # else custom text search
+              PMIDs <- PMIDsearch(keys=input$customPubMedSearch,  n=99999)
+              Count <- PMIDs[1]
+              PMIDs <- PMIDs[-1]
+              searchTerm <- input$customPubMedSearch
+              }
+           
+          if(length(PMIDs) > 0){
+            # random sample of all PMIDs to sample
+           randIndx <- sample(1:length(PMIDs), 
+                              ifelse(length(PMIDs) >= input$nPMIDAbstracts, 
+                                     input$nPMIDAbstracts, length(PMIDs)))
+           randPMIDs <- PMIDs[randIndx]
+           articleTitles <- getTitles(randPMIDs)
+           Abs <- PubMedWordcloud::getAbstracts(randPMIDs)
+           wordCloudDf <- data.frame(randPMIDs, articleTitles, stringsAsFactors=F)
+           wordCloudDf$url <- paste0('http://www.ncbi.nlm.nih.gov/pubmed/', wordCloudDf$randPMIDs)   
+           row.names(wordCloudDf) <- paste0("article ", 
+                                            seq(1, nrow(wordCloudDf), 1))
+           colnames(wordCloudDf)[1] <- paste0('Search term: ', searchTerm, " total PubMedIds returned: ", Count)
+                    
+            if(length(Abs) > 0){
+                  ClAbs <- PubMedWordcloud::cleanAbstracts(Abs)
+                  ###remove compound names from word frequency table
+                  subsName <- strsplit(input$wordCloudSelect, " ")[[1]]
+                  subsName <- unlist(lapply(subsName, function(x) grep(paste0("\\b", x, "\\b"), ClAbs$word, ignore.case=T)))
+                  if(length(subsName) > 0){
+                    ClAbs <- ClAbs[-subsName, ]
+                  }
+                  ###only keep word which are less than 50 characters
+                  ClAbs <- ClAbs[which(sapply(as.character(ClAbs$word), nchar) < 50), ]
+                  PMIDs <- paste0(PMIDs, collapse = '; ')
+                  names(PMIDs) <-  searchTerm
+                  Abs <- data.frame(Abs)
+                  colnames(Abs) <- searchTerm
+                  # row.names(Abs) <- randPMIDs
+                } else {
+                  ###if no PMIDs returned then plot 
+                  ClAbs <- data.frame(word="No Abstract text available", freq=1)
+                  wordCloudDf <- data.frame("No PMIDs returned")
+                  colnames(wordCloudDf) <- input$FeatureNames
+                  PMIDs <- 'none'
+                  names(PMIDs) <-  ifelse(searchTerm == '', 'noSearchTerm', searchTerm)
+                  Abs <- 'none'
+                }
+              } else {
+                ###if no PMIDs returned then plot 
+                ClAbs <- data.frame(word="No PubMedIDs returned", freq=1)
+                wordCloudDf <- data.frame("No PMIDs returned")
+                colnames(wordCloudDf) <- input$FeatureNames
+                PMIDs <- 'none'
+                names(PMIDs) <-  ifelse(searchTerm == '', 'noSearchTerm', searchTerm)
+                Abs <- 'none'
+              }
+          }
+          return(list(ClAbs=ClAbs, wordCloudDf=wordCloudDf, PMIDs=PMIDs, Abs=Abs))
+        })
         ####################################
         ##### 6. PubMed wordcloud plot #####
         ####################################
         
         output$WordCloud <- shiny::renderPlot({
-          if(length(object@DBanno)  ==  0){
-            ClAbs <- data.frame(word="metID.dbAnnotate function not run",  freq=1)
-            PubMedWordcloud::plotWordCloud(ClAbs,  min.freq=1,  max.words=100,  rot.per=0)
-          } else if (nrow(tmp.DBanno.res[[feat.indx]])   ==  0) {
-            ClAbs <- data.frame(word="No matches to DB",  freq=1)
-            PubMedWordcloud::plotWordCloud(ClAbs,  min.freq=1,  max.words=100,  rot.per=0)
-          } else {
-            
-            if(!is.null(input$wordCloudSelect) & !is.null(input$nPMIDAbstracts))
-            {
-              #subset -1 to remove count value obtained from eutils XML file
-              PMIDs <- PMIDsearch(keys=input$wordCloudSelect,  n=input$nPMIDAbstracts)[-1]      
-              if(length(PMIDs) > 0)
-              {
-                Abs <- PubMedWordcloud::getAbstracts(PMIDs)
-                if(length(Abs) > 0)
-                {
-                  ClAbs <- PubMedWordcloud::cleanAbstracts(Abs)
-                  ###remove compound names from word frequency table
-                  SubsName <- strsplit(input$wordCloudSelect, " ")[[1]]
-                  SubsName <- unlist(lapply(SubsName, function(x) grep(paste0("\\b", x, "\\b"), ClAbs$word, ignore.case=T)))
-                  if(length(SubsName)>0)
-                  {
-                    ClAbs <- ClAbs[-SubsName, ]
-                  }
-                  ###only keep word which are less than 50 characters
-                  ClAbs <- ClAbs[which(sapply(as.character(ClAbs$word), nchar)<50), ]
-                  suppressWarnings(PubMedWordcloud::plotWordCloud(ClAbs, max.words=100, scale=c(4, 0.5)))
-                } else {
-                  ###if no PMIDs returned then plot 
-                  ClAbs <- data.frame(word="No Abstract text available", freq=1)
-                  PubMedWordcloud::plotWordCloud(ClAbs, min.freq=1, max.words=100, rot.per=0)
-                }
-              } else {
-                ###if no PMIDs returned then plot 
-                ClAbs <- data.frame(word="No PubMedIDs returned", freq=1)
-                PubMedWordcloud::plotWordCloud(ClAbs, min.freq=1, max.words=100, rot.per=0)
-              }
-            }
+        if(input$pubMedSearchButton == 0){ 
+         return() } else if(input$pubMedSearchButton > 0){
+        ClAbs <- shiny::isolate(pubMedMine()[[1]])
+        if(nrow(ClAbs) == 1){
+          PubMedWordcloud::plotWordCloud(ClAbs,  min.freq=1,  max.words=100,  rot.per=0)     } else {
+          suppressWarnings(PubMedWordcloud::plotWordCloud(ClAbs, max.words=100, scale=c(4, 0.5)))
           }
-        })
+          }})
         
         ###########################################
         ##### 7. PubMed random article table  #####
         ###########################################
         
-        output$WordCloudTable <- shiny::renderTable({
-          if(length(object@DBanno)  ==  0){
-            WordCloud.df <- data.frame("No PMIDs returned")
-            colnames(WordCloud.df) <- input$FeatureNames
-            return(WordCloud.df)
-          } else if (nrow(tmp.DBanno.res[[feat.indx]])   ==  0) {
-            WordCloud.df <- data.frame("No PMIDs returned")
-            colnames(WordCloud.df) <- input$FeatureNames
-            return(WordCloud.df)
-          } else if(!is.null(input$wordCloudSelect) & !is.null(input$nPMIDAbstracts)){
-            PMIDs <- PMIDsearch(keys = input$wordCloudSelect,  n = input$nPMIDAbstracts)
-            Count <- PMIDs[1]
-            PMIDs <- PMIDs[-1]
-            RandArticleSample <- sample(PMIDs, 
-                                        ifelse(length(PMIDs)>=input$nRandomArticles, 
-                                               input$nRandomArticles, length(PMIDs)))
-            ##obtain titles for randomly selected articles
-            RandArticleTitles <- getTitles(RandArticleSample)
-            WordCloud.df <- data.frame(c(Count, 
-                                         paste0("<a href='http://www.ncbi.nlm.nih.gov/pubmed/", 
-                                                RandArticleSample, "' target='_blank'> PMID : ", 
-                                                RandArticleSample, " Title : ", 
-                                                RandArticleTitles, "</a>")))
-            row.names(WordCloud.df) <- c("number PubMedIds returned ", 
-                                       paste0("random article ",  
-                                              seq(1, nrow(WordCloud.df)-1, 1)))
-            colnames(WordCloud.df) <- input$FeatureNames
-            return(WordCloud.df)
-          } else {
-            WordCloud.df <- data.frame("No PMIDs returned")
-            colnames(WordCloud.df) <- input$FeatureNames
-            return(WordCloud.df)
-          }
-        },  sanitize.text.function = function(x) x)
+        output$WordCloudTable <- DT::renderDataTable({
+          if(input$pubMedSearchButton == 0){ 
+            wordCloudDf <- data.frame("No Search of PubMed performed")
+            colnames(wordCloudDf) <- input$FeatureNames
+            return(wordCloudDf)
+             } else if(input$pubMedSearchButton > 0){
+              wordCloudDf <- shiny::isolate(pubMedMine()[[2]])
+              
+              wordCloudDf$htmlUrl <- paste0("<a href='http://www.ncbi.nlm.nih.gov/pubmed/", 
+                     wordCloudDf[, 1], "' target='_blank'> PMID : ", 
+                     wordCloudDf[, 1], " Title : ", 
+                     wordCloudDf$articleTitles, "</a>")
+              htmlUrlOnly <- wordCloudDf[, 'htmlUrl', drop=F]
+              colnames(htmlUrlOnly) <- colnames(wordCloudDf)[1]
+              return(htmlUrlOnly)
+             }}, escape=F,  options = list(pageLength = 10))
+          # ,  sanitize.text.function = function(x) x)
+        
+        # download pubmed data
+        output$downloadPubMedData <- shiny::downloadHandler(
+          filename = function(){
+            resFiles <- isolate(pubMedMine())
+            fileNameTmp <- paste0("PubMedSearch_", names(resFiles[[3]]), "_",
+                                         Sys.Date(), '.zip')},
+          content = function(file){
+            resFiles <- isolate(pubMedMine())
+            tmpdir <- tempdir()
+            setwd(tempdir())
+            print(tempdir())
+            
+            fileNames <- paste0("PubMedSearch_", names(resFiles[[3]]),
+                                c("_wordFreq_", "_randArticles_", '_allPMIDs_', '_Abstracts_'), Sys.Date(), '.txt')
+            
+            write.table(resFiles['ClAbs'], fileNames[1], sep='\t', row.names=F)
+            write.table(resFiles['wordCloudDf'], fileNames[2], sep='\t', row.names=F)
+            write.table(resFiles['PMIDs'], fileNames[3], sep='')
+            # write.table(resFiles['Abs'], fileNames[4], sep='\t')
+  
+            print(fileNames)
+            
+            zip(zipfile=file, files=fileNames[1:3])
+          }, contentType = "application/zip")
         
         #####################################
         ##### 8. output MetFrag results #####

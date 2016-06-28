@@ -75,14 +75,17 @@ compMS2demo
 ##3. Intra-spectrum ion grouping and inter-MS2 file spectra grouping with signal summing.
 group and sum ions from different scans and then combine summed ion composite spectra
 across multiple files. This create a single composite spectra for each MS1 EIC
-matched to MS2 precursor scans.
+matched to MS2 precursor scans. Optionally, a minimimum inter-spectrum similarity filter (dot product) can be applied where only spectra with a minimum spectral similarity (see argument specSimFilter in ?combineMS2.Spectra) will be combined in the resultant composite spectrum. However, if none of the spectra of a
+group have any similarity to one another the spectrum with the highest mean precursor intensity will be returned.
 ```{r, collapse=TRUE}
 # intra-spectrum ion grouping and signal summing
 compMS2demo <- combineMS2(compMS2demo, "Ions")
 # View summary of compMS2 class object at any time 
 compMS2demo
-#inter spectrum ion grouping and signal summing
-compMS2demo <- combineMS2(compMS2demo, "Spectra") 
+#inter spectrum ion grouping and signal summing if the argument specSimFilter
+# is supplied (values 0-1) then any spectrum below this spectral similarity 
+# threshold (dot product) will not be included in the composite spectrum generated.
+compMS2demo <- combineMS2(compMS2demo, "Spectra", specSimFilter=NULL) 
 # View summary of compMS2 class object at any time 
 compMS2demo
 

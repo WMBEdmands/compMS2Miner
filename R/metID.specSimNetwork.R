@@ -4,12 +4,13 @@
 #' 
 #' @param object A "CompMS2" class object.  
 #' @param minDotProdThresh minimum dot product spectral similarity score (default = 0.8).
+#' @param binSizeMS2 numeric MS2 bin size for spectral similarity matching (default = 0.1)
 #' @return "CompMS2" class object with an additional network graph of any peakTable features above the correlation threshold.
 #' 
 #' @export
 setGeneric("metID.specSimNetwork", function(object, ...) standardGeneric("metID.specSimNetwork"))
 
-setMethod("metID.specSimNetwork", signature = "CompMS2", function(object, minDotProdThresh=0.8){
+setMethod("metID.specSimNetwork", signature = "CompMS2", function(object, minDotProdThresh=0.8,  binSizeMS2=0.1){
     # error handling
     stopifnot(!is.null(object))
     if(class(object) != "CompMS2"){
@@ -31,31 +32,9 @@ setMethod("metID.specSimNetwork", signature = "CompMS2", function(object, minDot
    #  return(preFragIntTmp)
    }))
    specNamesVecTmp <- gsub('\\..+', '', row.names(allSpecTmp))
-    # allSpecTmp <- cbind(allSpecTmp, specNamesVecTmp)
-    # padded integer labels
-    labelsTmp <- paste0(sprintf("(%04d", 1:999), ',', sprintf("%04d", 2:1000), ']')
-    massBinsIndivTmp <- cut(allSpecTmp[, 1], breaks=seq(1, 1000, 1), labels=labelsTmp)
-    # empty bins
-    emptyBins <- cut(seq(2, 1000, 1), breaks=seq(1, 1000, 1), labels=labelsTmp)
-    indivSpecVec <- tapply(allSpecTmp[, 2], paste0(specNamesVecTmp, massBinsIndivTmp), sum)
-    # identify any absent bins
-    allBinNames <- paste0(rep(unique(specNamesVecTmp), each=length(emptyBins)), rep(emptyBins, length(unique(specNamesVecTmp))))
-    # add absent bins as zeros
-    allBinsTmp <- rep(0, length(allBinNames))
-    names(allBinsTmp) <- allBinNames
-    allBinsTmp[which(allBinNames %in% names(indivSpecVec))] <- indivSpecVec
-    indivSpecMat <- matrix(allBinsTmp, byrow=F, nrow=length(emptyBins))
-    # mean all pairwise dotproducts
-    # dotProdMat <- t(indivSpecMat) %*% indivSpecMat
-    dotProdMat <- crossprod(indivSpecMat)
-    sqrtMatrixTmp <- matrix(sqrt(colSums(indivSpecMat^2)), nrow=nrow(dotProdMat), 
-                            ncol=ncol(dotProdMat), byrow = T) 
-    
-    fragsDotProds <- dotProdMat / (sqrtMatrixTmp * diag(sqrtMatrixTmp))
-    
-    colnames(fragsDotProds)  <- names(object@compSpectra)
-    row.names(fragsDotProds) <- names(object@compSpectra)
-    
+   
+   fragsDotProds <- dotProdMatrix(as.matrix(allSpecTmp), specNamesVecTmp, binSizeMS2=binSizeMS2)
+
     # 2. precursor - neutral losses
     
     # all constituent spectra
@@ -73,30 +52,7 @@ setMethod("metID.specSimNetwork", signature = "CompMS2", function(object, minDot
       # colnames(preFragIntTmp)[1] <- 'mass'
     }))
     specNamesVecTmp <- gsub('\\..+', '', row.names(allSpecTmp))
-    # allSpecTmp <- cbind(allSpecTmp, specNamesVecTmp)
-    # padded integer labels
-    labelsTmp <- paste0(sprintf("(%04d", 1:999), ',', sprintf("%04d", 2:1000), ']')
-    massBinsIndivTmp <- cut(allSpecTmp[, 1], breaks=seq(1, 1000, 1), labels=labelsTmp)
-    # empty bins
-    emptyBins <- cut(seq(2, 1000, 1), breaks=seq(1, 1000, 1), labels=labelsTmp)
-    indivSpecVec <- tapply(allSpecTmp[, 2], paste0(specNamesVecTmp, massBinsIndivTmp), sum)
-    # identify any absent bins
-    allBinNames <- paste0(rep(unique(specNamesVecTmp), each=length(emptyBins)), rep(emptyBins, length(unique(specNamesVecTmp))))
-    # add absent bins as zeros
-    allBinsTmp <- rep(0, length(allBinNames))
-    names(allBinsTmp) <- allBinNames
-    allBinsTmp[which(allBinNames %in% names(indivSpecVec))] <- indivSpecVec
-    indivSpecMat <- matrix(allBinsTmp, byrow=F, nrow=length(emptyBins))
-    # mean all pairwise dotproducts
-    # dotProdMat <- t(indivSpecMat) %*% indivSpecMat
-    dotProdMat <- crossprod(indivSpecMat)
-    sqrtMatrixTmp <- matrix(sqrt(colSums(indivSpecMat^2)), nrow=nrow(dotProdMat), 
-                            ncol=ncol(dotProdMat), byrow = T) 
-    
-    preFragDotProds <- dotProdMat / (sqrtMatrixTmp * diag(sqrtMatrixTmp))
-    
-    colnames(preFragDotProds)  <- names(object@compSpectra)
-    row.names(preFragDotProds) <- names(object@compSpectra)
+    preFragDotProds <- dotProdMatrix(as.matrix(allSpecTmp), specNamesVecTmp, binSizeMS2=binSizeMS2)
     
     # replace upper tri with zero
     fragsDotProds[upper.tri(fragsDotProds, diag=T)] <- 0

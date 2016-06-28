@@ -44,8 +44,10 @@ compMS2demo
 compMS2demo <- combineMS2(compMS2demo, "Ions")
 # View summary of compMS2 class object at any time 
 compMS2demo
-#inter spectrum ion grouping and signal summing
-compMS2demo <- combineMS2(compMS2demo, "Spectra") 
+#inter spectrum ion grouping and signal summing if the argument specSimFilter
+# is supplied (values 0-1) then any spectrum below this spectral similarity 
+# threshold (dot product) will not be included in the composite spectrum generated.
+compMS2demo <- combineMS2(compMS2demo, "Spectra", specSimFilter=NULL) 
 # View summary of compMS2 class object at any time 
 compMS2demo
 

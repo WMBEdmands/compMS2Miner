@@ -57,7 +57,10 @@ shiny::shinyUI(shiny::fluidPage(
                 
                 shiny::actionButton("CloseAppBtn", "Close"),
                 shiny::br(),
-                # shiny::br(),
+                # download button corpus and PMIDs/ paper names
+                shiny::h5('Download zip file of PubMed papers, PMIDs and word frequencies (.txt)'),
+                shiny::downloadButton('downloadPubMedData', 'download'),
+                shiny::br(),
                 # shiny::tags$b("Save comments and best candidates"),
                 # shiny::actionButton("CommentButton", "SAVE"),
                 # shiny::br(),
@@ -74,7 +77,7 @@ shiny::shinyUI(shiny::fluidPage(
                 ), 
    shiny::column(width=8, 
                 shiny::conditionalPanel(condition="input.tabbedPanelButton >'0' & input.FeatureNames!='No MS2 features found'", 
-                                        shiny::tabsetPanel(
+                shiny::tabsetPanel(
                                           shiny::tabPanel('Composite MS2 plot', 
                                                           shiny::fluidRow(shiny::verbatimTextOutput("compMS2Hover")),   
                                                           shiny::fluidRow(splitLayout(cellWidths = c('55%', '45%'), shiny::plotOutput("MS2_plot", width = "800px",  height = "600px", brush = 'compMS2_brush', hover='compMS2_hover'), DT::dataTableOutput('spectralDBtable'))),
@@ -93,8 +96,24 @@ shiny::shinyUI(shiny::fluidPage(
                                           # metId comments
                                           shiny::tabPanel("metID comments", rHandsontableOutput("hot")), 
                                           #                                   tabPanel("Best candidates", dataTableOutput("BestCandidate")), 
-                                          shiny::tabPanel("PubMed Word Cloud",  shiny::uiOutput("wordCloudSelect"),  shiny::uiOutput("nPMIDAbstracts"),  shiny::verbatimTextOutput("WordCloudText"), 
-                                                          shiny::uiOutput("nRandomArticles"),  shiny::tableOutput(outputId="WordCloudTable"),  shiny::plotOutput("WordCloud", width = "800px",  height = "600px")), 
+shiny::tabPanel("PubMed Word Cloud", 
+        shiny::fluidRow(shiny::verbatimTextOutput("WordCloudText")),
+        shiny::fluidRow(
+          splitLayout(shiny::splitLayout(
+            cellWidths = c(400, 550),
+            cellArgs = list(style = "padding: 6px"),#shiny::column(width=2, 
+          shiny::uiOutput('customPubMedSearch'), 
+                    #shiny::column(width=2,
+          # shiny::uiOutput("nRandomArticles"),
+          shiny::uiOutput("nPMIDAbstracts")
+          ))), 
+        shiny::fluidRow(shiny::uiOutput("wordCloudSelect"), 
+                        shiny::uiOutput('pubMedSearchButton')),
+        shiny::br(),
+        shiny::fluidRow(splitLayout(cellWidths=c('40%', '60%'), 
+                                    shiny::plotOutput("WordCloud", width = "800px",  height = "600px"), DT::dataTableOutput(outputId="WordCloudTable"))) 
+        # shiny::fluidRow(shiny::uiOutput('downloadPubMedData'))
+        ), 
                                           shiny::tabPanel("MetFrag results",  shiny::tableOutput(outputId="MetFragTable")), 
                                            shiny::tabPanel("dynamic noise filter video", #t, 
                                                            shiny::fluidRow(
