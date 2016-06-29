@@ -14,7 +14,7 @@ Data curation, visualization and sharing is made possible at any stage of the Co
 
 #Installation
 
-**1.** install the latest development version and all package dependencies in one-line of code directly from github using the devtools package. First ensure devtools is installed, instructions can be found here: https://github.com/hadley/devtools
+**1.** install the latest development version and all package dependencies in one-line of code directly from GitHub using the devtools package. First ensure devtools is installed, instructions can be found here: https://github.com/hadley/devtools
 ```{r}
 devtools::install_github('WMBEdmands/CompMS2miner', dependencies=c("Depends", "Imports", "Suggests"), build_vignettes=TRUE)
 ```
@@ -53,13 +53,15 @@ The CompMS2miner structured workflow performs the following (v1.2.5, 2016/06/28)
 * calculates correlation and spectral similarity networks which can be visualized in the shiny interface. ```metID(method='corrNetwork')``` and ```metID(method='specSimNetwork')```
 * provides wrapper functions for pre-existing *in silico* fragmentation software (http://msbi.ipb-halle.de/MetFrag/). ```metID(method='metFrag')```
 * an interactive table to record a user's decision making process or any confirmation (e.g. database entries or literature DOIs). ```compMS2explorer()``` or ```runGitHubApp()```
-* The CompMS2explorer app can be very rapidly published to the shinyapps.io hosting site after setting up an account. ```publishApp()```
+* The **Composite MS2 Explorer** app (accessible with the function ```compMS2explorer()```) can be very rapidly published to the shinyapps.io hosting site after setting up an account using the function ```publishApp()```
 
 An example **Composite MS2 Explorer** application created using the example data (within extdata of the package) is hosted on the shinyapps.io site here: 
 
 <a href="http://bit.ly/28QOxj6" target="blank"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"/></a> 
 
-Upon completion of the CompMS2miner workflow it is intended that the user publishes the **Composite MS2 Explorer** application  to the shinyapps.io site or as a self-contained zip file that can easily viewed by others. Using the CompMS2miner function ```publishApp()``` the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained **Composite MS2 Explorer** app should be viewable in perpetuity.
+Upon completion of the CompMS2miner workflow the user can then load the **Composite MS2 Explorer** app (```compMS2explorer()```) and systematically examine each composite spectrum using all of the available tools provided in the  interface. Once a decision has been made on a putative annotation the user can then make potentially detailed comments in the interactive table. In this way metabolite identification decisions can be effectively and very efficiently recorded (such as links to journal articles and other pieces of evidence in support of an assignment). 
+
+As a final step following systematic evaluation of the data presented by the **Composite MS2 Explorer** app it is intended that the user publishes the **Composite MS2 Explorer** application  to the shinyapps.io site or as a self-contained zip file that can easily viewed by others. Using the CompMS2miner function ```publishApp()``` the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained **Composite MS2 Explorer** app should be viewable in perpetuity.
 
 This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.
 
