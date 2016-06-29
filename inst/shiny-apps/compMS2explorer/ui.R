@@ -43,9 +43,16 @@ shiny::shinyUI(shiny::fluidPage(
                 shiny::actionButton("DBbutton", "Search"), 
                 shiny::br(),
                 shiny::br(),
-                shiny::tags$b("metID comments"),
+                shiny::tags$b(shiny::tags$h4("metID comments")),
+                # render ui for move to comments table
                 shiny::br(),
-                shiny::tags$b('(close app and save comments)'),
+                # shiny::tags$b('move selected row from best annotation table to metID comments:'),
+                # shiny::actionButton("moveComments", "move"),
+                # shiny::br(),
+                shiny::tags$b('close app and save comments:'),
+                shiny::actionButton("CloseAppBtn", "Close"),
+                shiny::br(),
+                
                 helpText("N.B.: make sure to assign the ",
                          "compMS2explorer output to an object",
                          'in your R session to save any metabolite',
@@ -55,8 +62,6 @@ shiny::shinyUI(shiny::fluidPage(
                          'to end your session.',
                          'Published apps have read-only',
                          'metID comments tabs.'),
-                
-                shiny::actionButton("CloseAppBtn", "Close"),
                 shiny::br(),
                 # download button corpus and PMIDs/ paper names
                 shiny::h5('Download zip file of PubMed papers, PMIDs and word frequencies (.txt)'),
@@ -91,7 +96,7 @@ shiny::shinyUI(shiny::fluidPage(
 #                                           shiny::tabPanel("MS2 spectrum table", DT::dataTableOutput(outputId="MS2_data")), 
                                           shiny::tabPanel("MS1 MS2 match summary", DT::dataTableOutput(outputId="metadata")), 
                                           shiny::tabPanel("DB Annotations",  DT::dataTableOutput(outputId="DB.results")), 
-                                          shiny::tabPanel("Best Annotations",  DT::dataTableOutput("BestCandidates")), 
+                                          shiny::tabPanel("Best Annotations", DT::dataTableOutput("BestCandidates")), 
                                           shiny::tabPanel("Substructure Annotations",  DT::dataTableOutput("BestSubStrAnno")), 
                                           # metId comments
                                           shiny::tabPanel("metID comments", rHandsontableOutput("hot")), 

@@ -556,6 +556,15 @@ shiny::shinyServer(function(input,  output, session){
           }
           # currently selected to top of table
           metIDcomments <- metIDcomments[order(metIDcomments$compSpectrum %in% Features.v[feat.indx], decreasing = T), ]
+          # 
+          # if(input$moveComments){
+          #   # if(!is.null(input$BestCandidates_rows_selected)){
+          #   DB.results <- tmp.BestAnno[[feat.indx]]
+          #   selectedMetab <- DB.results[input$BestCandidates_rows_selected, 'DBname']
+          #   indxTmp <- metIDcomments$compSpectrum %in% Features.v[feat.indx]
+          #   metIDcomments$possible_identity[indxTmp] <- selectedMetab
+          #   # }
+          # }   
           setHot(metIDcomments)
           rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
             # hot_col('compSpectrum', readOnly = T) %>%
@@ -924,21 +933,21 @@ shiny::shinyServer(function(input,  output, session){
         ##load in any previous user comments
         ###add text area for storing user comments
         
-        output$CommentSectionHeader <- shiny::renderUI({shiny::tags$b("Add metabolite identification notes including any useful html links here...\n
-                                                                      NB. Do not forget to save your comments to the features results directory using the button on the left")})
-        output$UserComments <- shiny::renderUI({
-          if(length(Comments(compMS2))  ==  0){
-            PrevComment <- "No previous comments"
-          } else if(is.null(Comments(object)[[feat.indx]])){
-            PrevComment <- "No previous comments"
-          } else {
-            PrevComment <- Comments(object)[[feat.indx]]
-            PrevComment <- as.character(PrevComment[nrow(PrevComment),  2])
-          }
-          
-          shiny::tags$textarea(id="UserComments",  rows=4,  cols=60,  PrevComment)
-        })
-        
+        # output$CommentSectionHeader <- shiny::renderUI({shiny::tags$b("Add metabolite identification notes including any useful html links here...\n
+        #                                                               NB. Do not forget to save your comments to the features results directory using the button on the left")})
+        # output$UserComments <- shiny::renderUI({
+        #   if(length(Comments(compMS2))  ==  0){
+        #     PrevComment <- "No previous comments"
+        #   } else if(is.null(Comments(object)[[feat.indx]])){
+        #     PrevComment <- "No previous comments"
+        #   } else {
+        #     PrevComment <- Comments(object)[[feat.indx]]
+        #     PrevComment <- as.character(PrevComment[nrow(PrevComment),  2])
+        #   }
+        #   
+        #   shiny::tags$textarea(id="UserComments",  rows=4,  cols=60,  PrevComment)
+        # })
+        # 
         
         #########################
         ##### 13. Comments  #####
