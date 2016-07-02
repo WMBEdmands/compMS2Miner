@@ -38,23 +38,23 @@ Just type ```vignette('CompMS2miner_Workflow')``` to view the pdf of the workflo
 
 [![CompMS2miner_logo](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png)](http://bit.ly/28T06oN)
 
-Example data illustrating CompMS2miner is provided consisting of a peak-picker output table of nano-flow LC-hrMS metabolomic dataset of human blood samples and data-dependent MS/MS data files, which is also made available as external example data within the CompMS2miner package. A example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
+Example data illustrating CompMS2miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-hrMS metabolomic dataset of human blood samples and corresponding data-dependent MS/MS data files. An example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
 
 #Features
 
 The CompMS2miner structured workflow performs the following (v1.2.5, 2016/06/28): 
-* matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2()```
-* dynamically filters variable noise. ```deconvNoise()```:
+* Matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2()```
+* Dynamically filters variable noise. ```deconvNoise()```:
 ![DNF animation](https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/DNFanimation.gif)
-* generates composite mass spectra by multiple scan signal summation. ```combineIons()```
-* interprets possible substructures from a literature curated database. ```subStructure()```
-* annotates unknown masses from several metabolomic databases. ```metID(method='dbAnnotate')```
-* matches spectral databases such as massbank in the NIST msp text database format. ```metID(method='matchSpectralDB')```
-* performs crude prediction of mammalian biotransformation metabolites. ```metID(method='predSMILES')```
-* calculates correlation and spectral similarity networks which can be visualized in the shiny interface. ```metID(method='corrNetwork')``` and ```metID(method='specSimNetwork')```
-* provides wrapper functions for pre-existing *in silico* fragmentation software (http://msbi.ipb-halle.de/MetFrag/). ```metID(method='metFrag')```
-* an interactive table to record a user's decision making process or any confirmation (e.g. database entries or literature DOIs). ```compMS2explorer()``` or ```runGitHubApp()```
-* The **Composite MS2 Explorer** app (accessible with the function ```compMS2explorer()```) can be very rapidly published to the shinyapps.io hosting site after setting up an account using the function ```publishApp()```
+* Generates composite mass spectra by multiple scan signal summation. ```combineIons()```
+* Interprets possible substructures from a literature curated database. ```subStructure()```
+* Annotates unknown masses from several metabolomic databases. ```metID(method='dbAnnotate')```
+* Matches spectral databases such as massbank in the NIST msp text database format. ```metID(method='matchSpectralDB')```
+* Performs crude prediction of mammalian biotransformation metabolites. ```metID(method='predSMILES')```
+* Calculates correlation and spectral similarity networks which can be visualized in the shiny interface. ```metID(method='corrNetwork')``` and ```metID(method='specSimNetwork')```
+* Provides wrapper functions for pre-existing *in silico* fragmentation software (http://msbi.ipb-halle.de/MetFrag/). ```metID(method='metFrag')```
+* An interactive table to record a user's decision making process or any confirmation (e.g. database entries or literature DOIs). ```compMS2explorer()``` or ```runGitHubApp()```
+* The **Composite MS2 Explorer** app (accessible with the function ```compMS2explorer()```) can be very rapidly published to the shinyapps.io hosting site after setting up an account using the function ```publishApp()``` or as a stand-alone zip file.
 
 An example **Composite MS2 Explorer** application created using the example data (within extdata of the package) is hosted on the shinyapps.io site here: 
 
@@ -62,7 +62,7 @@ An example **Composite MS2 Explorer** application created using the example data
 
 Upon completion of the CompMS2miner workflow the user can then load the **Composite MS2 Explorer** app (```compMS2explorer()```) and systematically examine each composite spectrum using all of the available tools provided in the  interface. Once a decision has been made on a putative annotation the user can then make potentially detailed comments in the interactive table. In this way metabolite identification decisions can be effectively and very efficiently recorded (such as links to journal articles and other pieces of evidence in support of an assignment). 
 
-As a final step following systematic evaluation of the data presented by the **Composite MS2 Explorer** app it is intended that the user publishes the application  to the shinyapps.io site or as a self-contained zip file that can easily viewed by others. Using the CompMS2miner function ```publishApp()``` the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained **Composite MS2 Explorer** app should be viewable in perpetuity.
+As a final step following systematic evaluation of the data presented by the **Composite MS2 Explorer** app it is intended that the user publishes the application  to the shinyapps.io site or as a self-contained zip file that can be easily viewed by others. Using the CompMS2miner function ```publishApp()``` the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained **Composite MS2 Explorer** app should be viewable in perpetuity.
 
 This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.
 
