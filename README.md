@@ -27,7 +27,7 @@ install.packages(c('foreach', 'Rcpp', 'shiny', 'couchDB', 'fastcluster', 'data.t
  
 source("https://bioconductor.org/biocLite.R")
 biocLite(c('mzR', 'ChemmineR', 'ChemmineOB'))
-# N.B. include full file path to your donwloads directory
+# N.B. include full file path to your downloads directory
 install.package('compMS2Miner_v1.2.3.tar.gz', repos=NULL, type='source')
 ```
 
