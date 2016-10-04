@@ -1,4 +1,4 @@
-[![compMS2Miner_logo](https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/compMS2MinerLogoExApp.png)](http://bit.ly/28QOxj6)
+[![compMS2Miner_logo](https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoExApp.png)](http://bit.ly/28QOxj6)
 
 compMS2Miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.
 
