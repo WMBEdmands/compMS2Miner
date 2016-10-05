@@ -18,19 +18,19 @@
         <h1>CompMS2miner</h1>
         <p>metabolite identification R-package for metabolomic high-resolution LC-MS datasets.</p>
 
-        <p class="view"><a href="https://github.com/WMBEdmands/CompMS2miner">View the Project on GitHub <small>WMBEdmands/CompMS2miner</small></a></p>
+        <p class="view"><a href="https://github.com/WMBEdmands/compMS2Miner">View the Project on GitHub <small>WMBEdmands/compMS2Miner</small></a></p>
 
 
         <ul>
-          <li><a href="https://github.com/WMBEdmands/CompMS2miner/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/WMBEdmands/CompMS2miner/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/WMBEdmands/CompMS2miner">View On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/WMBEdmands/compMS2Miner/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/WMBEdmands/compMS2Miner/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/WMBEdmands/compMS2Miner">View On <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
-        <p><a href="http://bit.ly/28QOxj6"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoExApp.png" alt="CompMS2miner_logo"></a></p>
+        <p><a href="http://bit.ly/28QOxj6"><img src="https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoExApp.png" alt="compMS2Miner_logo"></a></p>
 
-<p>CompMS2miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.</p>
+<p>compMS2Miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.</p>
 
 <p><a href="http://dx.doi.org/10.5281/zenodo.56582"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.56582.svg" alt="DOI"></a>
 latest stable release v1.2.5 (archived on zenodo).</p>
@@ -38,18 +38,18 @@ latest stable release v1.2.5 (archived on zenodo).</p>
 <h1>
 <a id="purpose" class="anchor" href="#purpose" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Purpose</h1>
 
-<p>A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-hrMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS/MS fragmentation data.</p>
+<p>A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS/MS fragmentation data.</p>
 
-<p>CompMS2miner is a package in the R programming language developed for comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. CompMS2miner brings together many useful metabolite identification tools (see <a href="#features">Features</a> section below) and is modular and therefore fully extensible. </p>
+<p>compMS2Miner is a package in the R programming language developed for comprehensive unknown feature identification using peak-picker output files and MS/MS data files as inputs. compMS2Miner brings together many useful metabolite identification tools (see <a href="#features">Features</a> section below) and is modular and therefore fully extensible. </p>
 
-<p>Data curation, visualization and sharing is made possible at any stage of the CompMS2miner package workflow via an application <strong>Composite MS2 Explorer</strong> developed with the R shiny package.</p>
+<p>Data curation, visualization and sharing is made possible at any stage of the compMS2Miner package workflow via an application <strong>Composite MS2 Explorer</strong> developed with the R shiny package.</p>
 
 <h1>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
 
 <p><strong>1.</strong> install the latest development version and all package dependencies in one-line of code directly from GitHub using the devtools package. First ensure devtools is installed, instructions can be found here: <a href="https://github.com/hadley/devtools">https://github.com/hadley/devtools</a></p>
 
-<div class="highlight highlight-source-r"><pre><span class="pl-e">devtools</span><span class="pl-k">::</span>install_github(<span class="pl-s"><span class="pl-pds">'</span>WMBEdmands/CompMS2miner<span class="pl-pds">'</span></span>, <span class="pl-v">dependencies</span><span class="pl-k">=</span>c(<span class="pl-s"><span class="pl-pds">"</span>Depends<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Imports<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Suggests<span class="pl-pds">"</span></span>), <span class="pl-v">build_vignettes</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)</pre></div>
+<div class="highlight highlight-source-r"><pre><span class="pl-e">devtools</span><span class="pl-k">::</span>install_github(<span class="pl-s"><span class="pl-pds">'</span>WMBEdmands/compMS2Miner<span class="pl-pds">'</span></span>, <span class="pl-v">dependencies</span><span class="pl-k">=</span>c(<span class="pl-s"><span class="pl-pds">"</span>Depends<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Imports<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Suggests<span class="pl-pds">"</span></span>), <span class="pl-v">build_vignettes</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)</pre></div>
 
 <p><strong>-Or-</strong></p>
 
@@ -59,29 +59,29 @@ latest stable release v1.2.5 (archived on zenodo).</p>
 
 source(<span class="pl-s"><span class="pl-pds">"</span>https://bioconductor.org/biocLite.R<span class="pl-pds">"</span></span>)
 biocLite(c(<span class="pl-s"><span class="pl-pds">'</span>mzR<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>ChemmineR<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>ChemmineOB<span class="pl-pds">'</span></span>))
-<span class="pl-c"># N.B. include full file path to your donwloads directory</span>
-install.package(<span class="pl-s"><span class="pl-pds">'</span>CompMS2miner_v1.2.3.tar.gz<span class="pl-pds">'</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>source<span class="pl-pds">'</span></span>)</pre></div>
+<span class="pl-c"># N.B. include full file path to your downloads directory</span>
+install.package(<span class="pl-s"><span class="pl-pds">'</span>compMS2Miner_v1.2.3.tar.gz<span class="pl-pds">'</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>source<span class="pl-pds">'</span></span>)</pre></div>
 
 <h1>
 <a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting started</h1>
 
-<p>After CompMS2miner is installed begin by reading the package vignette <em>"CompMS2miner_Workflow"</em>
-Just type <code>vignette('CompMS2miner_Workflow')</code> to view the pdf of the workflow. Or view an html version of the vignette on the web by clicking the image below:</p>
+<p>After compMS2Miner is installed begin by reading the package vignette <em>"compMS2Miner_Workflow"</em>
+Just type <code>vignette('compMS2Miner_Workflow')</code> to view the pdf of the workflow. Or view an html version of the vignette on the web by clicking the image below:</p>
 
-<p><a href="http://bit.ly/28T06oN"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png" alt="CompMS2miner_logo"></a></p>
+<p><a href="http://bit.ly/28T06oN"><img src="https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png" alt="compMS2Miner_logo"></a></p>
 
-<p>Example data illustrating CompMS2miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-hrMS metabolomic dataset of human blood samples and corresponding data-dependent MS/MS data files. An example workflow using this data is illustrated in the package vignette. The CompMS2miner package is designed to offer a more complete solution to the LC-hrMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.</p>
+<p>Example data illustrating compMS2Miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-HRMS metabolomic dataset of human blood samples and corresponding data-dependent MS/MS data files. An example workflow using this data is illustrated in the package vignette. The compMS2Miner package is designed to offer a more complete solution to the LC-HRMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.</p>
 
 <h1>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h1>
 
-<p>The CompMS2miner structured workflow performs the following (v1.2.5, 2016/06/28): </p>
+<p>The compMS2Miner structured workflow performs the following (v1.2.5, 2016/06/28): </p>
 
 <ul>
 <li>Matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. <code>compMS2()</code>
 </li>
 <li>Dynamically filters variable noise. <code>deconvNoise()</code>:
-<img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/DNFanimation.gif" alt="DNF animation">
+<img src="https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/DNFanimation.gif" alt="DNF animation">
 </li>
 <li>Generates composite mass spectra by multiple scan signal summation. <code>combineIons()</code>
 </li>
@@ -104,18 +104,18 @@ Just type <code>vignette('CompMS2miner_Workflow')</code> to view the pdf of the 
 
 <p>An example <strong>Composite MS2 Explorer</strong> application created using the example data (within extdata of the package) is hosted on the shinyapps.io site here: </p>
 
-<p><a href="http://bit.ly/28QOxj6"><img src="https://raw.githubusercontent.com/WMBEdmands/CompMS2miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"></a> </p>
+<p><a href="http://bit.ly/28QOxj6"><img src="https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"></a> </p>
 
-<p>Upon completion of the CompMS2miner workflow the user can then load the <strong>Composite MS2 Explorer</strong> app (<code>compMS2explorer()</code>) and systematically examine each composite spectrum using all of the available tools provided in the  interface. Once a decision has been made on a putative annotation the user can then make potentially detailed comments in the interactive table. In this way metabolite identification decisions can be effectively and very efficiently recorded (such as links to journal articles and other pieces of evidence in support of an assignment). </p>
+<p>Upon completion of the compMS2Miner workflow the user can then load the <strong>Composite MS2 Explorer</strong> app (<code>compMS2explorer()</code>) and systematically examine each composite spectrum using all of the available tools provided in the  interface. Once a decision has been made on a putative annotation the user can then make potentially detailed comments in the interactive table. In this way metabolite identification decisions can be effectively and very efficiently recorded (such as links to journal articles and other pieces of evidence in support of an assignment). </p>
 
-<p>As a final step following systematic evaluation of the data presented by the <strong>Composite MS2 Explorer</strong> app it is intended that the user publishes the application  to the shinyapps.io site or as a self-contained zip file that can be easily viewed by others. Using the CompMS2miner function <code>publishApp()</code> the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained <strong>Composite MS2 Explorer</strong> app should be viewable in perpetuity.</p>
+<p>As a final step following systematic evaluation of the data presented by the <strong>Composite MS2 Explorer</strong> app it is intended that the user publishes the application  to the shinyapps.io site or as a self-contained zip file that can be easily viewed by others. Using the compMS2Miner function <code>publishApp()</code> the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained <strong>Composite MS2 Explorer</strong> app should be viewable in perpetuity.</p>
 
 <p>This app publication approach could provide a feasible mechanism for transparency and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.</p>
 
 <h1>
 <a id="licence" class="anchor" href="#licence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Licence</h1>
 
-<p>The CompMS2miner package is licenced under the GPLv3 (<a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a>).</p>
+<p>The compMS2Miner package is licenced under the GPLv3 (<a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a>).</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/WMBEdmands">WMBEdmands</a></p>
