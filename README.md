@@ -6,11 +6,11 @@ compMS2Miner is an R package for comprehensive and truly automatable annotation 
 latest stable release v2.2.3 (archived on zenodo).
 
 #Purpose
-A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS/MS fragmentation data.
+A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS<sup>2</sup> fragmentation data.
 
 The number of MS<sup>2</sup> spectra commonly collected in a precursor selection based experiment (often thousands in a single MS<sup>2</sup> datafile) limits the feasibility of painstaking manual interpretation of every spectrum. A degree of autonomous unknown annotation and at the very least a confident annotation of an unknowns most probable compound class is highly desirous. A holistic overview of the relationships between spectra can greatly facilitate the correct annotation of statistically relevant unknowns. When a handful of unknowns are targeted in isolation the broader context of an unknown can be easily missed and therefore putative identities poorly interpreted.
 
-compMS2Miner is a package in the popular R programming language developed for comprehensive unknown feature annotation using peak-picker output files and MS/MS data files as inputs. compMS2Miner brings together many useful metabolite identification tools (see [Features](#features) section below) and is modular and therefore fully extensible. 
+compMS2Miner is a package in the popular R programming language developed for comprehensive unknown feature annotation using peak-picker output files and MS<sup>2</sup> data files as inputs (.mzML, .mzXML, .mgf). compMS2Miner brings together many useful metabolite identification tools (see [Features](#features) section below) and is modular and therefore fully extensible. 
 
 Data curation, visualization and sharing is made possible at any stage of the compMS2Miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package. The application allows the user to rapidly create their own study-specific MS<sup>2</sup> databases for each of their chromatographic methods. Additionally an msp database file can also be rapidly generated from the output of the compMS2Miner workflow.
 
