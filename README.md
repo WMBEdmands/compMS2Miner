@@ -10,7 +10,7 @@ A long-standing challenge of untargeted metabolomic profiling by liquid-chromato
 
 The number of MS<sup>2</sup> spectra commonly collected in a precursor selection based experiment (often thousands in a single MS<sup>2</sup> datafile) limits the feasibility of painstaking manual interpretation of every spectrum. A degree of autonomous unknown annotation and at the very least a confident annotation of an unknowns most probable compound class is highly desirous. A holistic overview of the relationships between spectra can greatly facilitate the correct annotation of statistically relevant unknowns. When a handful of unknowns are targeted in isolation the broader context of an unknown can be easily missed and therefore putative identities poorly interpreted.
 
-compMS2Miner is a package in the popular R programming language developed for comprehensive unknown feature annotation using peak-picker output files and MS<sup>2</sup> data files as inputs (.mzML, .mzXML, .mgf). compMS2Miner brings together many useful metabolite identification tools (see [Features](#features) section below) and is modular and therefore fully extensible. 
+compMS2Miner is a package in the popular R programming language developed for comprehensive unknown feature annotation using peak-picker output files and MS<sup>2</sup> data files as inputs (.mzML, .mzXML, .mgf). compMS2Miner brings together many useful metabolite identification tools (see [Features](#features) section below) and is modular and every workflow method is therefore fully extensible. 
 
 Data curation, visualization and sharing is made possible at any stage of the compMS2Miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package. The application allows the user to rapidly create their own study-specific MS<sup>2</sup> databases for each of their chromatographic methods. Additionally an msp database file can also be rapidly generated from the output of the compMS2Miner workflow.
 
@@ -76,6 +76,8 @@ Upon completion of the compMS2Miner workflow the user can then load the **Compos
 As a final step following systematic evaluation of the data presented by the **Composite MS2 Explorer** app it is intended that the user publishes the application  to the shinyapps.io site or as a self-contained zip file that can be easily viewed by others. Using the compMS2Miner function ```publishApp()``` the application can be publically deployed and explored by other investigators and all of the now read-only interactive table comments can be viewed. However, the user is still able to redeploy the application to the shinyapps.io site if any updates are necessary or just recreate the self-contained zip file. In theory, the published self-contained **Composite MS2 Explorer** app should be viewable in perpetuity.
 
 This app publication approach could provide a feasible mechanism for transparency, generate experimental spectrum databases and a helpful way to share metabolite identification data alongside metabolomic/lipidomic publications.
+
+Please give us your valuable feedback on anything you like/don't like and any suggestions for improvement or alternative methods you may find useful. We are always open to collaborations from fellow metabolomic investigators.
 
 #Licence
 The compMS2Miner package is licenced under the GPLv3 (http://www.gnu.org/licenses/gpl.html).
