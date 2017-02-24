@@ -3,6 +3,10 @@
 #  # assign any metabolite identification comments to a new or the same "compMS2" object
 #  compMS2Example_commented <- compMS2Explorer(compMS2Example)
 
+## ---- eval=FALSE---------------------------------------------------------
+#  rmarkdown::draft("metabolomic_workflow_example.Rmd", template = "compMS2Template",
+#                   package = "compMS2Miner", create_dir = TRUE)
+
 ## ---- include=FALSE------------------------------------------------------
 library(knitr)
 opts_knit$set(progress=FALSE)
@@ -215,6 +219,9 @@ library(compMS2Miner)
 ## ---- eval=FALSE---------------------------------------------------------
 #  # full path to zip file written by publishApp function
 #  compMS2Demo <- compMS2Explorer('C:/compMS2Demo/compMS2Demo.zip')
+
+## ---- eval=FALSE---------------------------------------------------------
+#  metID(compMS2Demo, 'compMS2toMsp')
 
 ## ------------------------------------------------------------------------
 sessionInfo()

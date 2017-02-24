@@ -45,6 +45,18 @@ library(compMS2Miner)
 # assign any metabolite identification comments to a new or the same "compMS2" object
 compMS2Example_commented <- compMS2Explorer(compMS2Example)
 ```
+
+An Rmarkdown (.Rmd) file pdf skeleton is provided within the package. This file
+has a typical workflow using xcms, CAMERA and compMS2Miner and details each of the
+compMS2Miner functions in sequence. This skeleton can be used to create a
+reproducible workflow of your peak-picking and MS^2^ data annotation and the resulting
+pdf file can be bundled alongside your published application.
+
+```{r, eval=FALSE}
+rmarkdown::draft("metabolomic_workflow_example.Rmd", template = "compMS2Template", 
+                 package = "compMS2Miner", create_dir = TRUE)
+```
+
 The following example illustrates the compMS2Miner workflow:
 
 ## 1. construct compMS2 class object.
@@ -397,9 +409,10 @@ compMS2Demo <- metID(compMS2Demo, 'optimConsensus', autoPossId=TRUE,
 ```
 
 ##6. Optional curate data as zip file, in CouchDB and/or publish results as a shiny application. 
-CompMS2 class objects can be sent to either a local or online couchDB database.
+compMS2 class objects can be sent to either a local or online couchDB database.
 Furthermore, the results of the compMS2Miner workflow can be published on the 
-web as a shiny application to share metabolite identification information or as a self-contained zip file using the publishApp function.
+web as a shiny application to share metabolite identification information or as a self-contained zip file using the publishApp function. Spectral hash identifiers (Splash codes) are
+automatically generated for every spectrum on publication/zip file/msp file generation.
 
 ```{r, eval=FALSE, collapse=TRUE}
 # publish your app to shinyapps.io see ?publishApp for more details
@@ -445,6 +458,15 @@ publishApp(compMS2Demo, appName='compMS2Demo',
 ```{r, eval=FALSE}
 # full path to zip file written by publishApp function
 compMS2Demo <- compMS2Explorer('C:/compMS2Demo/compMS2Demo.zip')
+```
+
+## An msp database text file can be generated directly from the compMS2 class object
+this allows an in-house database to be constructed. These files can then be
+rapidly matched to new datasets using the metID.matchSpectralDB function. In this
+way previously annotated spectra can be matched limiting redundancy in the 
+investigator's efforts.
+```{r, eval=FALSE}
+metID(compMS2Demo, 'compMS2toMsp')
 ```
 
 # sessionInfo
