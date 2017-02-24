@@ -31,9 +31,9 @@ setMethod("publishApp", signature = "compMS2", function(object, appName=NULL,  w
     if(!require(rsconnect)){
       stop('The package rsconnect must be installed to send your app to shinyapps.io...')
     }
-    if(!require(shinyapps)){
-      stop('The package shinyapps must be installed to send your app to shinyapps.io...')
-    }
+    # if(!require(shinyapps)){
+    #   stop('The package shinyapps must be installed to send your app to shinyapps.io...')
+    # }
     
     message('Generating splash codes and adding to compMS2 object.\n')
     flush.console()
@@ -131,7 +131,7 @@ setMethod("publishApp", signature = "compMS2", function(object, appName=NULL,  w
     save(object, file=paste0(outDir, '/compMS2object.RData'))  
       
     # deploy app
-    shinyapps::deployApp(appDir = outDir, appName=appName, ...)
+    rsconnect::deployApp(appDir = outDir, appName=appName, ...)
     }
    }
 }) # end function

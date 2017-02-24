@@ -42,7 +42,6 @@ Suggests:
     ChemmineR,
     ChemmineOB,
     rsconnect,
-    shinyapps, 
     devtools,
     fingerprint,
     rcdk,
@@ -51,7 +50,7 @@ Suggests:
     DEoptim,
     splashR
 BugReports: https://github.com/WMBEdmands/compMS2Miner/issues/new
-URL: doi.org/10.5281/zenodo.56582 (stable release v1.2.5)
+URL: doi.org/10.5281/zenodo.56582 (stable release v2.2.3)
 LazyData: true
 LazyLoad: true
 VignetteBuilder: knitr
