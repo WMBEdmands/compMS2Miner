@@ -1,6 +1,6 @@
 [![compMS2Miner_logo](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/compMS2MinerLogo.png)](http://bit.ly/28QOxj6)
 
-compMS2Miner is an R package for comprehensive and truly automatable annotation of metabolomic high-resolution LC-MS datasets.
+compMS2Miner is an R package for comprehensive and automatable annotation of metabolomic high-resolution LC-MS datasets.
 
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56582.svg)](http://dx.doi.org/10.5281/zenodo.56582)
 latest stable release v2.2.3 (archived on zenodo).
@@ -43,12 +43,12 @@ Just type ```vignette('compMS2Miner_Workflow')``` to view the pdf of the workflo
 
 [![compMS2Miner_logo](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/compMS2MinerLogoTutorial.png)](http://bit.ly/28T06oN)
 
-Example data illustrating compMS2Miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-HRMS metabolomic dataset of human blood samples and corresponding data-dependent MS/MS data files. An example workflow using this data is illustrated in the package vignette. 
+Example data illustrating compMS2Miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-HRMS metabolomic dataset of human blood samples and corresponding data-dependent MS<sup>2</sup> data files. An example workflow using this data is illustrated in the package vignette. 
 
 #Features
 
 The compMS2Miner structured workflow performs the following (v2.2.3, 2017/02/24): 
-* Matches unknown mass spectral features to precursor MS/MS scans and constructs the "compMS2" class object. ```compMS2Construct()```
+* Matches unknown mass spectral features to precursor MS<sup>2</sup> scans and constructs the "compMS2" class object. ```compMS2Construct()```
 * Dynamically filters variable noise. ```deconvNoise()```: (additional noise filtration method options are in development) 
 ![DNF animation](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/DNFanimation.gif)
 * Generates composite mass spectra by multiple scan signal summation and are only combined based on a minimum mean spectral similarity score. ```combineIons()```
