@@ -1,57 +1,92 @@
-#' Metabolite identification methods
+#' Combinatorial metabolite identification methods
 #' 
 #' @description methods to facilitate metabolite identification including database
 #' monoisotopic mass matching, probable annotation filtration, mammalian Phase II
-#' metabolite prediction, lipophilicity (logD) prediction, insilico metabolite 
-#' fragmentation and metabolite chemical similarity scoring.
+#' metabolite prediction, molecular descriptor- random forest based retention time
+#' prediction, insilico metabolite fragmentation and nearest network neighbour
+#' metabolite chemical similarity scoring. In addition annotations can be 
+#' automatically ranked and possible identities selected based on a mean
+#' consensus score based on mass accuracy, spectral database similarity, 
+#' \emph{in silico} fragmentation similarity, predicted retention time similarity,
+#' nearest network neighbour chemical similarity and crude plausibility ranking
+#' by PubMed repository text-mining. Optionally a divergent evolution approach
+#' to globally optimize the contributary weight of each consensus score using
+#' a training set of possible annotations contained in the "metID comments" table.
+#' The metaheuristic attempts to weight the include consensus scores according to
+#' how well the correct annotations are ranked amongst the possible best annotations.
+#' 
 #'  
 #' @param object. a compMS2 class object
 #' @param method. method to use for metabolite identification. See details. 
-#' "predSMILES" based on 
 #' @param ... option arguments to be passed along.
 #' @details Available methods:
 #' 
-#' 1. monoisotopic mass annotation to data base resources (\code{\link{metID.dbAnnotate}}),
-#'    currently available databases include HMDB, DrugBank, T3DB and ReSpect.
+#' \enumerate{
+#' \item monoisotopic mass annotation to data base resources (\code{\link{metID.dbAnnotate}}),
+#'    currently available databases include HMDB, LMSD (lipidMaps) DrugBank, T3DB and ReSpect.
 #'    possible metabolites electrospray adducts and substructure mass shifts 
 #'    are taken into account.
 #' 
-#' 2. identifies most probable database annotations (\code{\link{metID.dbProb}}), 
+#' \item identifies most probable database annotations (\code{\link{metID.dbProb}}), 
 #'    taking into account substructure annotations identified by \code{\link{subStructure.Annotate}}.  
 #' 
-#' 3. Phase II metabolite identification from canonical SMILES currently 
+#' \item Phase II metabolite identification from canonical SMILES currently 
 #'    available phase II metabolite prediction types include: acyl-, hydroxl- 
 #'    and amine- sulfates and glucuronides and glycine conjugates 
 #'    (\code{\link{metID.PredSMILES}}). 
 #' 
-#' 4. Lipophilicity (LogD) calculation using the ChemAxon command line interface,
-#'    this requires ChemAxon software to be installed (In development) (\code{\link{metID.LogDchemAxon}}).
+#' \item Retention time prediction using the molecular descriptors derived from the \link[package]{rcdk} package and a randomForest recursive-feature elimination method of the \link[package]{caret} package (\code{\link{metID.rtPred}}).
 #' 
-#' 5. Combinatorial insilico fragment prediction using the command line version
-#'    of MetFrag (\code{\link{metID.metFrag}}).
+#' \item Combinatorial \emph{in silico} fragment prediction using the command line version of MetFrag (\code{\link{metID.metFrag}}) or Competitive fragmentation modelling (CFM \code{\link{metID.CFM}}).
 #' 
-#' 6. Inter- and intra-feature chemical similarity scoring (In development) (\code{\link{metID.chemSim}}).
+#' \item Correlation network from a peak table. This function calculates a correlation matrix from the peak areas/ height sample columns and creates a prefuse force directed correlation network that can then be visualized in the \code{\link{compMS2Explorer}} application. \code{\link{metID.corrNetwork}}
 #' 
-#' 7. Correlation network from a peak table. This function calculates a correlation matrix from the peak areas/ height sample columns and creates a prefuse force directed correlation network that can then be visualized in the \code{\link{compMS2explorer}} application. \code{\link{metID.corrNetwork}}
+#' \item Spectral similarity network. Inter-spectrum spectral similarity scores (dot product) are calculated. Both fragment ion and precursor - fragment neutral loss
+#' pattern similarity scores are calculated and used to identify clusters of spectra with similar fragmentation/neutral loss patterns. A spectral similarity network is then calculated based on a minimum dot product score (minDotProdThresh, default = 0.8). The resulting network can then be visualized in the \code{\link{compMS2Explorer}} application. \code{\link{metID.specSimNetwork}}.
 #' 
-#' 8. Spectral similarity network. Inter-spectrum spectral similarity scores (dot product) are calculated. Both fragment ion and precursor - fragment neutral loss
-#' pattern similarity scores are calculated and used to identify clusters of spectra with similar fragmentation/neutral loss patterns. A spectral similarity network is then calculated based on a minimum dot product score (minDotProdThresh, default = 0.8).
-#' The resulting network can then be visualized in the \code{\link{compMS2explorer}} application. \code{\link{metID.specSimNetwork}}.
+#' \item Correlation and spectral similarity based 1st Neighbour maximum chemical similarity scoring and optional automatic annotation identification  (\code{\link{metID.chemSim}}). 
+#' 
+#' \item build consensus annotations (\code{\link{metID.buildConsensus}}). This function seeks to rank annotation 
+#' strength and automate metabolite identification based on 6 optional orthogonal
+#' annotation evidences, namely: mass accuracy, spectral database similarity (see function \code{\link{metID.matchSpectralDB}}),
+#' \emph{in silico} fragmentation similarity (both metFrag and CFM see functions \code{\link{metID.metFrag}} and  \code{\link{metID.CFM}}), 
+#' random forest predicted retention time similarity (see function \code{\link{metID.rtPred}}), 1st network neighbour chemical similarity (both 
+#' correlation and spectral similarity see function \code{\link{metID.chemSim}}) 
+#' and finally crude literature based metabolite annotation strength by text-mining
+#' the PubMed repository using the Entrez system.  
+#' The function can automatically add annotations to the 'metID comment" table
+#' of the \code{\link{compMS2Explorer}} application and also ranks the individual
+#' "best annotations" tables by the mean consensus metabolite annotation score.
+#' 
+#' \item optimize consensus annotations using the differential evolution algorithm
+#' of the \code{\link{DEoptim}} package.
+#' }
 #' 
 #' @return A compMS2 object with various metabolite identification information.
 #' @seealso \code{\link{metID.dbAnnotate}}, \code{\link{metID.dbProb}}, 
 #' \code{\link{metID.predSMILES}}, 
-#' \code{\link{metID.LogDChemAxon}}, \code{\link{metID.metFrag}}, 
+#' \code{\link{metID.reconSubStr}}, \code{\link{metID.metFrag}}, 
 #' \code{\link{metID.chemSim}}, \code{\link{metID.corrNetwork}},
-#' \code{\link{metID.specSimNetwork}}, \code{\link{metID.matchSpectralDB}} 
+#' \code{\link{metID.specSimNetwork}}, \code{\link{metID.matchSpectralDB}}, 
+#' \code{\link{metID.rtPred}}, \code{\link{metID.buildConsensus}},
+#' \code{\link{metID.optimConsensus}},
+#' \code{\link{metID.compMS2toMsp}}.
+#' 
+#' @source Kenneth V. Price, Rainer M. Storn and Jouni A. Lampinen (2006). 
+#' Differential Evolution - A Practical Approach to Global Optimization. 
+#' Berlin Heidelberg: Springer-Verlag. ISBN 3540209506.
 #' @export
 setGeneric("metID", function(object, ...) standardGeneric("metID"))
 
-setMethod("metID", signature = "CompMS2", function(object, method="dbAnnotate", 
+setMethod("metID", signature = "compMS2", function(object, method="dbAnnotate", 
                                                     ...) {
   
   method <- match.arg(method, c("dbAnnotate", "dbProb", "predSMILES", 
-                                "LogDChemAxon", "metFrag", "CFM", "chemSim", "corrNetwork", 'specSimNetwork', 'matchSpectralDB'))
+                                "metFrag", "CFM", "chemSim", 
+                                "corrNetwork", 'specSimNetwork', 
+                                'matchSpectralDB', 'rtPred', 'buildConsensus', 
+                                'optimConsensus', 'molDescDB', 'compMS2toMsp',
+                                'reconSubStr'))
   method <- paste("metID", method, sep=".")
   invisible(do.call(method, alist(object, ...)))
 }) 

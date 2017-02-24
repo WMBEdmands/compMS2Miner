@@ -9,7 +9,7 @@
 #' @export
 setGeneric("deconvNoise", function(object, ...) standardGeneric("deconvNoise"))
 
-setMethod("deconvNoise", signature = "CompMS2", function(object, method="DNF", ...) {
+setMethod("deconvNoise", signature = "compMS2", function(object, method="DNF", ...) {
   
   method <- match.arg(method, c("DNF","maxInt"))
   method <- paste("deconvNoise", method, sep=".")

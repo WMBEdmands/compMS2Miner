@@ -17,7 +17,7 @@ signalGrouping <- function(spectrum.df=NULL, mzError=0.001,
   # error handling
   if(is.null(spectrum.df)){
     stop("No spectrum matrix/dataframe supplied")    
-  } else {
+  } else if(nrow(spectrum.df) > 1){
     hr <- fastcluster::hclust(dist(spectrum.df[, 1]), method = "median", members=NULL)
     # cut tree according to absolute m/z error
     spectrum_group <- cutree(hr, h=mzError)
@@ -27,14 +27,17 @@ signalGrouping <- function(spectrum.df=NULL, mzError=0.001,
     grouped.df <- data.frame(mass = mass, 
                             intensity = tapply(spectrum.df[, 2], 
                                                  as.factor(spectrum_group), sum),
-                              stringsAsFactors = F)
+                              stringsAsFactors = FALSE)
     #average any additional columns i.e. retention time
     if(ncol(spectrum.df) > 2){
-    groupedCols <- apply(spectrum.df[, 3:ncol(spectrum.df), drop=F], 2, function(x) 
+    groupedCols <- apply(spectrum.df[, 3:ncol(spectrum.df), drop=FALSE], 2, function(x) 
                          tapply(x, as.factor(spectrum_group), mean))
     grouped.df <- cbind(grouped.df, groupedCols)
     }
-    if(nrow(grouped.df) > minPeaks){
+  } else {
+    grouped.df <- spectrum.df
+  }
+    if(nrow(grouped.df) >= minPeaks){
       if(!is.null(colnames(spectrum.df))){
       colnames(grouped.df) <- colnames(spectrum.df)
       }
@@ -42,5 +45,4 @@ signalGrouping <- function(spectrum.df=NULL, mzError=0.001,
     } else {
       return("Less than minPeak")  
     }
-  }
 }

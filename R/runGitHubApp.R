@@ -21,9 +21,9 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, dirPath=NULL, auth_token=NULL, 
                               subdir, username = username, ref = NULL, sha = NULL, 
                               auth_token = auth_token)
   
-  bundle <- devtools:::remote_download(remote, quiet = F)
+  bundle <- devtools:::remote_download(remote, quiet = FALSE)
   on.exit(unlink(bundle), add = TRUE)
-  outdir <- tempfile(pattern = "CompMS2miner")
+  outdir <- tempfile(pattern = "compMS2Miner")
   dir.create(outdir)
   
   pathTmp <- utils::unzip(bundle, exdir = outdir) 
@@ -41,7 +41,7 @@ runGitHubApp <- function(repo=NULL, subdir=NULL, dirPath=NULL, auth_token=NULL, 
   if(!any(tmpIndx)){
     stop(subdir, ' sub-directory name not found please check and try again...')
   }
-  tmpAppDir <- tempfile(pattern='CompMS2miner')
+  tmpAppDir <- tempfile(pattern="compMS2Miner")
   if(!is.null(dirPath)){
   dirPath <- gsub("/$|\\\\$", '', dirPath)
   }

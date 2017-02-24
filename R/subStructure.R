@@ -7,11 +7,11 @@
 #' @param ... option arguments to be passed along.
 #' 
 #' @return A compMS2 object with substructure annotated composite spectra.
-#' @seealso subStructure.Annotate, subStructure.prob, subStructure.probSummary
+#' @seealso \link{subStructure.Annotate}, \link{subStructure.prob}, \link{subStructure.probSummary}
 #' @export
 setGeneric("subStructure", function(object, ...) standardGeneric("subStructure"))
 
-setMethod("subStructure", signature = "CompMS2", function(object, method="Annotate", 
+setMethod("subStructure", signature = "compMS2", function(object, method="Annotate", 
                                                     ...) {
   
   method <- match.arg(method, c("Annotate","prob","probSummary"))

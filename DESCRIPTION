@@ -1,8 +1,8 @@
-Package: CompMS2miner
+Package: compMS2Miner
 Type: Package
 Title: metabolite identification workflow for metabolomic
     high-resolution LC-MS datasets
-Version: 1.2.5
+Version: 2.2.3
 Date: 2016-06-23
 Authors@R: c(
     person("William MB", "Edmands", role = c("aut", "cre"), email="edmandsw@berkeley.edu"),
@@ -17,6 +17,7 @@ Description: metabolite identification workflow for metabolomic high-resolution
     LC-MS datasets.
 Depends:
     R (>= 3.1.0)
+LinkingTo: Rcpp
 Imports:
     foreach,
     mzR,
@@ -43,14 +44,16 @@ Suggests:
     rsconnect,
     shinyapps, 
     devtools,
+    fingerprint,
     rcdk,
     randomForest,
-    caret
-BugReports: https://github.com/WMBEdmands/CompMS2miner/issues/new
-URL: dx.doi.org/10.5281/zenodo.50590 (stable release v1.0.0)
+    caret,
+    DEoptim,
+    splashR
+BugReports: https://github.com/WMBEdmands/compMS2Miner/issues/new
+URL: doi.org/10.5281/zenodo.56582 (stable release v1.2.5)
 LazyData: true
 LazyLoad: true
 VignetteBuilder: knitr
 License: GPL (>= 3) 
-RoxygenNote: 5.0.1
-
+RoxygenNote: 6.0.1

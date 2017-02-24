@@ -16,90 +16,198 @@
 #' @export
 setGeneric("metID.predSMILES", function(object, ...) standardGeneric("metID.predSMILES"))
 
-setMethod("metID.predSMILES", signature = "CompMS2", function(object){
+setMethod("metID.predSMILES", signature = "compMS2", function(object){
   
   # error handling
-  if(class(object) != "CompMS2"){
-    stop("argument object is not an CompMS2 class object")
+  if(class(object) != "compMS2"){
+    stop("argument object is not an compMS2 class object")
   } else if (length(BestAnno(object)) == 0){
     stop("No probable/ best annotations have yet been selected")
-  } else {
+  } 
     # indx best Anno
-    bestAnno.indx <- sapply(BestAnno(object), is.null) == F
-    
-    SubstrucStrings<-list(Hydroxyl_sulfate="S(O)(=O)=O",
-                          Hydroxyl_glucuronide="[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O",
-                          Acyl_sulfate="S(O)(=O)=O",
-                          Acyl_glucuronide="[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O",
-                          Amine_sulfate="S(O)(=O)=O",
-                          Amine_glucuronide="[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O",
-                          glycine="NCC(O)=O")
-    
-    #   bestAnno.tmp <- 
-    bestAnno.tmp <- lapply(BestAnno(object)[bestAnno.indx], function(x){
+    bestAnnoIndx <- sapply(BestAnno(object), is.null) == FALSE
+   
+  # 1. sulfates    
+    DBanno(object)[bestAnnoIndx] <- lapply(DBanno(object)[bestAnnoIndx], function(x){
       # if none of the substructures in current Phase II list
-      PhaseIIsub.indx <- grep("^sulfate$|^glucuronide$|^glycine$", x$SubStr_type, ignore.case = T)
-      if(length(PhaseIIsub.indx) > 0){
-        # substr indx
-        SMILES.sub <- x$SMILES[PhaseIIsub.indx]
-        # add new pred smiles colnames
-        SubstrucStringsIndx.tmp <- as.numeric(unlist(lapply(unique(x$SubStr_type[PhaseIIsub.indx]), grep, names(SubstrucStrings))))
-        x[, paste0("If_", names(SubstrucStrings)[SubstrucStringsIndx.tmp], "_SMILES")] <- ""
-        
-        # carboxyl groups acyl-sulfates/ glucuronides and glycines
-        Carboxyl.indx <- grep("C\\(O\\)=O", SMILES.sub)
-        
-        ###if any carboxyl groups
-        if(length(Carboxyl.indx) > 0){  
-          col.indx.tmp <- grep("Acyl|glycine", colnames(x))
-          if(length(col.indx.tmp) > 0){
-            AcylSub <- gsub("If_|_SMILES", "", colnames(x)[col.indx.tmp])
-            stringSMILES <- unlist(SubstrucStrings[which(names(SubstrucStrings) %in% AcylSub)])
-            x[PhaseIIsub.indx[Carboxyl.indx], col.indx.tmp] <- sapply(stringSMILES, function(y){
-              predSmiles.tmp <- sub("C\\(O\\)=O", paste0("C(O", y, ")=O"), SMILES.sub[Carboxyl.indx])
-            })
-          }
+      sulfIndx <- grepl("^sulfate$", x$SubStr_type, ignore.case = TRUE)
+      if(any(sulfIndx)){
+        # substr indexs
+        hydroxylIndx <- lapply(gregexpr('O\\)|O$|^O', x$SMILES[sulfIndx]), function(y){
+         if(y[1] != -1){
+         unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+         }})
+        # carboxyl
+        carboxylIndx <- lapply(gregexpr('^OC\\(=O\\)|C\\(O\\)=O', x$SMILES[sulfIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # phosphoryl
+        phosphoIndx <- lapply(gregexpr('OP\\(=O\\)|P\\(O\\)\\(=O\\)', x$SMILES[sulfIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # ketone 
+        ketoIndx <- lapply(gregexpr('=O\\)|=O$|^O=', x$SMILES[sulfIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # amine
+        amineIndx <- lapply(gregexpr('\\(N\\)', x$SMILES[sulfIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # set difference and replace functional group with conj group
+        conjType <- sapply(1:sum(sulfIndx), function(y){
+        remChar <- setdiff(hydroxylIndx[[y]], carboxylIndx[[y]])
+        remChar <- setdiff(remChar, phosphoIndx[[y]])
+        remChar <- setdiff(remChar, ketoIndx[[y]])
+        if(length(remChar) == 2 & all(c(1, nchar(x$SMILES[sulfIndx][y])) %in% remChar)){
+        smilesTmp <- x$SMILES[sulfIndx][y]  
+        return(paste0(smilesTmp, 'S(O)(=O)=O'))  
+        } else if(length(remChar) == 2){
+        smilesTmp <- x$SMILES[sulfIndx][y]
+        return(paste0(substr(smilesTmp, 1, remChar[1]), 'S(O)(=O)=O', substr(smilesTmp, remChar[2], nchar(smilesTmp)))) 
+        } else if(length(remChar) == 1){
+        smilesTmp <- x$SMILES[sulfIndx][y]  
+        if(nchar(smilesTmp) == remChar){
+        return(paste0(smilesTmp, 'S(O)(=O)=O'))
+        } else if(substr(smilesTmp, 2, 2) == '[') {
+          closeBrack <- regexpr('\\]', smilesTmp)
+          return(paste0(substr(smilesTmp, 2, closeBrack), '(OS(O)(=O)=O)', substr(smilesTmp, closeBrack + 1, nchar(smilesTmp)))) 
+        } else if(grepl('\\(|[0-9]', substr(smilesTmp, 2, 2))){
+          return('no functional group') 
+        } else {
+          return(paste0(substr(smilesTmp, 2, 2), '(OS(O)(=O)=O)', substr(smilesTmp, 3, nchar(smilesTmp))))
         }
-        # hydroxyl groups
-        Hydroxyl.indx <- grep("\\(O\\)", SMILES.sub)
-        ###if any hydroxyl groups
-        if(length(Hydroxyl.indx) > 0){  
-          col.indx.tmp <- grep("Hydroxyl", colnames(x))
-          if(length(col.indx.tmp) > 0){
-            HydroxylSub <- gsub("If_|_SMILES", "", colnames(x)[col.indx.tmp])
-            stringSMILES <- unlist(SubstrucStrings[which(names(SubstrucStrings) %in% HydroxylSub)])
-            x[PhaseIIsub.indx[Hydroxyl.indx], col.indx.tmp] <- sapply(stringSMILES, function(y){
-              predSmiles.tmp <- sub("\\(O\\)", paste0("(O", y, ")"), SMILES.sub[Hydroxyl.indx])
-              # replace potential phosphate and carboxyl
-              subStringSMILES <- gsub("\\(", "\\\\(" ,y)
-              subStringSMILES <- gsub("\\)", "\\\\)" , subStringSMILES)
-              subStringSMILES <- gsub("\\[", "\\\\[" , subStringSMILES)
-              subStringSMILES <- gsub("\\]", "\\\\]" , subStringSMILES)
-              predSmiles.tmp <- gsub(paste0("P\\(O", subStringSMILES, "\\)\\(=O\\)"), "P(O)(=O)", predSmiles.tmp)
-              predSmiles.tmp <- gsub(paste0("C\\(O", subStringSMILES, "\\)=O"), "C(O)=O", predSmiles.tmp)
-              predSmiles.tmp <- ifelse(predSmiles.tmp == SMILES.sub[Hydroxyl.indx], "", predSmiles.tmp)
-            })
-          }
+        } else if(length(remChar) > 2){
+        smilesTmp <- x$SMILES[sulfIndx][y]
+        firstPair <- which(diff(remChar) == 1)[1]
+        remChar <- remChar[firstPair:(firstPair + 1)]
+        return(paste0(substr(smilesTmp, 1, remChar[1]), 'S(O)(=O)=O', substr(smilesTmp, remChar[2], nchar(smilesTmp)))) 
+        } else if(length(carboxylIndx[[y]]) > 0){
+        smilesTmp <- x$SMILES[sulfIndx][y] 
+        return(ifelse(carboxylIndx[[y]][1] == 1, paste0('OS(=O)(=O)', smilesTmp), paste0(substr(smilesTmp, 1, carboxylIndx[[y]][3]), 'S(O)(=O)=O', substr(smilesTmp, carboxylIndx[[y]][4], nchar(smilesTmp)))))
+        } else if(length(amineIndx[[y]]) > 0){
+          smilesTmp <- x$SMILES[sulfIndx][y] 
+          return(paste0(substr(smilesTmp, 1, amineIndx[[y]][2]), 'S(O)(=O)=O', substr(smilesTmp, amineIndx[[y]][3], nchar(smilesTmp))))
+        } else {
+        return('no functional group')  
+        }})
+        # subset to remove any smiles with no function groups for conjugation
+        x$SMILES[sulfIndx] <- conjType
+        x$DBid[sulfIndx] <- paste0(x$DBid[sulfIndx], '_sulfate')
+        x$SubStr_type[sulfIndx] <- ''
+        # remove any rows with no funtional group detected
+        x <- x[x$SMILES != 'no functional group', , drop=FALSE]
         }
-        # amines
-        Amine.indx <- grep("\\(N\\)", SMILES.sub)
-        ###if any hydroxyl groups
-        if(length(Amine.indx) > 0){  
-          col.indx.tmp <- grep("Amine", colnames(x))
-          if(length(col.indx.tmp) > 0){
-            AmineSub <- gsub("If_|_SMILES", "", colnames(x)[col.indx.tmp])
-            stringSMILES <- unlist(SubstrucStrings[which(names(SubstrucStrings) %in% AmineSub)])
-            x[PhaseIIsub.indx[Amine.indx], col.indx.tmp] <- sapply(stringSMILES, function(y){
-              predSmiles.tmp <- sub("\\(N\\)", paste0("(N", y, ")"), SMILES.sub[Amine.indx])
-            })
-          }
-        }
-        # remove any empty columns
-        x <- x[, apply(x, 2, function(y) all(y == "")) == F]
+        return(x)
+        }) # end sulfates
+  
+    # 2. glucuronides    
+    DBanno(object)[bestAnnoIndx] <- lapply(DBanno(object)[bestAnnoIndx], function(x){
+      # if none of the substructures in current Phase II list
+      glucIndx <- grepl("^glucuronide$", x$SubStr_type, ignore.case = TRUE)
+      if(any(glucIndx)){
+        # substr indexs
+        hydroxylIndx <- lapply(gregexpr('O\\)|O$|^O', x$SMILES[glucIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # carboxyl
+        carboxylIndx <- lapply(gregexpr('^OC\\(=O\\)|C\\(O\\)=O', x$SMILES[glucIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # phosphoryl
+        phosphoIndx <- lapply(gregexpr('OP\\(=O\\)|P\\(O\\)\\(=O\\)', x$SMILES[glucIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # ketone 
+        ketoIndx <- lapply(gregexpr('=O\\)|=O$|^O=', x$SMILES[glucIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # amine
+        amineIndx <- lapply(gregexpr('\\(N\\)', x$SMILES[glucIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # set difference and replace functional group with conj group
+        conjType <- sapply(1:sum(glucIndx), function(y){
+          remChar <- setdiff(hydroxylIndx[[y]], carboxylIndx[[y]])
+          remChar <- setdiff(remChar, phosphoIndx[[y]])
+          remChar <- setdiff(remChar, ketoIndx[[y]])
+          if(length(remChar) == 2 & all(c(1, nchar(x$SMILES[glucIndx][y])) %in% remChar)){
+            smilesTmp <- x$SMILES[glucIndx][y]  
+            return(paste0(smilesTmp, '[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O'))  
+          } else if(length(remChar) == 2){
+            smilesTmp <- x$SMILES[glucIndx][y]
+            return(paste0(substr(smilesTmp, 1, remChar[1]), '[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O', substr(smilesTmp, remChar[2], nchar(smilesTmp)))) 
+          } else if(length(remChar) == 1){
+            smilesTmp <- x$SMILES[glucIndx][y]  
+            if(nchar(smilesTmp) == remChar){
+              return(paste0(smilesTmp, '[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O'))
+            } else if(substr(smilesTmp, 2, 2) == '[') {
+              closeBrack <- regexpr('\\]', smilesTmp)
+              return(paste0(substr(smilesTmp, 2, closeBrack), '(O[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O)', substr(smilesTmp, closeBrack + 1, nchar(smilesTmp)))) 
+            } else if(grepl('\\(|[0-9]', substr(smilesTmp, 2, 2))){
+              return('no functional group') 
+            } else {
+              return(paste0(substr(smilesTmp, 2, 2), '(O[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O)', substr(smilesTmp, 3, nchar(smilesTmp))))
+            } 
+          } else if(length(remChar) > 2){
+            smilesTmp <- x$SMILES[glucIndx][y]
+            firstPair <- which(diff(remChar) == 1)[1]
+            remChar <- remChar[firstPair:(firstPair + 1)]
+            return(paste0(substr(smilesTmp, 1, remChar[1]), '[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O', substr(smilesTmp, remChar[2], nchar(smilesTmp)))) 
+          } else if(length(carboxylIndx[[y]]) > 0){
+            smilesTmp <- x$SMILES[glucIndx][y] 
+            return(ifelse(carboxylIndx[[y]][1] == 1, paste0('O[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O', smilesTmp), paste0(substr(smilesTmp, 1, carboxylIndx[[y]][3]), '[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O', substr(smilesTmp, carboxylIndx[[y]][4], nchar(smilesTmp)))))
+          } else if(length(amineIndx[[y]]) > 0){
+            smilesTmp <- x$SMILES[glucIndx][y] 
+            return(paste0(substr(smilesTmp, 1, amineIndx[[y]][2]), '[C@@H]9O[C@@H]([C@@H](O)[C@H](O)[C@H]9O)C(O)=O', substr(smilesTmp, amineIndx[[y]][3], nchar(smilesTmp))))
+          } else {
+            return('no functional group')  
+          }})
+        # subset to remove any smiles with no function groups for conjugation
+        x$SMILES[glucIndx] <- conjType
+        x$DBid[glucIndx] <- paste0(x$DBid[glucIndx], '_glucuronide')
+        x$SubStr_type[glucIndx] <- ''
+        # remove any rows with no funtional group detected
+        x <- x[x$SMILES != 'no functional group', , drop=FALSE]
       }
       return(x)
-    })
-    BestAnno(object)[bestAnno.indx] <- bestAnno.tmp
+    }) # end glucuronides
+
+    # 3. glycines
+    DBanno(object)[bestAnnoIndx] <- lapply(DBanno(object)[bestAnnoIndx], function(x){
+      # if none of the substructures in current Phase II list
+      glyIndx <- grepl("^glycine$", x$SubStr_type, ignore.case = TRUE)
+      if(any(glyIndx)){
+       # carboxyl
+        carboxylIndx <- lapply(gregexpr('C\\(O\\)=O', x$SMILES[glyIndx]), function(y){
+          if(y[1] != -1){
+            unlist(mapply(seq, from=y, to=(y + attr(y, 'match.length')) - 1, by=1, SIMPLIFY = FALSE))
+          }})
+        # set difference and replace functional group with conj group
+        conjType <- sapply(1:sum(glyIndx), function(y){
+          if(length(carboxylIndx[[y]]) > 0){
+            smilesTmp <- x$SMILES[glyIndx][y] 
+            return(paste0(substr(smilesTmp, 1, carboxylIndx[[y]][3]), 'NCC(O)=O', substr(smilesTmp, carboxylIndx[[y]][4], nchar(smilesTmp)))) 
+          } else {
+            return('no functional group')  
+          }})
+        # subset to remove any smiles with no function groups for conjugation
+        x$SMILES[glyIndx] <- conjType
+        x$DBid[glyIndx] <- paste0(x$DBid[glyIndx], '_glycine')
+        x$SubStr_type[glyIndx] <- ''
+        # remove any rows with no funtional group detected
+        x <- x[x$SMILES != 'no functional group', , drop=FALSE]
+      }
+      return(x)
+    }) # end glycines
+    
     return(object)
-  }
-})
+}) # end function

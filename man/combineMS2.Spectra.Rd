@@ -9,13 +9,14 @@ combineMS2.Spectra(object, ...)
 \arguments{
 \item{mzError}{interpeak absolute m/z error for composite spectra signal grouping (default = 0.01)}
 
-\item{minPeaks}{Minimum number of peaks per composite spectrum (default = 3)}
+\item{minPeaks}{Minimum number of peaks per composite spectrum (default = 1)}
 
-\item{specSimFilter}{umeric minimum spectral similarity score (dot product score) between spectra matched to the same MS1 feature (values between 0 to 1) if argument is supplied spectra are only combined if they have a minimum spectral similarity score (default = NULL). If all spectra matched to an MS1 feature are dissimilar from one another the MS2 spectrum with the highest precursor intensity will be returned.}
+\item{specSimFilter}{numeric minimum spectral similarity score (dot product score) between spectra matched to the same MS1 feature (values between 0 to 1) if argument is supplied spectra are only combined if they have a minimum spectral similarity score (default = NULL). If all spectra matched to an MS1 feature are dissimilar from one another the MS2 spectrum with the highest precursor intensity will be returned.}
 
 \item{binSizeMS2}{numeric MS2 bin size for spectral similarity matching (default = 0.1)}
+
+\item{verbose}{logical if TRUE display progress bars.}
 }
 \description{
 combine ions across spectra matched to the same MS1 feature
 }
-

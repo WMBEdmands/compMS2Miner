@@ -7,7 +7,8 @@ getTitles <- function(pmid){
     hlp1 <- paste(eDDownload, paste(pmid, collapse = ",", 
                                     sep = ""), sep = "")
     hlp2 <- paste(hlp1, "&rettype=Abstract", sep = "")
-    testDoc <- XML::xmlTreeParse(hlp2, useInternalNodes = TRUE)
+    hlpURL <- RCurl::getURL(hlp2, .opts=RCurl::curlOptions(followlocation=TRUE))
+    testDoc <- XML::xmlTreeParse(hlpURL, useInternalNodes = TRUE)
     topFetch <- XML::xmlRoot(testDoc)
     Title <- XML::xpathSApply(topFetch, "//ArticleTitle", XML::xmlValue)
   } else {

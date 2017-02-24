@@ -1,21 +1,21 @@
 #' CouchDB login
 #' send CompMS2 data set to couchDB
 #' @param couchDBname New or existing CouchDB database name (must be all lower case,  can contain underscores) 
-#' @return CouchDB records : All Results from the current stage of the CompMS2miner
+#' @return CouchDB records : All Results from the current stage of the compMS2Miner
 #'  are sent to the already established/ newly created couchDB database. 
 #'  The following documents are sent to couchDB :
 #'  
 #' @export
 setGeneric("couchDBcurate", function(object, ...) standardGeneric("couchDBcurate"))
 
-setMethod("couchDBcurate", signature = "CompMS2", function(object,
+setMethod("couchDBcurate", signature = "compMS2", function(object,
                                                            couchDBname=NULL, 
                                                            nSlaves=NULL, 
                                                            Username=NULL, 
                                                            Password=NULL, 
                                                            Host = NULL){
   # error handling
-  if(class(object) != "CompMS2"){
+  if(class(object) != "compMS2"){
     stop("argument object is not an CompMS2 class object")
   } else  if(is.null(couchDBname)){
     stop("argument couchDBname is missing with no default")
@@ -39,7 +39,7 @@ setMethod("couchDBcurate", signature = "CompMS2", function(object,
   # to get host,  username and password correct
   for(i in 1:2){
     #headers and cache control do not appear in 
-    if(any((pingReq == "Error in response from CouchDB") == T)){ 
+    if(any((pingReq == "Error in response from CouchDB") == TRUE)){ 
       # if incorrect credentials then give user a message
       tcltk::tkmessageBox(message = 'Connection could not be made with CouchDB make sure the localhost server is running, and username/password are correct see futon interface "http://localhost:5984/_utils"')
       # run getLoginDetails if wrong details supplied
@@ -54,7 +54,7 @@ setMethod("couchDBcurate", signature = "CompMS2", function(object,
   }
   
   # final error if not able to login
-  if(any((pingReq=="Error in response from CouchDB")==T))
+  if(any((pingReq=="Error in response from CouchDB")==TRUE))
   {
     tcltk::tkmessageBox(message = 'Too many failed attempts to connect with 
                         CouchDB try again')

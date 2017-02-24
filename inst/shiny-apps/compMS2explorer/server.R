@@ -1,19 +1,30 @@
-library(CompMS2miner)
+library(compMS2Miner)
 library(DT)
 library(shiny)
-library(igraph)
+library(igraph)   
 library(rhandsontable)
 
 shiny::shinyServer(function(input,  output, session){
   # comment lines below if action button is used to commit changes
   values <- reactiveValues()
   setHot <- function(x) values[["hot"]] = x
+  currEICRv <- reactiveValues(currEIC='')
+  output$pdfviewer <- renderText({
+    return(paste('<iframe style="height:900px; width:100%" src="', pdfFile, '"></iframe>', sep = ""))
+  })
   
+  output$currEIC <- shiny::renderText({
+    paste0('Current EIC:', gsub('.+_', '', currEICRv$currEIC))
+  })
+  output$sessionTxt <- shiny::renderUI({shiny::HTML(seshTxtTmp)})
   #options(shiny.trace=T)
   observe({
     if(input$CloseAppBtn > 0){
       if(!is.null(values[["hot"]])){
-        object@Comments <- values[["hot"]]
+        metIDcomments  <- values[["hot"]]
+        metIDcomments$currently_subset <- NULL
+        metIDcomments <- metIDcomments[order(as.numeric(row.names(metIDcomments))), ]       
+        object@Comments <- metIDcomments
       }
       shiny::stopApp(object)
     }
@@ -26,7 +37,10 @@ shiny::shinyServer(function(input,  output, session){
         if(input$specDBMatch == T){
           FeaturesIndx <- rep(F, length(Features.v))
           FeaturesIndx[indxSpectralDb] <- T
-        } else {
+        } else if(input$inSilicoMatch == T){
+          FeaturesIndx <- rep(F, length(Features.v))
+          FeaturesIndx[inSilicoIndx] <- T
+        } else {  
         FeaturesIndx <- rep(T, nrow(SubStr_types))
         NoFeaturesIndx <- rep(F, nrow(SubStr_types))
         if(any(input$NotSubStrTypes != "")){
@@ -145,6 +159,7 @@ shiny::shinyServer(function(input,  output, session){
                             choices=Featurenames, options=list(maxOptions=10000))
     })
     
+    currEICRv$currEIC <- ''
     output$matchSummaryText <- shiny::renderText({
       return("Match summary table")
     })
@@ -172,9 +187,7 @@ shiny::shinyServer(function(input,  output, session){
       shiny::selectizeInput('FeatureNames',  'Choose a feature to plot :',  
                             choices=Featurenames, options=list(maxOptions=10000))
     })
-    
-    
-    
+
     output$matchSummary <- shiny::renderTable({
       Featurenames <- shiny::isolate({DBFeatureselection()})
       if(Featurenames[1]!="No MS2 features found"){
@@ -184,7 +197,7 @@ shiny::shinyServer(function(input,  output, session){
         return()
       }
     })
-    
+    currEICRv$currEIC <- ''
     output$tabbedPanelButton = shiny::renderUI({
       shiny::actionButton("tabbedPanelButton", "ViewData")
     })
@@ -207,15 +220,21 @@ shiny::shinyServer(function(input,  output, session){
         # }
         # isolate feature index
         feat.indx <- which(Features.v %in% shiny::isolate(input$FeatureNames))
-        
+        currEICRv$currEIC <- input$FeatureNames
         ###########################
         ##### 1. Raw data plot ####
         ###########################
         
         plotDf <- reactive({
+          if(!is.null(composite_spectra[[feat.indx]])){
           MS2_data <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)
           MS2_data[] <- lapply(MS2_data,  as.character)
           if("interfrag.diff" %in% colnames(MS2_data)){
+            if(nrow(MS2_data) > 1){
+            MS2_data <- as.data.frame(apply(MS2_data, 2, function(x) gsub('noSMILES|noSMILES;|noID|noID;', '', x)), stringsAsFactors=FALSE)
+            } else {
+            MS2_data[1, ] <- gsub('noSMILES|noSMILES;|noID|noID;', '', MS2_data)  
+            }
             MS2_data[, c(1:5)] <- apply(MS2_data[, c(1:5)], 2, function(x) round(as.numeric(x), digits=4))
             SMILESindx <- grep("SMILES$", colnames(MS2_data))
             IDindx <- sapply(paste0(gsub("\\.SMILES", "", colnames(MS2_data)[SMILESindx]), "$"), grep, colnames(MS2_data))
@@ -238,9 +257,12 @@ shiny::shinyServer(function(input,  output, session){
             MS2_data[, c(1:2)] <- apply(MS2_data[, c(1:2)], 2, function(x) round(as.numeric(x), digits=4))
           }
           colnames(MS2_data) <- gsub("\\.", "_", colnames(MS2_data))
+          if(!is.null(MS2_data$Precursorfrag_diff)){
           MS2_data$Precursorfrag_diff <- as.numeric(MS2_data$Precursorfrag_diff)
           MS2_data$Fragment_Assigned <- ifelse(apply(MS2_data[, c("Frag_ID", "Neutral_loss", "interfrag_loss")], 1, function(x) any(x!="")), "Fragment_identified", "No_Fragment_identified")
+          
           MS2_data <- MS2_data[, grepl('_SMILES', colnames(MS2_data))  ==  F, drop=F]
+          }
           # if spectral DB matches
           if(feat.indx %in% indxSpectralDb){
           if(is.numeric(input$spectralDBtable_rows_selected)){
@@ -255,16 +277,23 @@ shiny::shinyServer(function(input,  output, session){
           colnames(dbMassIntensities) <- c('mass', 'intensity')
           dbMassIntensities <- cbind(dbMassIntensities, Rel_Intensity=-(dbMassIntensities[, 'intensity']/max(dbMassIntensities[, 'intensity']) * 100), dbData=rep(1, nrow(dbMassIntensities)))
           MS2_data$dbData <- 0
+          if(!'Rel_Intensity' %in% colnames(MS2_data)){
+            MS2_data[, 2] <- {MS2_data[, 2]/max(MS2_data[, 2])} * 100
+            colnames(MS2_data)[2] <- 'Rel_Intensity'
+          }
           MS2_data <- rbind(MS2_data[, c('mass', 'Rel_Intensity', 'dbData')],
                             dbMassIntensities[, c('mass', 'Rel_Intensity', 'dbData')])
             }
           }
+        } else {
+        MS2_data <- data.frame()
+        }  
           return(MS2_data)
         })
         
         output$MS2_plot <- shiny::renderPlot({
-         
               plotDfTmp <- plotDf()
+              if(ncol(plotDfTmp) > 0){
               if(!is.null(input$compMS2_brush)){
                 xlimTmp <- c(input$compMS2_brush$xmin, input$compMS2_brush$xmax)
                 ylimTmp <- c(input$compMS2_brush$ymin, input$compMS2_brush$ymax)
@@ -284,8 +313,17 @@ shiny::shinyServer(function(input,  output, session){
                 abline(h=0)
                 legend('topright', c("composite spectrum", 'database spectrum'), lty=c(1, 1), lwd=c(4, 4), col=c('#000000', "#009E73"), pt.cex=4, cex=1.8, ncol=1)
               } else {
+                if(!is.null(plotDfTmp$Fragment_Assigned)){
+                  colsTmp <- ifelse(plotDfTmp$Fragment_Assigned  ==  'Fragment_identified', 'red', 'black')
+                } else{
+                  colsTmp <- 'black'
+                }
               plot(plotDfTmp[, c('mass', 'intensity')], xlim=xlimTmp, ylim=ylimTmp,
-                   type='h', col=ifelse(plotDfTmp$Fragment_Assigned  ==  'Fragment_identified', 'red', 'black'), cex.axis=1.5, cex.lab=1.5)
+                   type='h', col=colsTmp, cex.axis=1.5, cex.lab=1.5)
+              }
+              } else {
+                plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+                text(x = 0.5, y = 0.5, paste('no MS2 data matched to this feature'), cex = 1.6, col = "black")  
               }
           })
         
@@ -301,7 +339,7 @@ shiny::shinyServer(function(input,  output, session){
           } else {
           return(data.frame(spectral_database_match='no spectral database match'))  
           }
-        }, selection='single', rownames=FALSE)
+        }, selection='single', rownames=F)
         
         
         # ui tab 1 text plot hover and main plot
@@ -337,7 +375,7 @@ shiny::shinyServer(function(input,  output, session){
           plotDfTmp <- plotDf()  
           brushedPoints(plotDfTmp, input$compMS2_brush, xvar = "mass", yvar = "intensity")
           }
-        }, rownames=FALSE,  escape = F)
+        }, rownames=F,  escape = F)
           
         ###########################
         ##### 9. overview plot ####
@@ -368,16 +406,23 @@ shiny::shinyServer(function(input,  output, session){
             metIDcomments <- hot_to_r(input$hot)
           } 
           
-          compMSCommented <- apply(metIDcomments[, 3:ncol(metIDcomments)], 1, function(x) any(x != '')) 
+          compMSCommented <- apply(metIDcomments[, 'possible_identity', drop=FALSE], 1, function(x) any(x != '')) 
           overviewMatchCommented <- match(subFeatTable$specNames, metIDcomments$compSpectrum)
           compMSCommented <- overviewMatchCommented %in% which(compMSCommented)
           colsTmp[compMSCommented] <- "#C77CFF"  
           selectedFeat <- allFeatTable$specNames[feat.indx]
-          colsTmp[subFeatTable$specNames %in% selectedFeat] <- 'red'
+          tmpIdx <- subFeatTable$specNames %in% selectedFeat
+          colsTmp[tmpIdx] <- 'red'
+          coordsTmp <- c(subFeatTable$mass[tmpIdx], subFeatTable$rt[tmpIdx])
           with(subFeatTable, symbols(x=rt, y=mass, circles=precursorInt_group, inches=1/8, bg=colsTmp, fg=NULL, ylab='m/z', xlab='retentionTime', cex.axis=1.5, cex.lab=1.5, ylim = ylimTmp, xlim = xlimTmp))
-          legend('topleft', c('already commented', 'currently selected'),
-                 pch=c(NA, NA), lty=c(1, 1), lwd=c(4, 4),
-                 col=c("#C77CFF", 'red'), cex=1.4, ncol=1)
+          legend('topleft', c('uncommented', 'metID Commented', 'currently selected'),
+                 pch=c(21, 21, 21), pt.cex=3, #lty=c(1, 1, 1), lwd=c(4, 4, 4),
+                 pt.bg=c("darkblue", "#C77CFF", 'red'), cex=1.4, ncol=1)
+          abline(h=rep(coordsTmp[1], nrow(subFeatTable)), col="red", 
+                 lwd=0.8, lty=2)
+          abline(v=rep(coordsTmp[2], nrow(subFeatTable)), col="red", 
+                 lwd=0.8, lty=2)
+          
       })
         
         
@@ -394,22 +439,52 @@ shiny::shinyServer(function(input,  output, session){
             subFeatTable <- allFeatTable  
           }
           
-          brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, rownames=FALSE)
+          brushedPoints(subFeatTable, input$overview_brush, yvar = "mass", xvar = "rt")}, rownames=F)
         
         #######################################
         ##### 10. correlation network plot ####
         ####################################### 
         output$corrNodesEdges <- shiny::renderText({
+          if(!is.null(object@network$corrNetworkGraph)){
           paste0('nodes: ', length(igraph::V(corrNetTmp)), ' edges: ', length(igraph::E(corrNetTmp)), ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
+          } else {
+          paste0('?metID.corrNetwork function has not yet been run.')  
+          }
         })
-      
-      output$corrNetworkTableBrush <- DT::renderDataTable({
-      bpDfTmp  <- brushedPoints(corrScaledLayout, input$corr_network_brush, xvar='xvar', yvar='yvar')
-      bpDfTmp <- bpDfTmp[, 3:6]
-      }, rownames=FALSE, options = list(pageLength = 20))
+        
+        output$corrNetworkTableBrush  <- DT::renderDataTable({
+          if(!is.null(object@network$corrNetworkGraph)){
+            if(!is.null(input$reconSub_network_brush)){
+              bpDfTmp  <- brushedPoints(corrScaledLayout, input$corr_network_brush, xvar='xvar', yvar='yvar')
+            } else {
+              bpDfTmp <- corrScaledLayout
+            }
+            
+            # if any commented then change colour
+            if(!is.null(input$hot)){
+              metIDcomments <- hot_to_r(input$hot)
+            } 
+            corrNetMatch <- match(bpDfTmp[, 3],  gsub('CC_',  '', metIDcomments$compSpectrum))
+            bpDfTmp <- as.data.frame(bpDfTmp[, 3:5, drop=FALSE]) 
+            bpDfTmp$possible_identity <- as.character(metIDcomments$possible_identity[corrNetMatch])
+            bpDfTmp$compound_class <- as.character(metIDcomments$compound_class[corrNetMatch])
+            selFeatIndx <- corrNetMatchIndx %in% feat.indx
+            if(any(selFeatIndx) & input$firstNeigh == TRUE){
+            # id first neighbours
+            neighSel <- neighbors(corrNetTmp, which(selFeatIndx), mode='all')
+            neighSel <- c(Features.v[feat.indx], names(neighSel))
+            neighIdx <- bpDfTmp[, 1] %in% gsub('CC_',  '', neighSel)
+            bpDfTmp <- bpDfTmp[neighIdx, , drop=FALSE]
+            }
+            return(bpDfTmp)
+          } else {
+            data.frame(result='?metID.corrNetwork function has not yet been run.')
+          }
+        }, rownames=FALSE, options = list(pageLength = 20))
                
       output$corr_network_plot <- shiny::renderPlot({
-          if(length(object@network) > 0){
+        
+        if(!is.null(object@network$corrNetworkGraph)){
             if(!is.null(input$corr_network_brush)){
               xlimTmp <- c(input$corr_network_brush$xmin, input$corr_network_brush$xmax)
               ylimTmp <- c(input$corr_network_brush$ymin, input$corr_network_brush$ymax)
@@ -417,17 +492,22 @@ shiny::shinyServer(function(input,  output, session){
               xlimTmp <- c(-1, 1)
               ylimTmp <- c(-1, 1)
             } 
-             
+            coordTmp <- NULL
             vertexSizeSub <- igraph::V(corrNetTmp)$vertexSize
             MS2netColsSub <- igraph::V(corrNetTmp)$MS2netColours
             vertexShapesSub <- igraph::V(corrNetTmp)$vertexShapes
+            edgeNames <- attr(igraph::E(corrNetTmp), 'vnames')
+            edgeColours <- rep("gray33", length(edgeNames))
+            firstNeighSubIdx <- vector('logical', length(vertexShapesSub))
+            vertexLabCols <- rep("gray83", length(firstNeighSubIdx))
+            vertFrameCols <- rep("black", length(firstNeighSubIdx))
             # if any commented then change colour
             if(!is.null(input$hot)){
               metIDcomments <- hot_to_r(input$hot)
             } 
             
-            compMSCommented <- apply(metIDcomments[, 3:ncol(metIDcomments)], 1, function(x) any(x != '')) 
-            corrNetMatchCommented <- match(paste0('CC_', igraph::V(corrNetTmp)$name), metIDcomments$compSpectrum)
+            compMSCommented <- apply(metIDcomments[, 'possible_identity', drop=FALSE], 1, function(x) any(x != '')) 
+            corrNetMatchCommented <- match(igraph::V(corrNetTmp)$name, metIDcomments$compSpectrum)
             compMSCommented <- corrNetMatchCommented %in% which(compMSCommented)
             if(any(compMSCommented)){
             MS2netColsSub[compMSCommented] <- "#C77CFF"  
@@ -437,10 +517,28 @@ shiny::shinyServer(function(input,  output, session){
             if(any(selFeatIndx)){
             vertexSizeSub[selFeatIndx] <- 6
             MS2netColsSub[selFeatIndx] <- "#7CAE00"
+            firstNeighSubIdx[selFeatIndx] <- TRUE
+            coordTmp <- corrScaledLayout$xvar[selFeatIndx]
+            coordTmp <- c(coordTmp, corrScaledLayout$yvar[selFeatIndx])
             # id first neighbours
             neighSel <- neighbors(corrNetTmp, which(selFeatIndx), mode='all')
             MS2netColsSub[neighSel] <- "#7CAE00"
+            if(input$firstNeigh == TRUE){
+            firstNeighSubIdx[neighSel] <- TRUE
+            subGraphTmp <- induced_subgraph(corrNetTmp, c(Features.v[feat.indx], names(neighSel)))
+            namesSubGraph <- attr(igraph::E(subGraphTmp), 'vnames')
+            edgeColours[{edgeNames %in% namesSubGraph} == FALSE] <- '#00000000' 
+            } else {
+            firstNeighSubIdx[1:length(firstNeighSubIdx)] <- TRUE
             }
+            } else {
+            firstNeighSubIdx[1:length(firstNeighSubIdx)] <- TRUE
+            }
+            
+            # change colour of nodes to match background if first neighbor only
+            MS2netColsSub[firstNeighSubIdx == FALSE] <- '#00000000' 
+            vertexLabCols[firstNeighSubIdx == FALSE] <- '#00000000'
+            vertFrameCols[firstNeighSubIdx == FALSE] <- '#00000000'
             # highlight subset features as triangles
             if(input$goButton){
               Featurenames <- shiny::isolate({Featureselection()})
@@ -453,61 +551,126 @@ shiny::shinyServer(function(input,  output, session){
             if(any(subsetFeatures)){
             vertexShapesSub[subsetFeatures] <- 'csquare'  
             }
-           
+            
             # black background igraph
             par(bg = "black")
              
-            plot(corrNetTmp, layout=corrLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color="gray33", vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=V(corrNetTmp)$name, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+            plot(corrNetTmp, layout=corrLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color=edgeColours, vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= vertexLabCols, vertex.label=gsub('CC_', '', V(corrNetTmp)$name), vertex.shape=vertexShapesSub, vertex.frame.color=vertFrameCols, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp)
+            # Now set the plot region to grey
+            
+            #layout=layout.circle,
             legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", "unmatched EIC", 'already commented', paste0('edge corrCoeff >= ', round(object@Parameters$corrThresh, 2))), pch=c(NA, 22, 21, 21, 21, NA), lty=c(1, NA, NA, NA, NA, 1), lwd=c(4, 1, 1, 1, 1, 4),
                    col=c("#7CAE00", "black", "black", "black", "black", 'gray33'), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#0072B2", "#C77CFF", "gray33"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
-          }
-        })
+            # if necc add node location
+            if(!is.null(coordTmp)){
+              abline(h=rep(coordTmp[2], nrow(corrScaledLayout)), col="#7CAE00", 
+                     lwd=1.5, lty=2)
+              abline(v=rep(coordTmp[1], nrow(corrScaledLayout)), col="#7CAE00", 
+                     lwd=1.5, lty=2)
+            }
+            
+      } else {
+        plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+        text(x = 0.5, y = 0.5, paste('?metID.corrNetwork function has not yet been run.'), cex = 1.6, col = "black")
+      }
+      })
         
       ###############################################
       ##### 12. spectral similarity network plot ####
       ############################################### 
       output$specSimNodesEdges <- shiny::renderText({
+        if(!is.null(object@network$specSimGraph)){
         paste0('nodes: ', length(igraph::V(specSimNetTmp)), ' edges: ', length(igraph::E(specSimNetTmp)), ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
+        } else {
+        return('?metID.specSimNetwork function has not yet been run.')  
+        }
       })
       
       output$specSimNetworkTableBrush <- DT::renderDataTable({
-        bpDfTmp  <- brushedPoints(specSimScaledLayout, input$specSim_network_brush, xvar='xvar', yvar='yvar')
-        bpDfTmp <- bpDfTmp[, 3:6, drop=F]
+        if(!is.null(object@network$specSimGraph)){
+          if(!is.null(input$reconSub_network_brush)){
+            bpDfTmp  <- brushedPoints(specSimScaledLayout, input$specSim_network_brush, xvar='xvar', yvar='yvar')
+          } else {
+            bpDfTmp <- specSimScaledLayout
+          }
+        # if any commented then change colour
+        if(!is.null(input$hot)){
+          metIDcomments <- hot_to_r(input$hot)
+        } 
+        specSimNetMatch <- match(bpDfTmp[, 3],  metIDcomments$compSpectrum)
+        bpDfTmp <- as.data.frame(bpDfTmp[, 3:5, drop=FALSE]) 
+        bpDfTmp$possible_identity <- as.character(metIDcomments$possible_identity[specSimNetMatch])
+        bpDfTmp$compound_class <- as.character(metIDcomments$compound_class[specSimNetMatch])
+        selFeatIndx <- scIdx %in% feat.indx
+        if(any(selFeatIndx) & input$firstNeigh == TRUE){
+          # id first neighbours
+          neighSel <- neighbors(specSimNetTmp, which(selFeatIndx), mode='all')
+          neighSel <- c(Features.v[feat.indx], names(neighSel))
+          neighIdx <- bpDfTmp[, 1] %in% neighSel
+          bpDfTmp <- bpDfTmp[neighIdx, , drop=FALSE]
+        }
+        return(bpDfTmp)
+        } else {
+          data.frame(result='?metID.specSimNetwork function has not yet been run.')
+        }
       }, rownames=FALSE, options = list(pageLength = 20))
       
       output$specSim_network_plot <- shiny::renderPlot({
-        if(length(object@network) > 0){
-          if(!is.null(input$specSim_network_brush)){
+        if(!is.null(object@network$specSimGraph)){
+         if(!is.null(input$specSim_network_brush)){
             xlimTmp <- c(input$specSim_network_brush$xmin, input$specSim_network_brush$xmax)
             ylimTmp <- c(input$specSim_network_brush$ymin, input$specSim_network_brush$ymax)
           } else {
             xlimTmp <- c(-1, 1)
             ylimTmp <- c(-1, 1)
           } 
-          
+          coordTmp <- NULL
           vertexSizeSub <- igraph::V(specSimNetTmp)$vertexSize
           MS2netColsSub <- igraph::V(specSimNetTmp)$MS2netColours
           vertexShapesSub <- igraph::V(specSimNetTmp)$vertexShapes
+          edgeNames <- attr(igraph::E(specSimNetTmp), 'vnames')
+          edgeColours <- igraph::E(specSimNetTmp)$color
+          firstNeighSubIdx <- vector('logical', length(vertexShapesSub))
+          vertexLabCols <- rep("gray83", length(firstNeighSubIdx))
+          vertFrameCols <- rep("black", length(firstNeighSubIdx))
           # if any commented then change colour
           if (!is.null(input$hot)){
             metIDcomments <- hot_to_r(input$hot)
           } 
           
-          compMSCommented <- apply(metIDcomments[, 3:ncol(metIDcomments)], 1, function(x) any(x != '')) 
+          compMSCommented <- apply(metIDcomments[, 'possible_identity', drop=FALSE], 1, function(x) any(x != '')) 
           specSimMatchCommented <- match(igraph::V(specSimNetTmp)$name, metIDcomments$compSpectrum)
           compMSCommented <- specSimMatchCommented %in% which(compMSCommented)
           if(any(compMSCommented)){
             MS2netColsSub[compMSCommented] <- "#C77CFF"  
           }
           # colour selected features
-          selFeatIndx <- specSimMatchIndx %in% feat.indx
+          selFeatIndx <- scIdx %in% feat.indx
           if(any(selFeatIndx)){
             vertexSizeSub[selFeatIndx] <- 6
             MS2netColsSub[selFeatIndx] <- "#7CAE00"
+            firstNeighSubIdx[selFeatIndx] <- TRUE
+            coordTmp <- specSimScaledLayout$xvar[selFeatIndx]
+            coordTmp <- c(coordTmp, specSimScaledLayout$yvar[selFeatIndx])
             # id first neighbours
             neighSel <- neighbors(specSimNetTmp, which(selFeatIndx), mode='all')
             MS2netColsSub[neighSel] <- "#7CAE00"
+            if(input$firstNeigh == TRUE){
+              firstNeighSubIdx[neighSel] <- TRUE
+              subGraphTmp <- induced_subgraph(specSimNetTmp, c(Features.v[feat.indx], names(neighSel)))
+              namesSubGraph <- attr(igraph::E(subGraphTmp), 'vnames')
+              edgeColours[{edgeNames %in% namesSubGraph} == FALSE] <- '#00000000' 
+            } else {
+              firstNeighSubIdx[1:length(firstNeighSubIdx)] <- TRUE
+            }
+          } else {
+            firstNeighSubIdx[1:length(firstNeighSubIdx)] <- TRUE
           }
+          
+          # change colour of nodes to match background if first neighbor only
+          MS2netColsSub[firstNeighSubIdx == FALSE] <- '#00000000' 
+          vertexLabCols[firstNeighSubIdx == FALSE] <- '#00000000'
+          vertFrameCols[firstNeighSubIdx == FALSE] <- '#00000000'
           # highlight subset features as triangles
           if(input$goButton){
             Featurenames <- shiny::isolate({Featureselection()})
@@ -516,87 +679,263 @@ shiny::shinyServer(function(input,  output, session){
             Featurenames <- shiny::isolate({DBFeatureselection()})
           }
           subsetFeatures <- which(Features.v %in% Featurenames)
-          subsetFeatures <- specSimMatchIndx %in% subsetFeatures
+          subsetFeatures <- scIdx %in% subsetFeatures
           if(any(subsetFeatures)){
             vertexShapesSub[subsetFeatures] <- 'csquare'  
           }
           
-          # black background igraph
-          par(bg = "black")
-          
-          plot(specSimNetTmp, layout=specSimLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color=igraph::E(specSimNetTmp)$color, vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= "gray83", vertex.label=gsub('CC_', '', V(specSimNetTmp)$name), vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+          plot(specSimNetTmp, layout=specSimLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color=edgeColours, vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= vertexLabCols, vertex.label=gsub('CC_', '', V(specSimNetTmp)$name), vertex.frame.color=vertFrameCols, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
           legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'currently subset EIC', "MS2 matched EIC", 'already commented', paste0('edge fragment ions (dot product >= ', round(object@Parameters$minDotProdThresh, 2), ')'), paste0('edge neutral losses (dot product >= ', round(object@Parameters$minDotProdThresh, 2), ')')), pch=c(NA, 22, 21, 21, NA, NA), lty=c(1, NA, NA, NA, 1, 1), lwd=c(4, 1, 1, 1, 4, 4),
                  col=c("#7CAE00", "black", "black", "black", "#CC79A7", "#56B4E9"), pt.bg=c("#7CAE00", "#D55E00", "#D55E00", "#C77CFF", "#CC79A7", "#56B4E9"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)#text.col='white', bty="n",
+          # if necc add node location
+          if(!is.null(coordTmp)){
+            abline(h=rep(coordTmp[2], nrow(specSimScaledLayout)), col="#7CAE00", 
+                   lwd=1.5, lty=2)
+            abline(v=rep(coordTmp[1], nrow(specSimScaledLayout)), col="#7CAE00", 
+                   lwd=1.5, lty=2)
+          }
+        } else {
+          plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+          text(x = 0.5, y = 0.5, paste('?metID.specSimNetwork function has not yet been run.'), cex = 1.6, col = "black")
         }
       })
       
+      ######################################################
+      ##### 12. reconstructed substructure network plot ####
+      ###################################################### 
+      output$reconSubNodesEdges <- shiny::renderText({
+        if(!is.null(object@network$reconSubGraph)){
+          paste0('nodes: ', length(igraph::V(reconSubNetTmp)), ' edges: ', length(igraph::E(reconSubNetTmp)), ' (N.B. large numbers of nodes e.g. >= 300 may not display properly)')
+        } else {
+          return('?metID.reconSubNetwork function has not yet been run.')  
+        }
+      })
+      
+      output$reconSubNetworkTableBrush <- DT::renderDataTable({
+        if(!is.null(object@network$reconSubGraph)){
+          if(!is.null(input$reconSub_network_brush)){
+          bpDfTmp  <- brushedPoints(reconSubScaledLayout, input$reconSub_network_brush, xvar='xvar', yvar='yvar')
+          } else {
+            bpDfTmp <- reconSubScaledLayout
+          }
+          # if any commented then change colour
+          if(!is.null(input$hot)){
+            metIDcomments <- hot_to_r(input$hot)
+          } 
+          reconSubNetMatch <- match(bpDfTmp[, 3],  metIDcomments$compSpectrum)
+          bpDfTmp <- as.data.frame(bpDfTmp[, 3:5, drop=FALSE]) 
+          bpDfTmp$possible_identity <- as.character(metIDcomments$possible_identity[reconSubNetMatch])
+          bpDfTmp$compound_class <- as.character(metIDcomments$compound_class[reconSubNetMatch])
+          selFeatIndx <- rcIdx %in% feat.indx
+          if(any(selFeatIndx) & input$firstNeigh == TRUE){
+            # id first neighbours
+            neighSel <- neighbors(reconSubNetTmp, which(selFeatIndx), mode='all')
+            fragsNLTmp <- names(neighSel)
+            # all neighbours of the frags/neutral losses
+            for(i in 1:length(neighSel)){
+            fragsNLTmp <- c(fragsNLTmp, names(neighbors(reconSubNetTmp, neighSel[i], mode = 'all')))
+            }
+            fragsNLTmp <- unique(fragsNLTmp)
+            fragsNLTmp <- c(Features.v[feat.indx], fragsNLTmp)
+            neighIdx <- bpDfTmp[, 1] %in% fragsNLTmp
+            bpDfTmp <- bpDfTmp[neighIdx, , drop=FALSE]
+          }
+          return(bpDfTmp)
+        } else {
+          data.frame(result='?metID.reconSubNetwork function has not yet been run.')
+        }
+      }, rownames=FALSE, options = list(pageLength = 20))
+      
+      # reactive plot test
+      # reconSubNetPlot <- reactive({
+      # })
+      # 
+      output$reconSub_network_plot <- shiny::renderPlot({
+        if(!is.null(object@network$reconSubGraph)){
+          if(!is.null(input$reconSub_network_brush)){
+            xlimTmp <- c(input$reconSub_network_brush$xmin, input$reconSub_network_brush$xmax)
+            ylimTmp <- c(input$reconSub_network_brush$ymin, input$reconSub_network_brush$ymax)
+          } else {
+            xlimTmp <- c(-1, 1)
+            ylimTmp <- c(-1, 1)
+          } 
+        
+          coordTmp <- NULL
+          vertexSizeSub <- igraph::V(reconSubNetTmp)$sizeNDetects 
+          MS2netColsSub <- igraph::V(reconSubNetTmp)$color
+          vertexShapesSub <- igraph::V(reconSubNetTmp)$vertexShapes
+          edgeNames <- attr(igraph::E(reconSubNetTmp), 'vnames')
+          edgeColours <- rep('gray83')
+          firstNeighSubIdx <- vector('logical', length(vertexShapesSub))
+          vertexLabCols <- rep("gray83", length(firstNeighSubIdx))
+          vertFrameCols <- rep("black", length(firstNeighSubIdx))
+          
+          # colour selected features
+          selFeatIndx <- rcIdx %in% feat.indx
+          if(any(selFeatIndx)){
+            MS2netColsSub[selFeatIndx] <- "#7CAE00"
+            firstNeighSubIdx[selFeatIndx] <- TRUE
+            coordTmp <- reconSubScaledLayout$xvar[selFeatIndx]
+            coordTmp <- c(coordTmp, reconSubScaledLayout$yvar[selFeatIndx])
+            # id first neighbours
+            neighSel <- neighbors(reconSubNetTmp, which(selFeatIndx), mode='all')
+            firstNeighSubIdx[neighSel] <- TRUE
+            fragsNLTmp <- as.numeric()
+            # all neighbours of the frags/neutral losses
+            for(i in 1:length(neighSel)){
+              fragsNLTmp <- c(fragsNLTmp, neighbors(reconSubNetTmp, neighSel[i], mode = 'all'))
+            }
+            fragsNLTmp <- unique(fragsNLTmp)
+            MS2netColsSub[fragsNLTmp] <- "#7CAE00"
+            
+            if(input$firstNeigh == TRUE){
+              firstNeighSubIdx[fragsNLTmp] <- TRUE
+              
+              subGraphTmp <- induced_subgraph(reconSubNetTmp, c(Features.v[feat.indx], names(fragsNLTmp)))
+              namesSubGraph <- attr(igraph::E(subGraphTmp), 'vnames')
+              edgeColours[{edgeNames %in% namesSubGraph} == FALSE] <- '#00000000' 
+            } else {
+              firstNeighSubIdx[1:length(firstNeighSubIdx)] <- TRUE
+            }
+          } else {
+            firstNeighSubIdx[1:length(firstNeighSubIdx)] <- TRUE
+          }
+          
+          # change colour of nodes to match background if first neighbor only
+          MS2netColsSub[firstNeighSubIdx == FALSE] <- '#00000000' 
+          vertexLabCols[firstNeighSubIdx == FALSE] <- '#00000000'
+          vertFrameCols[firstNeighSubIdx == FALSE] <- '#00000000'
+          
+          par(bg='black')
+          plot(reconSubNetTmp, layout=reconSubLayoutTmp[, 1:2], edge.arrow.size=.1, edge.color=edgeColours, vertex.color=MS2netColsSub, vertex.label.font=2, vertex.label.color= vertexLabCols, vertex.label=gsub('CC_', '', V(reconSubNetTmp)$name), vertex.frame.color=vertFrameCols, vertex.shape=vertexShapesSub, vertex.size=vertexSizeSub, vertex.label.cex=1.5, xlim=xlimTmp, ylim=ylimTmp) #layout=layout.circle,
+          legend('topleft', c("currently selected spectrum and 1st neighbours (if present)", 'spectrum', "fragment", 'neutral loss'), pch=c(21, 21, 21, 21), lwd=c(1, 1, 1, 1),
+                 col=c("black", "black", "black", 'black'), pt.bg=c("#7CAE00", "#56B4E9", "#009E73", "#D55E00"), pt.cex=4, cex=1.8, bg='gray79', ncol=1)
+          # if necc add node location
+          if(!is.null(coordTmp)){
+            abline(h=rep(coordTmp[2], nrow(reconSubScaledLayout)), col="#7CAE00", 
+                   lwd=1.5, lty=2)
+            abline(v=rep(coordTmp[1], nrow(reconSubScaledLayout)), col="#7CAE00", 
+                   lwd=1.5, lty=2)
+          }
+        } else {
+          plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+          text(x = 0.5, y = 0.5, paste('?metID.reconSubNetwork function has not yet been run.'), cex = 1.6, col = "black")
+        }
+      })
         ##################################
         ##### 11. metID comments table ###
         ##################################
         output$hot = renderRHandsontable({
-          if (!is.null(input$hot)) {
-            metIDcomments = hot_to_r(input$hot)
-          } 
+          # add anno to comments
+         
+            if(!is.null(input$hot)){
+            metIDcomments <- hot_to_r(input$hot)
+            }
+            # if(input$addAnno){
+              if(!is.null(input$BestCandidates_rows_selected)){
+                DB.results <- tmp.BestAnno[[feat.indx]]
+                # sort by bc score if present
+                if(!is.null(DB.results$BC_meanScore)){
+                  DB.results <- DB.results[order(DB.results$BC_meanScore, decreasing = TRUE), , drop=FALSE]
+                }
+                selectedMetab <- as.character(DB.results[input$BestCandidates_rows_selected, 'DBname'])
+                selectedESI <- as.character(DB.results[input$BestCandidates_rows_selected, 'ESI_type'])
+                commIndx <- metIDcomments$compSpectrum %in% Features.v[feat.indx]
+                # empty cell
+                commIndx <- commIndx & {metIDcomments$possible_identity == ''}
+                metIDcomments$possible_identity[commIndx] <- selectedMetab
+                metIDcomments$ESI_type[commIndx] <- selectedESI
+              }
+              if(input$goButton){
+                Featurenames <- shiny::isolate({Featureselection()})
+              }
+              if(input$DBbutton){
+                Featurenames <- shiny::isolate({DBFeatureselection()})
+              }
+              currSubset <- metIDcomments$compSpectrum %in% Featurenames
+              currSubset <- ifelse(currSubset, 'Yes', 'No')
+              metIDcomments$currently_subset <- currSubset
+              metIDcomments <- metIDcomments[, c("compSpectrum", 'currently_subset', "possible_identity", "ESI_type", "compound_class", "user_comments")]
+              # order by currently subset
+              metIDcomments <- metIDcomments[order(currSubset, decreasing = T), , drop=F]
+              if(all(currSubset == 'Yes')){
+                # resort to Features.v order
+                metIDcomments <- metIDcomments[order(as.numeric(gsub('.+_', '', metIDcomments$compSpectrum))), ]  
+              }
+              # currently selected to top of table
+              metIDcomments <- metIDcomments[order(metIDcomments$compSpectrum %in% Features.v[feat.indx], decreasing = T), ]
+              setHot(metIDcomments)
+              rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
+                # hot_col('compSpectrum', readOnly = T) %>%
+                hot_table(highlightCol = TRUE, highlightRow = TRUE)
           
-          if(input$goButton){
-            Featurenames <- shiny::isolate({Featureselection()})
-          }
-          if(input$DBbutton){
-            Featurenames <- shiny::isolate({DBFeatureselection()})
-          }
-          currSubset <- metIDcomments$compSpectrum %in% Featurenames
-          currSubset <- ifelse(currSubset, 'Yes', 'No')
-          metIDcomments$currently_subset <- currSubset
-          metIDcomments <- metIDcomments[, c("compSpectrum", 'currently_subset', "possible_identity", "compound_class", "user_comments")]
-          # order by currently subset
-          metIDcomments <- metIDcomments[order(currSubset, decreasing = T), , drop=F]
-          if(all(currSubset == 'Yes')){
-          # resort to Features.v order
-          metIDcomments <- metIDcomments[order(as.numeric(row.names(metIDcomments))), ]  
-          }
-          # currently selected to top of table
-          metIDcomments <- metIDcomments[order(metIDcomments$compSpectrum %in% Features.v[feat.indx], decreasing = T), ]
-          # 
-          # if(input$moveComments){
-          #   # if(!is.null(input$BestCandidates_rows_selected)){
-          #   DB.results <- tmp.BestAnno[[feat.indx]]
-          #   selectedMetab <- DB.results[input$BestCandidates_rows_selected, 'DBname']
-          #   indxTmp <- metIDcomments$compSpectrum %in% Features.v[feat.indx]
-          #   metIDcomments$possible_identity[indxTmp] <- selectedMetab
-          #   # }
-          # }   
-          setHot(metIDcomments)
-          rhandsontable(metIDcomments, readOnly = object@Parameters$readOnly) %>%
-            # hot_col('compSpectrum', readOnly = T) %>%
-            hot_table(highlightCol = TRUE, highlightRow = TRUE)
         })
+        
+       
         ###########################
         ##### 2. metadata table ###
         ###########################
         
         output$metadata <- DT::renderDataTable({
           metadata.tmp.sub <- metaData.tmp[[feat.indx]]
+          splashCodeIndx <- grep('splash', metadata.tmp.sub)
+          if(length(splashCodeIndx) > 0){
+          splashCodeTmp <- metadata.tmp.sub[[splashCodeIndx]]
+          metadata.tmp.sub[[splashCodeIndx]] <- NULL
+          }
+          
+         metadata.tmp.sub <- tapply(metadata.tmp.sub, names(metadata.tmp.sub), function(x){
+            x <- unlist(x)
+            if(any(grepl(';', x))){
+              x <- paste(x, collapse = '; ') 
+            } else { 
+              if(any(grepl('(.*\\.)', x))){
+                if(any(nchar(gsub("(.*\\.)",  "",  as.character(x))) > 4)){
+                  x <- as.character(round(as.numeric(x),  digits = 4))
+                }
+              }
+              x <- paste(x,  collapse = "; ")
+            }   
+          })
+         
           row.names.tmp <- gsub(".+\\.mzXML_[0-9]*_",  "",  names(metadata.tmp.sub))
           #   gsub("_[:alpha:].+",  "",  names(metadata))
           column.names.tmp <- gsub(gsub("\\.",  "\\\\.",  
                                         paste(unique(row.names.tmp),  collapse = "$|")), 
                                    "",  names(metadata.tmp.sub))
           column.names.tmp <- gsub("_$",  "",  column.names.tmp)
-          metadata.tmp.sub <- sapply(metadata.tmp.sub,  function(x) {
-            if(nchar(gsub("(.*\\.)",  "",  as.character(x[1]))) > 4){
-              tmp <- round(x,  digits = 4) 
-              tmp <- paste(tmp,  collapse = "; ")
-              return(tmp)
-            } else {
-              tmp <- paste(x,  collapse = "; ")
-              return(tmp)
-            }
-          })
-          metadata.tmp.sub <- sapply(unique(column.names.tmp),  function(x) 
-            metadata.tmp.sub[grep(x,  names(metadata.tmp.sub))])
+          
+          metadata.tmp.sub <- do.call(cbind, lapply(unique(column.names.tmp),  function(x) 
+            metadata.tmp.sub[grep(x,  names(metadata.tmp.sub))]))
           row.names(metadata.tmp.sub) <- unique(row.names.tmp)
+          colnames(metadata.tmp.sub) <- unique(column.names.tmp)
+          if(all(colnames(metadata.tmp.sub) %in% 'V1')){
+            colnames(metadata.tmp.sub) <- 'Parameter'
+          }
+          # remove unnecessary rows
+          remIndx <- grep('MS\\.scantype|TICabovefilter|MS2TICfilt.Indx', row.names(metadata.tmp.sub), 
+                          ignore.case = TRUE)
+          metadata.tmp.sub <- metadata.tmp.sub[-remIndx, , drop=FALSE]
+          # only 1 value needed
+          oneOnlyIndx <- grepl('MS1_|ppmDiff', row.names(metadata.tmp.sub))
+          singleValues <- t(apply(metadata.tmp.sub[oneOnlyIndx, , drop=FALSE], 1, function(x){
+            splitTmp <- strsplit(x, ';')
+            singVal <- vector('character', length(splitTmp))
+            for(sp in 1:length(splitTmp)){
+            singVal[sp] <- splitTmp[[sp]][1]
+            }
+            return(singVal)
+          }))
+          metadata.tmp.sub[oneOnlyIndx, ] <- singleValues 
+          if(length(splashCodeIndx) > 0){
+          splashCodeTmp <-  matrix(splashCodeTmp, ncol=ncol(metadata.tmp.sub), nrow=1)
+          colnames(splashCodeTmp) <- colnames(metadata.tmp.sub)
+          row.names(splashCodeTmp) <- 'compSpectrum_splashCode'
+          metadata.tmp.sub <- rbind(metadata.tmp.sub, splashCodeTmp)
+          }
+          metadata.tmp.sub <- metadata.tmp.sub[-grep('isoMass|isoInt', row.names(metadata.tmp.sub)), , drop=FALSE]
           return(metadata.tmp.sub)    
-        },  options = list(pageLength = 21))
+        },  options = list(pageLength = 20))
         
         ###########################
         ##### 3. MS2 data table ###
@@ -643,10 +982,20 @@ shiny::shinyServer(function(input,  output, session){
             colnames(DB.results) <- "Result"
             return(DB.results) 
           } else {
-            DB.results <- tmp.DBanno.res[[feat.indx]]
+          DB.results <- tmp.DBanno.res[[feat.indx]]
+          if(is.null(DB.results)){
+            DB.results <- data.frame("no annotations have yet been made for this feature", stringsAsFactors=F)
+            colnames(DB.results) <- "Result"
+            return(DB.results)  
+          } else if(nrow(DB.results) == 0){
+          DB.results <- data.frame("no annotations were made to any database", stringsAsFactors=F)
+          colnames(DB.results) <- "Result"
+          return(DB.results)
+            } else {
+              # retention time prediction model remove molecular descriptors if necessary
+              DB.results <- DB.results[, grepl('^MD_|trainingSet|chemFP', colnames(DB.results)) == FALSE, drop=FALSE]
             ###create clickable url links to DB in table
-            DB.results$DBid  <- paste0("<a href='http://", DB.results$WebAddress,  DB.results$DBid,  
-                                     "' target='_blank'>",  DB.results$DBid,  "</a>")
+            DB.results$DBid  <- paste0("<a href='http://", DB.results$WebAddress,  gsub('_.+', '', DB.results$DBid), ifelse(grepl('chemspider', DB.results$WebAddress), ".html", ""), "' target='_blank'>",  DB.results$DBid,  "</a>")
             # clickable SMILES pugRest
             SMILESindx <- grep("SMILES$", colnames(DB.results))
             DB.results[, SMILESindx] <- sapply(SMILESindx, function(x){
@@ -657,29 +1006,38 @@ shiny::shinyServer(function(input,  output, session){
                             paste0(substring(DB.results[, x],  1,  6),  "..."), "</a>"))
             })
             DB.results$WebAddress <- NULL 
-            DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")] <- lapply(DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")],  as.numeric)
+            DB.results$BestAnno <- NULL
+            DB.results$chemFP <- NULL
+            numIndxTmp <- grep('observedMass', colnames(DB.results)):ncol(DB.results)
+            DB.results[, numIndxTmp] <- lapply(DB.results[, numIndxTmp, drop=F],  as.numeric)
+            DB.results[, numIndxTmp] <- apply(DB.results[, numIndxTmp, drop=F], 2,  round, 4)
             return(DB.results)
-          }}, rownames=FALSE,  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
+          }}}, rownames=F,  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
         
         ##############################
         ##### 5. Best annotations #####
         ##############################
         
         output$BestCandidates <- DT::renderDataTable({
-          if(length(object@BestAnno)  ==  0){
+          if(length(BestAnno(object))  ==  0){
             DB.results <- data.frame("metID.dbProb function has not yet been run", stringsAsFactors=F)
             colnames(DB.results) <- "Result"
             return(DB.results) 
           } else {
             DB.results <- tmp.BestAnno[[feat.indx]]
-          
-          if(nrow(DB.results) == 0){
+            if(is.null(DB.results)){
+              DB.results <- data.frame("no annotations have yet been made for this feature", stringsAsFactors=FALSE)
+              colnames(DB.results) <- "Result"
+              return(DB.results)  
+            } else if(nrow(DB.results) == 0){
               DB.results <- data.frame("no best/ most likely annotations based on substructures identified", stringsAsFactors=F)
               colnames(DB.results) <- "Result"
               return(DB.results) 
             } else {
+              # retention time prediction model remove molecular descriptors if necessary
+              DB.results <- DB.results[, grepl('^MD_|trainingSet|chemFP', colnames(DB.results)) == FALSE, drop=FALSE]
             ###create clickable url links to DB in table
-            DB.results$DBid  <- paste0("<a href='http://", DB.results$WebAddress,  DB.results$DBid,  
+            DB.results$DBid  <- paste0("<a href='http://", DB.results$WebAddress,  gsub('_.+', '', DB.results$DBid), ifelse(grepl('chemspider', DB.results$WebAddress), ".html", ""), 
                                      "' target='_blank'>",  DB.results$DBid,  "</a>")
             # clickable SMILES pugRest
             SMILESindx <- grep("SMILES$", colnames(DB.results))
@@ -691,10 +1049,58 @@ shiny::shinyServer(function(input,  output, session){
                             paste0(substring(DB.results[, x],  1,  6),  "..."), "</a>"))
             })
             DB.results$WebAddress <- NULL 
-            DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")] <- lapply(DB.results[,  c("expectedMass",  "candidateMass",  "ppmMatch")],  as.numeric)
+            DB.results$BestAnno <- NULL
+            numIndxTmp <- grep('observedMass', colnames(DB.results)):ncol(DB.results)
+            DB.results[, numIndxTmp] <- lapply(DB.results[, numIndxTmp, drop=F],  as.numeric)
+            DB.results[, numIndxTmp] <- apply(DB.results[, numIndxTmp, drop=F], 2,  round, 4)
+            # sort by bc score if present
+            if(!is.null(DB.results$BC_meanScore)){
+              DB.results <- DB.results[order(DB.results$BC_meanScore, decreasing = TRUE), , drop=FALSE]
+            }
             return(DB.results)
-          }}}, rownames=FALSE,  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
+          }}}, selection='single', rownames=F,  escape=F,  options = list(pageLength = 20))#, digits=4,  sanitize.text.function = function(x) x)
         
+        ################################################
+        ##### 12. random forest rt prediction plot #####
+        ################################################
+        output$rtPredPlot <- shiny::renderPlot({
+          # retention time prediction model
+          if(any(rtPredIndx)){
+            if(!is.null(input$rtPredPlot_brush)){
+              xlimTmp <- c(input$rtPredPlot_brush$xmin, input$rtPredPlot_brush$xmax)
+              ylimTmp <- c(input$rtPredPlot_brush$ymin, input$rtPredPlot_brush$ymax)
+            } else {
+              xlimTmp <- c(min(bestAnnoDf$ms1Rt) * 0.99, max(bestAnnoDf$ms1Rt) * 1.01)
+              ylimTmp <- c(min(bestAnnoDf$predRts) * 0.99, max(bestAnnoDf$predRts) * 1.01)
+            }  
+          # colour currently selected spectrum
+          indxTmp <- bestAnnoDf$specNames %in% Features.v[feat.indx]
+              
+          plot(bestAnnoDf$ms1Rt, bestAnnoDf$predRts, xlab='MS1 feature retentionTime', ylab='randomForest predicted retentionTime', xlim = xlimTmp,
+               ylim=ylimTmp, col='#0072B2', cex=3, pch=19, cex.axis=1.3, 
+               cex.lab=1.3)
+          text(bestAnnoDf$ms1Rt, bestAnnoDf$predRts, labels = bestAnnoDf$specNames,
+               pos=3, col="#999999", cex=0.8)
+          points(bestAnnoDf$ms1Rt[indxTmp], bestAnnoDf$predRts[indxTmp], col='red', cex=3, pch=19)
+          points(bestAnnoDf$ms1Rt[as.logical(bestAnnoDf$trainingSet)], bestAnnoDf$predRts[as.logical(bestAnnoDf$trainingSet)], col='#E69F00', cex=3, pch=19)
+          
+          abline(lmPredRt, col='black')
+          legend('topleft', c('trainingSet', 'unknown', 'currently selected'), 
+                 pch=21, 
+                 pt.bg = c("#E69F00", "#0072B2", "red"), pt.cex = 3, cex=1.3)
+          legend("topright", bty="n", legend=paste("r2:", format(summary(lmPredRt)$adj.r.squared, digits=3)), cex=1.3)
+          } else {
+            plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+            text(x = 0.5, y = 0.5, paste("?metID.rtPred function has not been run.\n"), cex = 1.6, col = "black")
+          }  
+        })
+        
+        output$rtPredTable <- DT::renderDataTable({
+          if(any(rtPredIndx)){
+          brushedPoints(bestAnnoDf, input$rtPredPlot_brush, xvar = "ms1Rt", yvar = "predRts") 
+          } else {
+          return(data.frame(rtPredTable="?metID.rtPred function has not been run."))           }
+        }, rownames=F, escape=F)
         
         ############################################
         ##### 6. Best substructure annotations #####
@@ -708,7 +1114,7 @@ shiny::shinyServer(function(input,  output, session){
           } else {
             SbStrResults <-  subStrAnno.df[subStrAnno.df$compSpecName %in% Features.v[feat.indx],  ,  drop = F]
             return(SbStrResults)
-          }}, rownames=FALSE,  escape=F,  options = list(pageLength = 8))
+          }}, rownames=F,  escape=F,  options = list(pageLength = 8))
         # text entry for custom searches
         output$customPubMedSearch <- shiny::renderUI({
           shiny::textInput('customPubMedSearch', 'Enter custom search text:')
@@ -888,48 +1294,225 @@ shiny::shinyServer(function(input,  output, session){
             zip(zipfile=file, files=fileNames[1:3])
           }, contentType = "application/zip")
         
-        #####################################
-        ##### 8. output MetFrag results #####
-        #####################################
-        
-        output$MetFragTable <- shiny::renderTable({
+        #######################################
+        ##### 8. output in silico results #####
+        #######################################
+        # reactive metfragtable
+        metFragTable <- reactive({
           if(length(tmp.metFrag)  ==  0){
             metFrag.df.tmp <- "metID.MetFrag function has not yet been run"
             metFrag.df.tmp <- data.frame(metFrag.df.tmp)
             colnames(metFrag.df.tmp) <- "Result"
-            return(metFrag.df.tmp)
+            return(list(metFragSelectDf=metFrag.df.tmp))
           } else {
             metFrag.df.tmp <- tmp.metFrag[[feat.indx]]
             if(is.null(metFrag.df.tmp)){
-              metFrag.df.tmp <- "metID.MetFrag function has not yet been run"
+              metFrag.df.tmp <- "metID.MetFrag returned no results"
               metFrag.df.tmp <- data.frame(metFrag.df.tmp)
               colnames(metFrag.df.tmp) <- "Result" 
-              return(metFrag.df.tmp)
-            } else if (is.character(metFrag.df.tmp)){
-              metFrag.df.tmp <- "MetFrag returned no results"
+              return(list(metFragSelectDf=metFrag.df.tmp))
+            } else if(ncol(metFrag.df.tmp) == 1){
+              metFrag.df.tmp <- "metID.MetFrag returned no results"
               metFrag.df.tmp <- data.frame(metFrag.df.tmp)
               colnames(metFrag.df.tmp) <- "Result" 
-              return(metFrag.df.tmp)
+              return(list(metFragSelectDf=metFrag.df.tmp))
             } else {  
               # reduce n decimal places to 4
-              metFrag.df.tmp[,  c("PeakScore",  "BondEnergyScore",  "Score")] <- sapply(metFrag.df.tmp[,  c("PeakScore",  "BondEnergyScore",  "Score")],  
-                                                                                     function(x) {
-                                                                                       if(nchar(gsub("(.*\\.)",  "",  as.character(x[1]))) > 4){
-                                                                                         x <- round(as.numeric(x),  digits = 4) 
-                                                                                       }
-                                                                                     })
+              # metFrag.df.tmp[,  c("PeakScore",  "BondEnergyScore",  "Score")] <- sapply(metFrag.df.tmp[,  c("PeakScore",  "BondEnergyScore",  "Score")], function(x) {if(nchar(gsub("(.*\\.)",  "",  as.character(x[1]))) > 4){x <- round(as.numeric(x),  digits = 4)}})
               ###create clickable url links to DB in table
-              metFrag.df.tmp$DBid  <- paste0("<a href='http://",  metFrag.df.tmp$WebAddress,  metFrag.df.tmp$DBid,  
-                                           "' target='_blank'>",  metFrag.df.tmp$DBid,  "</a>")
+              metFrag.df.tmp$DBid  <- paste0("<a href='http://",  metFrag.df.tmp$WebAddress,  gsub('_.+', '', metFrag.df.tmp$DBid), ifelse(grepl('chemspider', metFrag.df.tmp$WebAddress), ".html", ""), 
+                                             "' target='_blank'>",  metFrag.df.tmp$DBid,  "</a>")
               metFrag.df.tmp$WebAddress <- NULL 
               metFrag.df.tmp$SMILES <- paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", 
                                               metFrag.df.tmp$SMILES,  "/PNG",  "' target='_blank'>", 
                                               paste0(substring(metFrag.df.tmp$SMILES,  1,  6),  "..."),  "</a>")
-              return(metFrag.df.tmp)
+              names(metFrag.df.tmp)[names(metFrag.df.tmp) == 'NoExplPeaks'] <- 'nPeaksEx'
+              names(metFrag.df.tmp)[names(metFrag.df.tmp) == 'propIntEx'] <- 'metFrag_totPropEx'
+              metFrag.df.tmp$Score <- round(metFrag.df.tmp$Score, 2)
+              return(list(metFragSelectDf=metFrag.df.tmp[, c("DBid", "DBname", "metFrag_totPropEx", "nPeaksEx", 'SMILES', 'ESI_type', 'Score', 'mass', 'intensity', 'frag_smiles')]))
             }
           }
-        },  sanitize.text.function = function(x) x)
+        })
         
+        output$metFragTable <- DT::renderDataTable({
+        metFragSelectDf <-  metFragTable()$metFragSelectDf
+        metFragSelectDf$mass <- NULL
+        metFragSelectDf$intensity <- NULL
+        metFragSelectDf$frag_smiles <- NULL
+        return(metFragSelectDf) 
+        }, selection='single', escape=F, options = list(pageLength = 5), rownames=F)
+        
+        
+        # MetFrag head-to-tail plot
+        output$metFragPlot <- shiny::renderPlot({
+          metFragTableTmp <- metFragTable()$metFragSelectDf
+          if(ncol(metFragTableTmp) > 1){
+          if(!is.null(input$metFragTable_rows_selected)){
+            plotDfTmp <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)[, c('mass', 'Rel_Intensity', 'intensity')]
+            plotDfTmp$dbData <- 0
+            metFragEntryTmp <- metFragTableTmp[input$metFragTable_rows_selected, c('mass', 'intensity'), drop=F]
+            if(!is.na(metFragEntryTmp$mass)){
+            massTmp <- as.numeric(strsplit(as.character(metFragEntryTmp$mass), '; ')[[1]])
+            intTmp <- as.numeric(strsplit(as.character(metFragEntryTmp$intensity), '; ')[[1]])
+            metFragEntryTmp <- data.frame(mass=massTmp, Rel_Intensity=intTmp, stringsAsFactors = F)  
+            if(nrow(metFragEntryTmp) > 0){
+            metFragEntryTmp$Rel_Intensity <- -(metFragEntryTmp$Rel_Intensity / max(plotDfTmp$intensity) * 100)
+            metFragEntryTmp$dbData <- 1
+            plotDfTmp$intensity <- NULL
+            # rbind
+            plotDfTmp <- rbind(plotDfTmp, metFragEntryTmp)
+            colsTmp <- ifelse(plotDfTmp[, 'dbData'] == 1, "#009E73", '#000000')
+            
+            if(!is.null(input$metFrag_brush)){
+              xlimTmp <- c(input$metFrag_brush$xmin, input$metFrag_brush$xmax)
+              ylimTmp <- c(input$metFrag_brush$ymin, input$metFrag_brush$ymax)
+            } else {
+              xlimTmp <- c(0, max(plotDfTmp$mass) * 1.1)
+              ylimTmp <- c(min(plotDfTmp$Rel_Intensity), max(plotDfTmp$Rel_Intensity))
+            }
+            
+            plot(plotDfTmp[, c('mass', 'Rel_Intensity'), drop=F], xlim=xlimTmp, ylim=ylimTmp, yaxt='n', ylab='relative intensity',
+                 type='h', col=colsTmp, cex.axis=1.5, cex.lab=1.5)
+            axis(2, at=seq(-100, 100, 20), labels=c(abs(seq(-100, -20, 20)), seq(0, 100, 20)), las=2, cex.axis=1.3)
+            abline(h=0)
+            legend('topright', c("composite spectrum", 'metFrag result'), lty=c(1, 1), lwd=c(3, 3), col=c('#000000', "#009E73"), pt.cex=4, cex=1.2, ncol=1)
+          } else {
+            plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+            text(x = 0.5, y = 0.5, 'no peaks were explained', cex = 1.6, col = "black")   
+          }
+          } else {
+            plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+            text(x = 0.5, y = 0.5, 'no peaks were explained', cex = 1.6, col = "black")   
+          }
+          } else {
+            plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+            text(x = 0.5, y = 0.5, 'click a row in the table above to view the plot', cex = 1.6, col = "black") 
+          }
+          } else {
+            plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+            text(x = 0.5, y = 0.5, metFragTableTmp[, 1], cex = 1.6, col = "black") 
+          }
+        })
+        # metfragment table
+        output$metFragFragments <- DT::renderDataTable({
+          metFragTableTmp <-  metFragTable()$metFragSelectDf
+          metFragEntryTmp <- data.frame(result='select a row in the table above')
+          if(ncol(metFragTableTmp) > 1){
+            if(!is.null(input$metFragTable_rows_selected)){
+             
+              metFragEntryTmp <- metFragTableTmp[input$metFragTable_rows_selected, c('mass', 'intensity', 'frag_smiles'), drop=F]
+              if(!is.na(metFragEntryTmp$mass)){
+                massTmp <- as.numeric(strsplit(as.character(metFragEntryTmp$mass), '; ')[[1]])
+                massTmp <- round(massTmp, 4)#[-length(massTmp)]
+                # intTmp <- as.numeric(strsplit(as.character(metFragEntryTmp$intensity), '; ')[[1]])
+                fragSmilesTmp <- strsplit(as.character(metFragEntryTmp$frag_smiles), '; ')[[1]]
+                if(length(massTmp) > length(fragSmilesTmp)){
+                  massTmp <- massTmp[1:length(fragSmilesTmp)]  
+                }
+                metFragEntryTmp <- data.frame(mass=massTmp, frag_formula=fragSmilesTmp, stringsAsFactors = F) 
+                metFragEntryTmp <- metFragEntryTmp[order(metFragEntryTmp$mass, decreasing = T), , drop=F]
+                # brushedPoints(metFragEntryTmp, input$metFrag_brush, xvar = "mass") 
+               }
+            }
+          }
+          return(metFragEntryTmp)
+        }, rownames=F)
+        # reactive CFM table
+        cfmTable <- reactive({
+          if(length(cfmSelectTable)  ==  0){
+            cfmSelectDf <- "metID.CFM function has not yet been run"
+            cfmSelectDf <- data.frame(cfmSelectDf)
+            colnames(cfmSelectDf) <- "Result"
+            return(list(cfmSelectDf=cfmSelectDf))
+          } else {
+            cfmSelectDf <- cfmSelectTable[[feat.indx]]
+            cfmMatchesDf <- tmp.CFM[[feat.indx]]
+            if(is.null(cfmSelectDf)){
+              cfmSelectDf <- "metID.CFM function returned no results"
+              cfmSelectDf <- data.frame(cfmSelectDf)
+              colnames(cfmSelectDf) <- "Result" 
+              return(list(cfmSelectDf=cfmSelectDf))
+            } else {
+            ###create clickable url links to DB in table
+            cfmSelectDf$DBid  <- paste0("<a href='http://",  cfmSelectDf$WebAddress,  gsub('_.+', '', cfmSelectDf$DBid), ifelse(grepl('chemspider', cfmSelectDf$WebAddress), ".html", ""), 
+                                             "' target='_blank'>",  cfmSelectDf$DBid,  "</a>")
+              cfmSelectDf$WebAddress <- NULL 
+              cfmSelectDf$CFM_totPropEx <- round(as.numeric(cfmSelectDf$CFM_totPropEx),  digits = 2)
+              cfmSelectDf <- cfmSelectDf[order(cfmSelectDf$CFM_totPropEx, decreasing = T), , drop=F]
+              cfmSelectDf$DBname <- ifelse(nchar(cfmSelectDf$DBname) >= 35, 
+                                           paste0(substring(cfmSelectDf$DBname,  1,  35),  "..."), 
+                                           cfmSelectDf$DBname)
+             
+              return(list(cfmSelectDf=cfmSelectDf, cfmMatchesDf=cfmMatchesDf))
+            }
+          }
+        })
+        
+        output$cfmTable <- DT::renderDataTable({
+          return(cfmTable()$cfmSelectDf) 
+        }, selection='single', escape=F, rownames=F, options = list(pageLength = 5))
+        
+        
+        # MetFrag head-to-tail plot
+        output$cfmPlot <- shiny::renderPlot({
+          cfmTableTmp <- cfmTable()
+          if(ncol(cfmTableTmp$cfmSelectDf) > 1){
+            if(!is.null(input$cfmTable_rows_selected)){
+              plotDfTmp <- data.frame(composite_spectra[[feat.indx]],  stringsAsFactors = F)[, c('mass', 'intensity', 'Rel_Intensity')]
+              plotDfTmp$dbData <- 0
+             cfmEntryTmp <- cfmTableTmp$cfmSelectDf$DBid[input$cfmTable_rows_selected]
+             cfmMatchesTmp <- cfmTableTmp$cfmMatchesDf[cfmTableTmp$cfmMatchesDf$DBid %in% gsub(".+'>|</a>", '', cfmEntryTmp), c('mass', 'intensity')]
+             # remove duplicates
+             cfmMatchesTmp <- cfmMatchesTmp[duplicated(cfmMatchesTmp$mass) == F, , drop=F]
+             cfmMatchesTmp$Rel_Intensity <- -(cfmMatchesTmp$intensity / max(plotDfTmp$intensity) * 100)
+             cfmMatchesTmp$dbData <- 1
+                # rbind
+                plotDfTmp <- rbind(plotDfTmp, cfmMatchesTmp)
+                colsTmp <- ifelse(plotDfTmp[, 'dbData'] == 1, "#009E73", '#000000')
+                
+                if(!is.null(input$cfm_brush)){
+                  xlimTmp <- c(input$cfm_brush$xmin, input$cfm_brush$xmax)
+                  ylimTmp <- c(input$cfm_brush$ymin, input$cfm_brush$ymax)
+                } else {
+                  xlimTmp <- c(0, max(plotDfTmp$mass) * 1.1)
+                  ylimTmp <- c(min(plotDfTmp$Rel_Intensity), max(plotDfTmp$Rel_Intensity))
+                }
+                
+                plot(plotDfTmp[, c('mass', 'Rel_Intensity'), drop=F], xlim=xlimTmp, ylim=ylimTmp, yaxt='n', ylab='relative intensity',
+                     type='h', col=colsTmp, cex.axis=1.5, cex.lab=1.5)
+                axis(2, at=seq(-100, 100, 20), labels=c(abs(seq(-100, -20, 20)), seq(0, 100, 20)), las=2, cex.axis=1.3)
+                abline(h=0)
+                legend('topright', c("composite spectrum", 'CFM result'), lty=c(1, 1), lwd=c(3, 3), col=c('#000000', "#009E73"), pt.cex=4, cex=1.2, ncol=1)
+            } else {
+              plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+              text(x = 0.5, y = 0.5, 'click a row in the table above to view the plot', cex = 1.6, col = "black") 
+            }
+           
+          } else {
+            plot(c(0, 1), c(0, 1), ann=F, bty='n', type='n', xaxt='n', yaxt='n')
+            text(x = 0.5, y = 0.5, cfmTableTmp$cfmSelectDf[, 1], cex = 1.6, col = "black") 
+          }
+        })
+        
+        # cfm fragments table
+        output$cfmFragments <- DT::renderDataTable({
+          cfmEntryTmp <- data.frame(result='select a row in the table above')
+          cfmTableTmp <- cfmTable()
+          if(ncol(cfmTableTmp$cfmSelectDf) > 1){
+            if(!is.null(input$cfmTable_rows_selected)){
+              
+              cfmEntryTmp <- cfmTableTmp$cfmSelectDf$DBname[input$cfmTable_rows_selected]
+              cfmEntryTmp <- cfmTableTmp$cfmMatchesDf[cfmTableTmp$cfmMatchesDf$DBname %in% cfmEntryTmp, c('CFM_rank', 'CFM_mass', 'CFM_fragSMILES'), drop=F]
+              if(nrow(cfmEntryTmp) > 0){
+                cfmEntryTmp$CFM_fragSMILES <- paste0("<a href='https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/", 
+                                                     cfmEntryTmp$CFM_fragSMILES,  "/PNG",  "' target='_blank'>", 
+                       paste0(substring(cfmEntryTmp$CFM_fragSMILES,  1, 25),  "..."),  "</a>")
+                cfmEntryTmp <- cfmEntryTmp[duplicated(cfmEntryTmp$CFM_rank) == F, , drop=F]
+              }
+            }
+          }
+          return(cfmEntryTmp)
+        }, escape=F, rownames=F)
         ##load in any previous user comments
         ###add text area for storing user comments
         
@@ -968,7 +1551,9 @@ shiny::shinyServer(function(input,  output, session){
         # })
         
         
-        }
+      } else {
+        currEICRv$currEIC <- ''    
+      }
   }
   }
   })

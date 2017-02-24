@@ -10,38 +10,49 @@
 #' accuracy of each spectrum peak.    
 #' 
 #' @param mzError interpeak absolute m/z error for spectra signal grouping (default = 0.01).
-#' @param minPeaks Minimum number of peaks per spectrum (default = 3). 
+#' @param minPeaks Minimum number of peaks per spectrum (default = 1). 
 #' @param ... option arguments to be passed along.
-#' 
+#' @param verbose logical if TRUE display progress bars.
 #' @return A compMS2 object with ion grouped composite spectra.
 #' @export
 setGeneric("combineMS2.Ions", function(object, ...) standardGeneric("combineMS2.Ions"))
 
-setMethod("combineMS2.Ions", signature = "CompMS2", function(object, 
+setMethod("combineMS2.Ions", signature = "compMS2", function(object, 
                                                              mzError=0.01, 
-                                                             minPeaks=3){
+                                                             minPeaks=1,
+                                                             verbose=TRUE){
   # error handling
-  if(class(object) != "CompMS2"){
+  if(class(object) != "compMS2"){
     stop("argument object is not an CompMS2 class object")
   } else {
     
-    message(paste0("Grouping ions in ", length(object@compSpectra),
+    message(paste0("Grouping ions in ", length(compSpectra(object)),
                    " spectra..."))
     flush.console()
     
-    if(object@Parameters$nCores > 0){
+    if(Parameters(object)$nCores > 0){
+      if(!require(foreach)){
+        stop('package foreach must be installed to use this function in parallel')
+      }
+      if(!require(doSNOW)){
+        stop('package doSNOW must be installed to use this function in parallel')
+      }
       # create a cluster using the doSNOW package
-      message(paste0("Starting SNOW cluster with ", object@Parameters$nCores,
+      message(paste0("Starting SNOW cluster with ", Parameters(object)$nCores,
                      " local sockets..."))
       flush.console()
       
-      cl <- parallel::makeCluster(object@Parameters$nCores) 
+      cl <- parallel::makeCluster(Parameters(object)$nCores, outfile='') 
       doSNOW::registerDoSNOW(cl)
-      
+      progSeq <- round({length(compSpectra(object)) * seq(0, 1, 0.05)}, 0)
+      progSeq[1] <- 1
+      cat(paste0('Progress (', length(compSpectra(object)), ' spectra):\n'))
+      progress <- function(n){if(n %in% progSeq){cat(paste0(round({n/length(compSpectra(object))} * 100, 0), '%  '))}}
+      if(verbose == TRUE){opts <- list(progress=progress)} else {opts <- list(progress=NULL)}
       # foreach and dopar from foreach package
-      sign.group <- foreach(j = 1:length(object@compSpectra),
-                            .packages = c('stats')) %dopar% {
-                              signalGrouping(spectrum.df = object@compSpectra[[j]], 
+      sign.group <- foreach(j = 1:length(compSpectra(object)),
+                            .packages = c('stats'), .options.snow=opts) %dopar% {
+                              signalGrouping(spectrum.df = compSpectra(object)[[j]], 
                                              mzError=mzError,
                                              minPeaks=minPeaks)}
       # stop SNOW cluster
@@ -50,18 +61,17 @@ setMethod("combineMS2.Ions", signature = "CompMS2", function(object,
       
     } else {
       # create list to store results
-      sign.group <- vector("list", length(object@compSpectra))
+      sign.group <- vector("list", length(compSpectra(object)))
       # create progress bar
-      pb <- txtProgressBar(min=0, max=length(sign.group), style=3)
+      if(verbose == TRUE){ pb <- txtProgressBar(min=0, max=length(sign.group), style=3)}
       
       for(j in 1:length(sign.group)){
         
         #progress bar
-        Sys.sleep(0.01)
-        setTxtProgressBar(pb, j)
+        if(verbose==TRUE){setTxtProgressBar(pb, j)}
         flush.console()
         
-        sign.group.tmp <- signalGrouping(spectrum.df = object@compSpectra[[j]], 
+        sign.group.tmp <- signalGrouping(spectrum.df = compSpectra(object)[[j]], 
                                          mzError=mzError, 
                                          minPeaks = minPeaks)
         

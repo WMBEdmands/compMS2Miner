@@ -18,7 +18,7 @@
 #' 9. "basePeakIntensity" = intensity of the base peak for the scan 
 #' 10. "precursorScanNum" = precursor scan number (MS2) or scan number (MS1) 
 #' @export
-MS2fileInfo <- function(MS2file=NULL,TICfilter=NULL){
+MS2fileInfo <- function(MS2file=NULL, TICfilter=NULL){
   # error handling 
   if(is.null(TICfilter)){
     
@@ -45,7 +45,7 @@ MS2fileInfo <- function(MS2file=NULL,TICfilter=NULL){
     
     # create data frame using info function     
     tmp.df<-as.data.frame(t(sapply(c(1:length(MS2file)),FUN=Info)),
-                          stringsAsFactors = F) 
+                          stringsAsFactors = FALSE) 
     # add column names
     colnames(tmp.df) <- c("MS.scanType", "precursorMz", "retentionTime", "TIC", 
                           "TICaboveFilter", "precursorIntensity", 

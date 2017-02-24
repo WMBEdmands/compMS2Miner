@@ -14,9 +14,8 @@ dotProdMatrix(allSpectra = NULL, spectraNames = NULL, binSizeMS2 = NULL)
 \item{binSizeMS2}{numeric the MS2 bin size to bin MS2 data prior to dot product calculation (default = 0.1 Da).}
 }
 \value{
-a matrix of equal dimension corresponding to the number of factor levels f
+a matrix of equal dimension corresponding to the number of unique spectrum names
 }
 \description{
 dot product matrix calculation
 }
-

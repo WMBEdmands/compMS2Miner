@@ -50,7 +50,7 @@ dynamicNoiseFilter <- function(spectrum.df=NULL, DNF=2, minPeaks=5,
   } else {
     # rank matrix/ dataframe by intensity
     intOrder<-order(spectrum.df[, 2])
-    spectrum.df <- spectrum.df[intOrder, , drop=F]
+    spectrum.df <- spectrum.df[intOrder, , drop=FALSE]
     # median bottom half of intensity values
 #     medBottomHalf <- median(head(spectrum.df[, 2],
 #                                  n=nrow(spectrum.df)/2))
@@ -83,9 +83,9 @@ for(k in minIntIndx:(nrow(spectrum.df)-1)){
 }
     # filter by DNF noise filter level
     Noise.indx <- which(spectrum.df[, 2] >= Noise.level)
-    spectrum.df <- spectrum.df[Noise.indx, , drop=F]
+    spectrum.df <- spectrum.df[Noise.indx, , drop=FALSE]
     # sort by m/z
-    spectrum.df <- spectrum.df[order(spectrum.df[,1]), , drop=F]
+    spectrum.df <- spectrum.df[order(spectrum.df[,1]), , drop=FALSE]
     # number of peaks higher than minimum
     aboveMinPeaks <- nrow(spectrum.df) >= minPeaks
     # Total intensity composite spectrum 
@@ -101,7 +101,7 @@ for(k in minIntIndx:(nrow(spectrum.df)-1)){
                                       IntCompSpec=IntCompSpec,
                                       TotalIntSNR=TotalIntSNR,
                                       nPeaks=nrow(spectrum.df), 
-                                      stringsAsFactors = F),
+                                      stringsAsFactors = FALSE),
                   aboveMinPeaks=aboveMinPeaks)
     return(DNF.tmp)
   }  
