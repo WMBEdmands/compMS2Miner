@@ -14,7 +14,7 @@ compMS2Miner is a package in the popular R programming language developed for co
 
 Data curation, visualization and sharing is made possible at any stage of the compMS2Miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package. The application allows the user to rapidly create their own study-specific MS<sup>2</sup> databases for each of their chromatographic methods. Additionally an msp database file can also be rapidly generated from the output of the compMS2Miner workflow.
 
-If you find compMS2Miner useful for your metabolite annotation challenge please remember to cite us:
+If you find compMS2Miner useful for your metabolite annotation challenges please remember to cite us:
 
 **compMS2Miner: an automatable metabolite identification, visualization and data-sharing R package for high-resolution LC-MS datasets**
 *William Matthew Bell Edmands, Lauren M. Petrick, Dinesh Kumar Barupal, Augustin Scalbert, Mark Wilson, Jeffrey Wickliffe, and Stephen M Rappaport*
