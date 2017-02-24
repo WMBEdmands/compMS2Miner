@@ -3,7 +3,7 @@
 compMS2Miner is an R package for total metabolome identification of metabolomic high-resolution LC-MS datasets.
 
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56582.svg)](http://dx.doi.org/10.5281/zenodo.56582)
-latest stable release v1.2.5 (archived on zenodo).
+latest stable release v2.2.3 (archived on zenodo).
 
 #Purpose
 A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS/MS fragmentation data.
@@ -36,7 +36,7 @@ install.package('compMS2Miner_v1.2.3.tar.gz', repos=NULL, type='source')
 After compMS2Miner is installed begin by reading the package vignette *"compMS2Miner_Workflow"*
 Just type ```vignette('compMS2Miner_Workflow')``` to view the pdf of the workflow. Or view an html version of the vignette on the web by clicking the image below:
 
-[![compMS2Miner_logo](https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png)](http://bit.ly/28T06oN)
+[![compMS2Miner_logo](https://github.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/CompMS2minerLogoTutorial.png)](http://bit.ly/28T06oN)
 
 Example data illustrating compMS2Miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-HRMS metabolomic dataset of human blood samples and corresponding data-dependent MS/MS data files. An example workflow using this data is illustrated in the package vignette. The compMS2Miner package is designed to offer a more complete solution to the LC-HRMS metabolite identification challenge than currently available softwares in the R language and is also complementary to other extant R packages/ workflows.
 
@@ -45,7 +45,7 @@ Example data illustrating compMS2Miner is provided internal to the package and c
 The compMS2Miner structured workflow performs the following (v1.2.5, 2016/06/28): 
 * Matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2()```
 * Dynamically filters variable noise. ```deconvNoise()```:
-![DNF animation](https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/DNFanimation.gif)
+![DNF animation](https://github.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/DNFanimation.gif)
 * Generates composite mass spectra by multiple scan signal summation. ```combineIons()```
 * Interprets possible substructures from a literature curated database. ```subStructure()```
 * Annotates unknown masses from several metabolomic databases. ```metID(method='dbAnnotate')```
@@ -58,7 +58,7 @@ The compMS2Miner structured workflow performs the following (v1.2.5, 2016/06/28)
 
 An example **Composite MS2 Explorer** application created using the example data (within extdata of the package) is hosted on the shinyapps.io site here: 
 
-<a href="http://bit.ly/28QOxj6" target="blank"><img src="https://raw.githubusercontent.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"/></a> 
+<a href="http://bit.ly/28QOxj6" target="blank"><img src="https://github.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/screenshotCompMS2explorer_260_120.png"/></a> 
 
 Upon completion of the compMS2Miner workflow the user can then load the **Composite MS2 Explorer** app (```compMS2explorer()```) and systematically examine each composite spectrum using all of the available tools provided in the  interface. Once a decision has been made on a putative annotation the user can then make potentially detailed comments in the interactive table. In this way metabolite identification decisions can be effectively and very efficiently recorded (such as links to journal articles and other pieces of evidence in support of an assignment). 
 
