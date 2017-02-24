@@ -7,11 +7,11 @@ latest stable release v2.2.3 (archived on zenodo).
 
 #Purpose
 A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS/MS fragmentation data.
-The number of MS2 spectra collected (often thousands in a single MS^2^ datafile) limits the feasibility of manual interpretation of every spectrum. A degree of automatic unknown annotation and at the very least a confident annotation of an unknowns most probable compound class is highly desirous. A holistic overview of the relationships between spectra can greatly facilitate the correct annotation of statistically relevant unknowns. When a handful of unknowns are targeted in isolation the broader context of an unknown can be easily missed and therefore putative identities poorly interpreted.
+The number of MS2 spectra collected (often thousands in a single MS<sup>2</sup> datafile) limits the feasibility of manual interpretation of every spectrum. A degree of automatic unknown annotation and at the very least a confident annotation of an unknowns most probable compound class is highly desirous. A holistic overview of the relationships between spectra can greatly facilitate the correct annotation of statistically relevant unknowns. When a handful of unknowns are targeted in isolation the broader context of an unknown can be easily missed and therefore putative identities poorly interpreted.
 
 compMS2Miner is a package in the popular R programming language developed for comprehensive unknown feature annotation using peak-picker output files and MS/MS data files as inputs. compMS2Miner brings together many useful metabolite identification tools (see [Features](#features) section below) and is modular and therefore fully extensible. 
 
-Data curation, visualization and sharing is made possible at any stage of the compMS2Miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package. The application allows the user to rapidly create their own study-specific MS^2^ databases for each of their chromatographic methods. Additionally an msp database file can also be rapidly generated from the output of the compMS2Miner workflow.
+Data curation, visualization and sharing is made possible at any stage of the compMS2Miner package workflow via an application **Composite MS2 Explorer** developed with the R shiny package. The application allows the user to rapidly create their own study-specific MS<sup>2</sup> databases for each of their chromatographic methods. Additionally an msp database file can also be rapidly generated from the output of the compMS2Miner workflow.
 
 If you find compMS2Miner useful for your metabolite annotation challenge please remember to cite us:
 *compMS2Miner: an automatable metabolite identification, visualization and data-sharing R package for high-resolution LC-MS datasets*
@@ -50,7 +50,7 @@ The compMS2Miner structured workflow performs the following (v2.2.3, 2017/02/24)
 * Dynamically filters variable noise. ```deconvNoise()```: (additional noise filtration method options are in development) 
 ![DNF animation](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/DNFanimation.gif)
 * Generates composite mass spectra by multiple scan signal summation and are only combined based on a minimum mean spectral similarity score. ```combineIons()```
-* Possible contaminant/redundant spectra in precursor selection based MS^2^ are removed based on the following criteria: isobaric repeats of precursor masses of a minimum retention time gap and high spectral similarity. ```combineIons.removeContam()```
+* Possible contaminant/redundant spectra in precursor selection based MS<sup>2</sup> are removed based on the following criteria: isobaric repeats of precursor masses of a minimum retention time gap and high spectral similarity. ```combineIons.removeContam()```
 * Interprets possible substructures from a literature curated database. ```subStructure()```
 * Annotates unknown masses from several metabolomic databases. ```metID(method='dbAnnotate')```
 * Matches spectral databases such as massbank in the NIST msp text database format. ```metID(method='matchSpectralDB')```
