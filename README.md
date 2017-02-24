@@ -2,7 +2,7 @@
 
 compMS2Miner is an R package for comprehensive and automatable annotation of metabolomic high-resolution LC-MS datasets.
 
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56582.svg)](http://dx.doi.org/10.5281/zenodo.56582)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.322428.svg)](https://doi.org/10.5281/zenodo.322428)
 latest stable release v2.2.3 (archived on zenodo).
 
 #Purpose
