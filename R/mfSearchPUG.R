@@ -4,6 +4,9 @@
 #' formula
 #' @export
 mfSearchPUG <- function(mf='C10H21N'){
+  if(!require(XML)){
+    stop('package XML must be installed to use this function.')
+  }
   qUrl <- paste0('http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/formula/', mf, '/XML')
   parsedhtml <- XML::htmlParse(qUrl)
   
@@ -50,4 +53,7 @@ mfSearchPUG <- function(mf='C10H21N'){
   flush.console()
   return(as.numeric(unlist(cidsTmp)))
   } 
+  # obtain identifiers for all cids
+  # https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/1,2,3,4,5/property/IUPACname,MolecularFormula,InChIKey,MonoisotopicMass,CanonicalSMILES/XML
+  # 
 } # end function
