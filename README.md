@@ -43,9 +43,9 @@ Example data illustrating compMS2Miner is provided internal to the package and c
 #Features
 
 The compMS2Miner structured workflow performs the following (v1.2.5, 2016/06/28): 
-* Matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2()```
+* Matches unknown mass spectral features to precursor MS/MS scans and constructs the "CompMS2" class object. ```compMS2Construct()```
 * Dynamically filters variable noise. ```deconvNoise()```:
-![DNF animation](https://github.com/WMBEdmands/compMS2Miner/master/inst/shiny-apps/compMS2explorer/www/DNFanimation.gif)
+![DNF animation](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/DNFanimation.gif)
 * Generates composite mass spectra by multiple scan signal summation. ```combineIons()```
 * Interprets possible substructures from a literature curated database. ```subStructure()```
 * Annotates unknown masses from several metabolomic databases. ```metID(method='dbAnnotate')```
