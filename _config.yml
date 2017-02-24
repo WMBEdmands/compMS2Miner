@@ -1,0 +1,8 @@
+title: CompMS2miner
+description: metabolite identification R-package for metabolomic high-resolution LC-MS datasets.
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
