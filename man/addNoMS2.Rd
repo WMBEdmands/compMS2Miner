@@ -11,7 +11,8 @@ addNoMS2(object, ...)
 
 \item{specNames}{character vector of composite spectrum names.}
 
-\item{eicMzRt}{matrix of EICnos/unique id, mz values and rt values in 3 columns.}
+\item{eicMzRt}{data.frame of EICnos/unique id, mz values, rt values and (if applicable)
+ESI adducts/in-source fragments in 4 columns.}
 }
 \value{
 a "compMS2" class object with noMS2 data added to the appropriate slots.

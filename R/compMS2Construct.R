@@ -68,6 +68,11 @@ compMS2Construct <-  function(MS1features = NULL, msDataDir = NULL, MS2files=NUL
                                                 "negative"), 
           " ionisation mode")
   flush.console()
+  if(!is.null(nCores)){
+    if(!require(foreach)){
+      stop('foreach package must be installed for parallel computation.\n')
+    }
+  }
   # new compMS2 object 
   object <- new("compMS2")
   # set global options

@@ -34,7 +34,7 @@ setMethod("publishApp", signature = "compMS2", function(object, appName=NULL,  w
     # if(!require(shinyapps)){
     #   stop('The package shinyapps must be installed to send your app to shinyapps.io...')
     # }
-    
+    # 
     message('Generating splash codes and adding to compMS2 object.\n')
     flush.console()
     metaData(object) <- sapply(1:length(compSpectra(object)), function(x){
