@@ -70,21 +70,6 @@ compMS2Construct <-  function(MS1features = NULL, msDataDir = NULL, MS2files=NUL
   flush.console()
   # new compMS2 object 
   object <- new("compMS2")
-  
-  # if foreach package not installed
-  if(!require(foreach)){
-    install.packages('foreach')
-    if(!require(foreach)){
-      stop('Unable to install the foreach package which is required for correct functioning of the compMS2miner package...\n')
-    }
-  }
-  # if foreach package not installed
-  if(!require(Rcpp)){
-    install.packages('Rcpp')
-    if(!require(Rcpp)){
-      stop('Unable to install the Rcpp package which is required for correct functioning of the compMS2miner package...\n')
-    }
-    }
   # set global options
   options(stringsAsFactors = FALSE)
   # if is.null msDataDir select .mzXML/.mzML/.mgf file containing directory
@@ -257,7 +242,11 @@ setMethod("show", "compMS2", function(object) {
   if(length(filePaths(object)) > 0){
     cat("A \"compMS2\" class object derived from", length(filePaths(object)), 
         "MS2 files \n\n")
-    indxTmp <- grepl('^.+_', names(metaData(object)))
+    # any non-ms2 matched
+    noMs2Idx <- grepl('noMS2', names(metaData(object)))
+    
+    indxTmp <- noMs2Idx == FALSE
+    
     Acc.tmp <- sapply(metaData(object)[which(indxTmp)], function(x){ 
       c(mean(abs(unlist(x[grep("ppmDiff", names(x))]))),
         mean(abs(unlist(x[grep("rtDiff", names(x))]))),
@@ -286,6 +275,9 @@ setMethod("show", "compMS2", function(object) {
       duplicated(unlist(x[grep('precursorScanNum', names(x))])) == FALSE})), na.rm=TRUE)
   
     cat(paste0(nChimScans, ' spectra of ', allPrecScans, ' precursor scans were identified as potentially chimeric (', round({nChimScans/allPrecScans} * 100, 2),'% an isolation width of ',  Parameters(object)$isoWid, ' Da was supplied to "compMS2Contruct").\n\n'))
+    if(any(noMs2Idx)){
+      cat(paste0('Additionally ', sum(noMs2Idx), ' EICs (', round({sum(noMs2Idx)/length(noMs2Idx)} * 100, 2),'%) are not matched to any MS2 scans and were added by the metID.corrNetwork function (correlation threshold >= ', Parameters(object)$corrThresh, '.\n'))
+    }
     # maxInterInt <- do.call(c, lapply(metaData(object), function(x) x[duplicated(x[, 'precursorScanNum']) == FALSE, 'maxInterIons']))
     # rtPrecScans <- do.call(c, lapply(metaData(object), function(x) x[duplicated(x[, 'precursorScanNum']) == FALSE, 'retentionTime']))
     # maxInterInt <- as.numeric(maxInterInt)

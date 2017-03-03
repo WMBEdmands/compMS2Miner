@@ -57,10 +57,11 @@ maxNodes=300, MS2only=1, minClustSize=2){
     Parameters(object)$corrMethod <- corrMethod
     Parameters(object)$deltaCorr <- delta
     Parameters(object)$MTC <- MTC
+    # index ms2 matched
+    ms2MatchedEICs <- as.numeric(gsub('.+_', '', names(compSpectra(object))))
     
     if(MS2only == 3){
       # subset to include MS2 matched
-      ms2MatchedEICs <- as.numeric(gsub('.+_', '', names(compSpectra(object))))
       # subset peakTable to only include MS2 matched
       peakTable <- peakTable[peakTable$EICno %in% ms2MatchedEICs, ]
     }
@@ -80,8 +81,13 @@ maxNodes=300, MS2only=1, minClustSize=2){
       obsTable[is.na(obsTable)] <- 0
     }
     # calc correlation matrix
-    message("Calculating correlation matrix for ", nrow(obsTable), " features\n\n")
+    message("Calculating correlation matrix for ", 
+            prettyNum(nrow(obsTable), big.mark = ','), " features\n\n")
     flush.console()
+    if(nrow(obsTable) > 10000){
+      warning('This is a large matrix and the correlation matrix may take some time or your R session may run out of memory.\n', immediate.=TRUE)
+      flush.console()
+    }
     # from https://stat.ethz.ch/pipermail/r-help/2000-January/009758.html
     cor.prob <- function(X, dfr = nrow(X) - 2, Method=corrMethod) {
       R <- cor(X, method=Method)
@@ -102,39 +108,71 @@ maxNodes=300, MS2only=1, minClustSize=2){
     # identify optimum correlation cutoff
     if(is.null(corrThresh)){
       cat('Estimating optimal correlation coefficient based on network attributes from a sequence of cut-off values.\n')
-      corrThresh <- optimCutOff(cor.m)$estCutOff
-      cat('estimate of optimal corrThresh value:', corrThresh, '.\n')
+      if(ncol(cor.m) > 2000){
+        cat('\nLarge correlation matrix', prettyNum(ncol(cor.m), big.mark = ','), 
+            'x', prettyNum(ncol(cor.m), big.mark = ','), 
+            ': starting from a cutoff of 0.5 correlation coefficient.\n')
+        cutOffSeqTmp <- seq(0.5, 1, 0.05)
+      } else {
+        cutOffSeqTmp <- seq(0.01, 1, 0.01)
+      }
+      corrThresh <- optimCutOff(cor.m, cutOffSeq = cutOffSeqTmp)$estCutOff
+      cat('\nestimate of optimal corrThresh value:', corrThresh, '.\n')
     }
     Parameters(object)$corrThresh <- corrThresh
     # replace upper tri with zero
     cor.m[upper.tri(cor.m, diag=TRUE)] <- 0
     # ID features above below corrThresh
-    sif <- apply(cor.m, 2, function(x){
-      pos.tmp <- which(x > corrThresh)
-      neg.tmp <- which(x < -corrThresh)
-      if(length(pos.tmp) > 0){
-        names(pos.tmp) <- x[pos.tmp]
-      }
-      if(length(neg.tmp) > 0){
-        names(neg.tmp) <- x[neg.tmp]
-      }
-      return(list(pos=pos.tmp, neg=neg.tmp))
-    })
-    # melt list result
-    sif.df <- reshape2::melt(sif)
-    # add correlation value
-    sif.df[, 4] <- as.numeric(gsub('.+pos\\.|.+neg\\.', '', names(unlist(sif))))
-    # create sif file names
-    sif.df[, 5] <- names(sif)[sif.df[, 1]]
+    posCorrTmp <- which(cor.m > corrThresh, arr.ind = TRUE)
+    negCorrTmp <- which(cor.m < {-corrThresh}, arr.ind = TRUE)
+    if(nrow(posCorrTmp) == 0 & nrow(negCorrTmp) == 0){
+      stop('no correlations above a threshold of ', corrThresh)
+    }
+    # correlation coefficient value
+    posCorrTmp <- cbind(posCorrTmp, cor.m[posCorrTmp])
+    posCorrTmp <- cbind(posCorrTmp, 'pos')
+    if(nrow(negCorrTmp) > 0){
+    # correlation coefficient value
+    negCorrTmp <- cbind(negCorrTmp, cor.m[negCorrTmp])
+    negCorrTmp <- cbind(negCorrTmp, 'neg')
+    sif.df <- rbind(posCorrTmp, negCorrTmp)
+    } else {
+    sif.df <- posCorrTmp
+    }
     
+    sif.df[, 1] <- peakTable[as.numeric(sif.df[, 1]), 1]
+    sif.df[, 2] <- peakTable[as.numeric(sif.df[, 2]), 1]
+    # sif <- apply(cor.m, 2, function(x){
+    #   pos.tmp <- which(x > corrThresh)
+    #   neg.tmp <- which(x < -corrThresh)
+    #   if(length(pos.tmp) > 0){
+    #     names(pos.tmp) <- x[pos.tmp]
+    #   }
+    #   if(length(neg.tmp) > 0){
+    #     names(neg.tmp) <- x[neg.tmp]
+    #   }
+    #   return(list(pos=pos.tmp, neg=neg.tmp))
+    # })
+    # # melt list result
+    # sif.df <- reshape2::melt(sif)
+    # add correlation value
+    # create sif file names
+    # sif.df[, 1] <- colnames(cor.m)[as.numeric(sif.df[, 1]]
+    
+    # add average intensity
+    avInt <- unique(as.vector(sif.df[, 1:2]))
+    avInt <- rowMeans(peakTable[peakTable[, 1] %in% avInt, obsNames])
+    names(avInt) <- ifelse(names(avInt) %in% ms2MatchedEICs, 
+                           paste0('CC_', names(avInt)), 
+                           paste0('noMS2_', names(avInt)))
     # add prefix to names
-    ms2MatchedEICs <- as.numeric(gsub('.+_', '', names(compSpectra(object))))
-    indxTmp <- sif.df[, 3] %in% ms2MatchedEICs
-    sif.df[, 3] <- ifelse(indxTmp, paste0('CC_', sif.df[, 3]), 
-                          paste0('noMS2_', sif.df[, 3]))
-    indxTmp <- sif.df[, 5] %in% ms2MatchedEICs
-    sif.df[, 5] <- ifelse(indxTmp, paste0('CC_', sif.df[, 5]), 
-                          paste0('noMS2_', sif.df[, 5]))
+    indxTmp <- sif.df[, 1] %in% ms2MatchedEICs
+    sif.df[, 1] <- ifelse(indxTmp, paste0('CC_', sif.df[, 1]), 
+                          paste0('noMS2_', sif.df[, 1]))
+    indxTmp <- sif.df[, 2] %in% ms2MatchedEICs
+    sif.df[, 2] <- ifelse(indxTmp, paste0('CC_', sif.df[, 2]), 
+                          paste0('noMS2_', sif.df[, 2]))
+    
     # add in features with no correlation above thresh
     # noCorrFeat <- setdiff(peakTable[, 1], unique(c(sif.df[, 3], sif.df[, 5])))
     # noCorrFeatM <- matrix(0, nrow=length(noCorrFeat), ncol=5)
@@ -143,15 +181,32 @@ maxNodes=300, MS2only=1, minClustSize=2){
     # noCorrFeatM[, 3] <- noCorrFeat
     # sif.df <- rbind(sif.df, noCorrFeatM)
     
-    netTmp <- igraph::graph(as.vector(t(sif.df[, c(3, 5)])))
+    netTmp <- igraph::graph(as.vector(t(sif.df[, c(1, 2)])))
     # add corr coeff
-    igraph::E(netTmp)$value <- sif.df[, 4]
+    igraph::E(netTmp)$value <- sif.df[, 3]
+    # add average intensity
+    idxTmp <- match(names(igraph::V(netTmp)), names(avInt))
+    igraph::V(netTmp)$avInt <- avInt[idxTmp]
     # neighbours of MS2 matched
     if(MS2only == 2){
     eicsMS2 <- which(igraph::V(netTmp)$name %in% names(compSpectra(object)))
     adjVertTmp <- c(eicsMS2, unlist(adjacent_vertices(netTmp, eicsMS2, mode='all')))
     netTmp <- igraph::induced_subgraph(graph=netTmp, vids=unique(adjVertTmp))
     }
+    
+    # if necessary remove clusters
+    if(minClustSize > 2){
+      clustsTmp <- igraph::clusters(netTmp)
+      beforeClust <- length(clustsTmp$csize)
+      indxTmp <- which(clustsTmp$csize >= minClustSize)
+      retVert <- names(clustsTmp$membership)[clustsTmp$membership %in% indxTmp]
+      # take subgraph
+      netTmp <- igraph::induced_subgraph(graph=netTmp, vids=retVert)
+      afterRem <- length(igraph::clusters(netTmp)$csize)
+      message(beforeClust - afterRem, ' clusters out of ', beforeClust, ' consisted of less than ', minClustSize, ' nodes and were removed.\n')
+      flush.console()
+    }
+    
     # add any noMS2 matched to object
     if(MS2only %in% c(1, 2)){
       # add any noMS2 matched to object
@@ -169,21 +224,15 @@ maxNodes=300, MS2only=1, minClustSize=2){
       namesTmp <- igraph::V(netTmp)$name
       namesTmp <- namesTmp[grep('^noMS2', namesTmp)]
       eicNos <- gsub('^noMS2_', '', namesTmp)
-      eicMzRt <- as.matrix(peakTable[match(eicNos, peakTable[, 1]), 1:3, drop=FALSE])
+      eicMzRt <- peakTable[match(eicNos, peakTable[, 1]), 1:4, drop=FALSE]
+      # see if the 4 th column contains adduct information
+      adducts <- any(grepl('M\\+|M\\-', peakTable[, 4]))
+      if(adducts == FALSE){
+      eicMzRt[, 4] <- ''
+      }
       object <- addNoMS2(object, namesTmp, eicMzRt)
     }
-    # if necessary reduce clusters
-    if(minClustSize > 2){
-      clustsTmp <- igraph::clusters(netTmp)
-      beforeClust <- length(clustsTmp$csize)
-      indxTmp <- which(clustsTmp$csize >= minClustSize)
-      retVert <- names(clustsTmp$membership)[clustsTmp$membership %in% indxTmp]
-      # take subgraph
-      netTmp <- igraph::induced_subgraph(graph=netTmp, vids=retVert)
-      afterRem <- length(igraph::clusters(netTmp)$csize)
-      message(beforeClust - afterRem, ' clusters out of ', beforeClust, ' consisted of less than ', minClustSize, ' nodes and were removed.\n')
-      flush.console()
-    }
+   
     nNodes <- length(igraph::V(netTmp))
     if(nNodes <= maxNodes){
       message('less than ', maxNodes, ' nodes using Fruchterman-Reingold layout. see ?igraph::with_fr()\n')
@@ -201,7 +250,7 @@ maxNodes=300, MS2only=1, minClustSize=2){
     indxTmp <- match(as.numeric(gsub('.+_', '', igraph::V(netTmp)$name)), peakTable[, 1])
     layoutTmp <- cbind(layoutTmp, as.matrix(peakTable[indxTmp, 1:3]))
     network(object)$corrNetworkGraph <- netTmp
-    network(object)$corrLayout <- layoutTmp
+    network(object)$corrLayout <- data.frame(layoutTmp, stringsAsFactors = FALSE)
     
     return(object)
 }) # end function

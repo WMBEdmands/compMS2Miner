@@ -10,11 +10,14 @@ subsetCompMS2(object, ...)
 \item{object}{a "compMS2" class object.}
 
 \item{specNames}{character vector of composite spectrum names.}
+
+\item{corrNetworkNodes}{logical should all the first correlation network 
+nodes of the composite spectrum names also be returned? 
+(default = FALSE).}
 }
 \value{
 a "compMS2" class object with the composite spectra and all metID 
-information removed. Any correlation or spectral similarity networks will 
-have to be recalculated.
+information removed.
 }
 \description{
 subset compMS2 class object using a vector of spectra names

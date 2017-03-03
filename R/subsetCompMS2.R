@@ -2,14 +2,18 @@
 #' 
 #' @param object a "compMS2" class object.
 #' @param specNames character vector of composite spectrum names.
+#' @param corrNetworkNodes logical should all the first correlation network 
+#' nodes of the composite spectrum names also be returned? 
+#' (default = FALSE).
 #' @return a "compMS2" class object with the composite spectra and all metID 
-#' information removed. Any correlation or spectral similarity networks will 
-#' have to be recalculated.
+#' information removed. 
 #' @export
 setGeneric("subsetCompMS2", function(object, ...) standardGeneric("subsetCompMS2"))
 
 setMethod("subsetCompMS2", signature = "compMS2", function(object, 
-                                                           specNames=NULL, ...){
+                                                           specNames=NULL, 
+                                                           corrNetworkNodes=FALSE, 
+                                                           ...){
 # error handling
   stopifnot(!is.null(object))
   if(class(object) != "compMS2"){
@@ -19,11 +23,47 @@ setMethod("subsetCompMS2", signature = "compMS2", function(object,
   if(!is.character(specNames)){
     stop('argument specNames must be a character vector') 
   }
-  matIndxTmp <- specNames %in% names(compSpectra(object)) 
-  if(any(matIndxTmp == FALSE)){
-  stop('The following composite spectrum names do not match:\n', paste0(specNames[matIndxTmp == FALSE], collapse = '\n'), '\nPlease Check and try again.')  
+  if(length(network(object)) > 0){
+  if(!require(igraph)){
+    stop('The igraph package must be installed to use this function.\n')
   }
-network(object) <- list()
+  }
+  if(corrNetworkNodes == TRUE){
+    if(length(network(object)$corrNetworkGraph) == 0){
+      stop('The function metID.corrNetwork must be run if all connected nodes should be included.')
+    }
+  }
+  matIndxTmp <- match(specNames, names(compSpectra(object))) 
+  if(any(is.na(matIndxTmp))){
+  stop('The following composite spectrum names do not match:\n', paste0(specNames[is.na(matIndxTmp)], collapse = '\n'), '\nPlease Check and try again.')  
+  }
+# network(object) <- list()
+
+if(!is.null(network(object)$corrNetworkGraph)){
+corrNetTmp <- network(object)$corrNetworkGraph
+corrNetIdx <- match(specNames, names(igraph::V(corrNetTmp)))
+corrNetIdx <- corrNetIdx[!is.na(corrNetIdx)]
+if(corrNetworkNodes){
+  # id first neighbours and add to corrNetIdx
+  neighSel <- sapply(corrNetIdx, function(x) names(igraph::neighbors(corrNetTmp, x)))
+  # add first neighbours to specNames
+  specNames <- unique(c(specNames, do.call(c, neighSel)))
+  # subset corr network
+  corrNetIdx <- match(specNames, names(igraph::V(corrNetTmp)))
+  corrNetIdx <- corrNetIdx[!is.na(corrNetIdx)]
+  # subset
+  corrNetTmp <- igraph::induced_subgraph(corrNetTmp, corrNetIdx)
+} 
+# subset layout
+layoutTmp <- network(object)$corrLayout
+corrNetIdx <- match(gsub('.+_', '', names(igraph::V(corrNetTmp))), layoutTmp[, 3])
+corrNetIdx <- corrNetIdx[!is.na(corrNetIdx)]
+layoutTmp <- layoutTmp[corrNetIdx, , drop=FALSE]
+# add back to object
+network(object)$corrLayout <- layoutTmp
+network(object)$corrNetworkGraph <- corrNetTmp
+}
+  
 compSpectra(object) <- compSpectra(object)[specNames]
 metaData(object) <- metaData(object)[specNames]
 if(length(DBanno(object)) > 0){

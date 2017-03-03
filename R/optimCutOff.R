@@ -23,12 +23,15 @@ optimCutOff <- function(x=NULL, cutOffSeq=seq(0.01, 1, 0.01), diffConsecVals=1.5
   }
   # remove upper tri
   x[upper.tri(x, diag=TRUE)] <- 0
+  x <- abs(x)
   # ID features above below corrThresh
   netData <- matrix(0, ncol=4, nrow=length(cutOffSeq))
   colnames(netData) <- c('nNodes', 'nEdges', 'nClust', 'netDense')
   row.names(netData) <- cutOffSeq
+  pb <- txtProgressBar(max=length(cutOffSeq), style=3)
   for(i in 1:length(cutOffSeq)){
-    arrIdxTmp <- which(abs(x) >= cutOffSeq[i], arr.ind = TRUE)
+    setTxtProgressBar(pb, i)
+    arrIdxTmp <- which(x >= cutOffSeq[i], arr.ind = TRUE)
     arrIdxTmp <- cbind(colnames(x)[arrIdxTmp[, 1]], colnames(x)[arrIdxTmp[, 2]])
     if(nrow(arrIdxTmp) > 0){
       netTmp <- igraph::graph(as.vector(t(arrIdxTmp[, c(1, 2)])))
@@ -61,17 +64,17 @@ optimCutOff <- function(x=NULL, cutOffSeq=seq(0.01, 1, 0.01), diffConsecVals=1.5
     }
   }
   if(is.na(estCutOff)){
-    warning('Failed to find a plateau in the network density. Returning an approximation close to the maximum number of clusters on the upward slope.\n', immediate. = TRUE)
+    warning('\nFailed to find a plateau in the network density. Returning an approximation close to the maximum number of clusters on the upward slope.\n', immediate. = TRUE)
     flush.console()
     nClustTmp <- netData[, 'nClust']
     maxClustTmp <- max(nClustTmp)
-    minClustTmp <- min(nClustTmp[cutOffSeq < 0.4])
+    minClustTmp <- min(nClustTmp[cutOffSeq <= ifelse(min(cutOffSeq) > 0.4, min(cutOffSeq), 0.4)])
     idxTmp <- c(max(which(nClustTmp == minClustTmp)), which(nClustTmp == maxClustTmp))
     medUpSlope <- round(quantile(idxTmp[1]:idxTmp[2], probs = seq(0, 1, 0.33))['66%'], 0)
     estCutOff <- cutOffSeq[medUpSlope]
   }
   if(estCutOff >= maxCutOff){
-    warning('Estimated cut-off value greater than ', round(maxCutOff, 2), '. This indicates that a large proportion of the network nodes are highly related. In the case of spectral similarity for example this could indicate large numbers of similar spectra which were not removed during the combineMS2.removeContam step for example or biologically related such as lipids.\n', immediate. = TRUE)
+    warning('\nEstimated cut-off value greater than ', round(maxCutOff, 2), '. This indicates that a large proportion of the network nodes are highly related. In the case of spectral similarity for example this could indicate large numbers of similar spectra which were not removed during the combineMS2.removeContam step for example or biologically related such as lipids.\n', immediate. = TRUE)
     estCutOff <- maxCutOff
     }
   # estimate cutoff
