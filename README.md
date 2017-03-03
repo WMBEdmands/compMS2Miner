@@ -69,7 +69,7 @@ The compMS2Miner structured workflow performs the following (v2.2.3, 2017/02/24)
 
 An example **Composite MS2 Explorer** application created using the example data (within extdata of the package) is hosted on the shinyapps.io site here: 
 
-<a href="http://bit.ly/28QOxj6" target="blank"><img src="https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/screenshotCompMS2Explorer_260_120.png"/></a> 
+<a href="https://wmbedmands.shinyapps.io/compMS2Example/" target="blank"><img src="https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/screenshotCompMS2Explorer_260_120.png"/></a> 
 
 Upon completion of the compMS2Miner workflow the user can then load the **Composite MS2 Explorer** app from the compMS2 object directly or from a zip file (```compMS2explorer()```) and systematically examine each composite spectrum (including any automatic annotation made) using all of the available tools provided in the  interface. Once a decision has been made on a putative annotation the user can then make potentially detailed comments in the interactive table. In this way metabolite identification decisions can be effectively and very efficiently recorded (such as links to journal articles and other pieces of evidence in support of an assignment). 
 
