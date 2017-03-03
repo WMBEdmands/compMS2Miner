@@ -32,22 +32,22 @@ if(length(pdfFile) == 0){
   # not found works just as well
 }
 
-composite_spectra <- compSpectra(object)
+composite_spectra <- object@compSpectra
 Features.v <- names(composite_spectra)
 ###DB search names
-tmp.DBanno.res <- DBanno(object)
+tmp.DBanno.res <- object@DBanno
 
 ### best anno
-tmp.BestAnno <- BestAnno(object)
-metaData.tmp <- metaData(object)
+tmp.BestAnno <- lapply(tmp.DBanno.res, function(x) x[x$BestAnno == TRUE, , drop=FALSE])
+metaData.tmp <- object@metaData
 UserComments.v <- vector("list", length(composite_spectra))
 # best substructure anno
-subStrAnno.df <- subStrAnno(object)
+subStrAnno.df <- object@subStrAnno
 
 # metFrag 
-tmp.metFrag <- MetFrag(object)
+tmp.metFrag <- object@inSilico$MetFrag
 # CFM 
-tmp.CFM <- CFM(object)
+tmp.CFM <- object@inSilico$CFM
 ###order by EIC number
 EICorderIndx <- order(as.numeric(gsub(".+_","",Features.v)))
 Features.v <- Features.v[EICorderIndx]
@@ -80,7 +80,7 @@ if(length(tmp.CFM) > 0){
   cfmSelectTable <- NULL
 }
 # DB match df to string match
-if(length(DBanno(object)) > 0){
+if(length(object@DBanno) > 0){
   DBmatches <-  t(sapply(tmp.DBanno.res, function(x){
     if(!is.null(x)){
     names.tmp <- x$DBname
@@ -185,9 +185,9 @@ subStrAnno.inputs <- unique(subStrAnno.df$SubStrType)
 TotalFeatures <- length(unique(gsub(".+_", "", Features.v)))
 TotalCompSpectra <- length(Features.v)
 # network graph
-if(!is.null(network(object)$corrNetworkGraph)){
-corrNetTmp <- network(object)$corrNetworkGraph
-corrLayoutTmp <- network(object)$corrLayout
+if(!is.null(object@network$corrNetworkGraph)){
+corrNetTmp <- object@network$corrNetworkGraph
+corrLayoutTmp <- object@network$corrLayout
 colnames(corrLayoutTmp)[1:2] <- c('xvar', 'yvar')
 # rescale layout
 corrScaledLayout <- data.frame(corrLayoutTmp, stringsAsFactors = F)
@@ -206,9 +206,9 @@ igraph::V(corrNetTmp)$vertexSize <- rep(4, length(corrNetMatchIndx))
 
 }
 # spectral similarity
-if(!is.null(network(object)$specSimGraph)){
-  specSimNetTmp <- network(object)$specSimGraph
-  specSimLayoutTmp <- network(object)$specSimLayout
+if(!is.null(object@network$specSimGraph)){
+  specSimNetTmp <- object@network$specSimGraph
+  specSimLayoutTmp <- object@network$specSimLayout
   colnames(specSimLayoutTmp)[1:2] <- c('xvar', 'yvar')
   # rescale layout
  specSimScaledLayout <- data.frame(specSimLayoutTmp, stringsAsFactors = F)
@@ -227,9 +227,9 @@ if(!is.null(network(object)$specSimGraph)){
 }
 
 # reconsubstructure similarity
-if(!is.null(network(object)$reconSubGraph)){
-  reconSubNetTmp <- network(object)$reconSubGraph
-  reconSubLayoutTmp <- network(object)$reconSubLayout
+if(!is.null(object@network$reconSubGraph)){
+  reconSubNetTmp <- object@network$reconSubGraph
+  reconSubLayoutTmp <- object@network$reconSubLayout
   colnames(reconSubLayoutTmp)[1:2] <- c('xvar', 'yvar')
   # rescale layout
   reconSubScaledLayout <- data.frame(reconSubLayoutTmp, stringsAsFactors = F)
@@ -244,9 +244,9 @@ if(!is.null(network(object)$reconSubGraph)){
   igraph::V(reconSubNetTmp)$vertexShapes <- rep('circle', length(rcIdx))
 }
 # chemical similarity
-# if(!is.null(network(object)$chemSimGraph)){
-#   specSimNetTmp <- network(object)$specSimGraph
-#   specSimLayoutTmp <- network(object)$specSimLayout
+# if(!is.null(object@network$chemSimGraph)){
+#   specSimNetTmp <- object@network$specSimGraph
+#   specSimLayoutTmp <- object@network$specSimLayout
 #   colnames(specSimLayoutTmp)[1:2] <- c('xvar', 'yvar')
 #   # rescale layout
 #   specSimScaledLayout <- data.frame(specSimLayoutTmp, stringsAsFactors = F)
@@ -263,13 +263,13 @@ if(!is.null(network(object)$reconSubGraph)){
 # }
 # 
 # # if all 3 graphs then create combined
-# allGraphsIndx <- c('corrNetworkGraph', 'specSimGraph', 'chemSimGraph') %in% names(network(object))
+# allGraphsIndx <- c('corrNetworkGraph', 'specSimGraph', 'chemSimGraph') %in% names(object@network)
 # if(all()){
 #   
 # }
 
 # met Id comments table
-metIDcomments <- Comments(object)
+metIDcomments <- object@Comments
 
 
 # spectral database indx
@@ -283,12 +283,12 @@ indxSpectralDb <- as.numeric()
 # in silico fragment indx
 if(length(object@inSilico) > 0){
   inSilicoIndx <- rep(FALSE, length(Features.v))
-  if(!is.null(MetFrag(object))){
-  inSilicoIndx[sapply(MetFrag(object), function(x){
+  if(!is.null(object@inSilico$MetFrag)){
+  inSilicoIndx[sapply(object@inSilico$MetFrag, function(x){
      if(!is.null(x)){ifelse(ncol(x) > 1, TRUE, FALSE)} else {F}})] <- T
   }
-  if(!is.null(CFM(object))){
-    inSilicoIndx[sapply(CFM(object), function(x){
+  if(!is.null(object@inSilico$CFM)){
+    inSilicoIndx[sapply(object@inSilico$CFM, function(x){
       if(!is.null(x)){ifelse(ncol(x) > 1, TRUE, FALSE)} else {F}})] <- T
   }
   inSilicoIndx <- which(inSilicoIndx[EICorderIndx])
