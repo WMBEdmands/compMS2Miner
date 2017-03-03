@@ -99,7 +99,7 @@ if(length(object@DBanno) > 0){
 }
 
 # DB match df to string match
-if(length(BestAnno(object)) > 0){
+if(length(tmp.BestAnno) > 0){
   DBBestMatches <-  t(sapply(tmp.BestAnno, function(x){
     if(!is.null(x)){
       names.tmp <- x$DBname
