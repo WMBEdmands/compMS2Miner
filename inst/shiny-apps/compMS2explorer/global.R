@@ -1,6 +1,6 @@
 load(file='compMS2object.RData')
 # if necessary read in r script and sessioninfo text files
-suppressWarnings(suppressMessages(library(compMS2Miner)))
+# suppressWarnings(suppressMessages(library(compMS2Miner)))
 suppressWarnings(suppressMessages(library(igraph)))
 suppressWarnings(suppressMessages(library(rhandsontable)))
 suppressWarnings(suppressMessages(library(scales)))
@@ -193,8 +193,8 @@ colnames(corrLayoutTmp)[1:2] <- c('xvar', 'yvar')
 corrScaledLayout <- data.frame(corrLayoutTmp, stringsAsFactors = F)
 corrScaledLayout$xvar <- scales::rescale(corrScaledLayout$xvar, c(-1, 1))
 corrScaledLayout$yvar <- scales::rescale(corrScaledLayout$yvar, c(-1, 1))
-corrScaledLayout$mzmed <- round(corrScaledLayout[, 4], 4)
-corrScaledLayout$rtmed <- round(corrScaledLayout[, 5], 4)
+corrScaledLayout[, 4] <- round(corrScaledLayout[, 4], 4)
+corrScaledLayout[, 5] <- round(corrScaledLayout[, 5], 4)
 corrNetMatchIndx <- match(igraph::V(corrNetTmp)$name, Features.v)
 # add possible substructure column
 possible_substructures <- ifelse(grepl('^CC_', Features.v[corrNetMatchIndx]), allFeatTable[corrNetMatchIndx[!is.na(corrNetMatchIndx)], 'possible substructure'], 'no composite spectrum')
