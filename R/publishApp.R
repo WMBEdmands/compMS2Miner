@@ -131,7 +131,7 @@ setMethod("publishApp", signature = "compMS2", function(object, appName=NULL,  w
     save(object, file=paste0(outDir, '/compMS2object.RData'))  
       
     # deploy app
-    shinyapps::deployApp(appDir = outDir, appName=appName, ...)
+    rsconnect::deployApp(appDir = outDir, appName=appName, ...)
     }
    }
 }) # end function
