@@ -2,7 +2,7 @@ Package: compMS2Miner
 Type: Package
 Title: metabolite identification workflow for metabolomic
     high-resolution LC-MS datasets
-Version: 2.2.5
+Version: 2.2.6
 Date: 2016-06-23
 Authors@R: c(
     person("William MB", "Edmands", role = c("aut", "cre"), email="edmandsw@berkeley.edu"),

@@ -183,7 +183,7 @@ maxNodes=300, MS2only=1, minClustSize=2){
     
     netTmp <- igraph::graph(as.vector(t(sif.df[, c(1, 2)])))
     # add corr coeff
-    igraph::E(netTmp)$value <- sif.df[, 3]
+    igraph::E(netTmp)$value <- as.numeric(sif.df[, 3])
     # add average intensity
     idxTmp <- match(names(igraph::V(netTmp)), names(avInt))
     igraph::V(netTmp)$avInt <- avInt[idxTmp]
@@ -250,7 +250,7 @@ maxNodes=300, MS2only=1, minClustSize=2){
     indxTmp <- match(as.numeric(gsub('.+_', '', igraph::V(netTmp)$name)), peakTable[, 1])
     layoutTmp <- cbind(layoutTmp, as.matrix(peakTable[indxTmp, 1:3]))
     network(object)$corrNetworkGraph <- netTmp
-    network(object)$corrLayout <- data.frame(layoutTmp, stringsAsFactors = FALSE)
-    
+    layoutTmp <- data.frame(layoutTmp, stringsAsFactors = FALSE)
+    network(object)$corrLayout <- layoutTmp
     return(object)
 }) # end function
