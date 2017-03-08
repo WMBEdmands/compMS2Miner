@@ -80,7 +80,7 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL, esiAdducts=NULL,
           flush.console()
           
           matches.tmp <- vector("list", length(unknowns))
-          matches.tmp <- compMS2Miner:::exactMassMatchCpp(matches.tmp, unknowns, metMassesAllEsiSub, 1:length(metMassesAllEsiSub), ppm, 1E06)
+          matches.tmp <- exactMassMatchCpp(matches.tmp, unknowns, metMassesAllEsiSub, 1:length(metMassesAllEsiSub), ppm, 1E06)
           
           matches.tmp <- lapply(1:length(matches.tmp), function(x){
             mTmp <- as.numeric(matches.tmp[[x]])

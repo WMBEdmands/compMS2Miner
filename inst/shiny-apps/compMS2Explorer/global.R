@@ -4,7 +4,7 @@ suppressWarnings(suppressMessages(library(compMS2Miner)))
 suppressWarnings(suppressMessages(library(igraph)))
 suppressWarnings(suppressMessages(library(rhandsontable)))
 suppressWarnings(suppressMessages(library(scales)))
-suppressWarnings(suppressMessages(library(shiny)))
+# suppressWarnings(suppressMessages(library(shiny)))
 # read session info if present
 seshInfo <- list.files(pattern='sessionInfo_')
 if(length(seshInfo) > 0){
