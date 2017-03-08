@@ -7,7 +7,7 @@
 #' 1. titles character vector of Abstract title(s)
 #' 2. abs character vector of abstract text(s).
 #' 3. clAbs clean abstract word frequency data.frame with column names 'word' and 'freq'. 
-#' @seealso \code{\link{PubMedWordcloud}}, \code{\link{getAbstracts}}, \code{\link{cleanAbstracts}}.
+#' @seealso PubMedWordcloud, \code{\link{getAbstracts}}, \code{\link{cleanAbstracts}}.
 #' @export
 pubMedSearch <- function(keys=NULL, n=500, maxChar=50, ...){
   #error handling

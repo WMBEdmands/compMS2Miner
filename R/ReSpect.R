@@ -16,7 +16,7 @@
 #'  \item molecular_formula. Molecular formula of ReSpect entry 
 #'  \item cas_number. CAS registry number of ReSpect entry
 #'  \item species_id. if available plant species name
-#'  \item - 295. (n=286) all molecular descriptors extracted from the chemistry development kit using the \code{\link{rcdk}} package and a 1024bit chemical fingerprint obtained using the \code{\link{chemmineR}} package in the form of an index rather than full length 1024 binary representation. see table below for details:
+#'  \item - 295. (n=286) all molecular descriptors extracted from the chemistry development kit using the rcdk package and a 1024bit chemical fingerprint obtained using the ChemmineR package in the form of an index rather than full length 1024 binary representation. see table below for details:
 #'  }
 #' \tabular{lll}{
 #' \strong{category} \tab \strong{className} \tab \strong{molDescNames}

@@ -44,7 +44,7 @@ the database entry information for each match.}
 automatically added using \code{\link{metID.chemSim}},
 \code{\link{metID.buildConsensus}} or \code{\link{metID.optimConsensus}}.}
 
-\item{\code{file.paths}}{character vector with absolute path names of each MS/MS 
+\item{\code{filePaths}}{character vector with absolute path names of each MS/MS 
 mzXML file.}
 
 \item{\code{Parameters}}{data.frame containing user supplied parameters for compMS2Miner

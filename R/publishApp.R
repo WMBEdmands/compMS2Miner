@@ -11,9 +11,9 @@
 #' @param addFiles character vector of full paths to files which will be included
 #' in the zip file or bundle to shinyapps.io. For example code used to generate 
 #' compMS2 results. The default is to include at minimum a text file containing 
-#' the output of \link{sessionInfo()} this is intended to maintain reproducibility
+#' the output of \link{sessionInfo} this is intended to maintain reproducibility
 #' of published results. 
-#' @param ... further arguments to the \code{\link{deployApp}} function
+#' @param ... further arguments to the \link{deployApp} function
 #' @export
 setGeneric("publishApp", function(object, appName=NULL, writeDir=NULL, addFiles=NULL, ...) standardGeneric("publishApp"))
 

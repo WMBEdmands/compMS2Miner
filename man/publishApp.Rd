@@ -17,10 +17,10 @@ and the current shiny app zip file to. This zip file can then be shared with oth
 \item{addFiles}{character vector of full paths to files which will be included
 in the zip file or bundle to shinyapps.io. For example code used to generate 
 compMS2 results. The default is to include at minimum a text file containing 
-the output of \link{sessionInfo()} this is intended to maintain reproducibility
+the output of \link{sessionInfo} this is intended to maintain reproducibility
 of published results.}
 
-\item{...}{further arguments to the \code{\link{deployApp}} function}
+\item{...}{further arguments to the \link{deployApp} function}
 }
 \description{
 you must hold a shinyapps.io account and have a token.

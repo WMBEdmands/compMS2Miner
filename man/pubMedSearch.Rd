@@ -25,5 +25,5 @@ a list containing 3 named elements:
 return cleaned abstracts from pubmed from searched key words
 }
 \seealso{
-\code{\link{PubMedWordcloud}}, \code{\link{getAbstracts}}, \code{\link{cleanAbstracts}}.
+PubMedWordcloud, \code{\link{getAbstracts}}, \code{\link{cleanAbstracts}}.
 }

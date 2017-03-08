@@ -1,6 +1,6 @@
 #' Quantitative Structure-Retention Relationship modelling (QSRR) using molecular descriptors and randomForest modelling
 #' 
-#' @details Based on the method described in Cao \emph{et. al.} \url{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4419193/} and use the \code{\link{caret}} package (see tutorial: \url{http://topepo.github.io/caret/rfe.html} for the recursive feature selection. randomForest method utilized).
+#' @details Based on the method described in Cao \emph{et. al.} \url{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4419193/} and use the caret package (see tutorial: \url{http://topepo.github.io/caret/rfe.html} for the recursive feature selection. randomForest method utilized).
 #' calculates a quantitative structure-retention relationship model
 #' the default is to use the putative annotations included in the "metID comments" table of \code{\link{compMS2Explorer}} the putative annotations in the possible_identity column of the metID comments interactive table must match perfectly the database entry names found in the "best annotations" table (e.g. ensure correct matching by copy and pasting the possible compound identity in to the possible_identity column of the "metID comments" table). The metID.rtPred functions calculates molecular descriptors for all database entries in the "Best annotations" panel using the rcdk package. 
 #' 
@@ -10,12 +10,12 @@
 #'  \item removing any molecular descriptors with near zero variance using the function \code{\link{nearZeroVar}} from the caret package.
 #'  \item a correlation matrix of remaining molecular descriptors is calculated and
 #' molecular descriptors with a standard deviation are removed.
-#' \item finally any molecular descriptors with a high pair-wise correlation (>= 0.9 pearson product moment) are identified and the molecular descriptors with the largest mean absolute correlation of each group are removed. see function \code{\link{findCorrelation}} from the caret package.
+#' \item finally any molecular descriptors with a high pair-wise correlation (>= 0.9 pearson product moment) are identified and the molecular descriptors with the largest mean absolute correlation of each group are removed. see function \link{findCorrelation} from the caret package.
 #' }
 #' 
-#' The calculation of molecular descriptors for a large number of database entries is a potentially time-consuming process and is therefore only needs to be conducted once and the results of the process saved in the \linkS4class{CompMS2} object.
+#' The calculation of molecular descriptors for a large number of database entries is a potentially time-consuming process and is therefore only needs to be conducted once and the results of the process saved in the \linkS4class{compMS2} object.
 #' 
-#' The caret package function \code{\link{rfe}} function is then used to identify the optimum set of remaining molecular descriptors to predict retention time. A plot should appear showing the correlation between the actual and predicted retention times of the training set.  
+#' The caret package function \link{rfe} function is then used to identify the optimum set of remaining molecular descriptors to predict retention time. A plot should appear showing the correlation between the actual and predicted retention times of the training set.  
 #' 
 #' A possible workflow sequence would consist of initial examination of the results in \code{\link{compMS2Explorer}} with putative annotation of metabolites followed by use of the \code{\link{metID.rtPred}} function. After the first time the \code{\link{metID.rtPred}} function has run a new plot will appear in the \code{\link{compMS2Explorer}} gui where the "Best Annotations" closest
 #' to the randomForest model predicted retention times can be easily visualized.
@@ -25,7 +25,7 @@
 #' as molecular descriptors have already been calculated and cleaned for all entries.
 #' 
 #' @param object A "compMS2" class object.  
-#' @param standardsTable data.frame of standard compounds. The standard compounds should have been acquired using the same chromatographic method as the metabolomic dataset. If this argument is supplied then this table will be used to calculate the \code{\link{randomForest}} retention time prediction model rather than the possible_identity annotations from the "met ID comments" table. The table which must contain at mimimum the following 3 column names and an error will be returned if this is not the case (will ignore case e.g. both the column names SMILES or smiles are acceptable): 
+#' @param standardsTable data.frame of standard compounds. The standard compounds should have been acquired using the same chromatographic method as the metabolomic dataset. If this argument is supplied then this table will be used to calculate the \link{randomForest} retention time prediction model rather than the possible_identity annotations from the "met ID comments" table. The table which must contain at mimimum the following 3 column names and an error will be returned if this is not the case (will ignore case e.g. both the column names SMILES or smiles are acceptable): 
 #' \enumerate{
 #' \item compound "character" type of compound names.
 #' \item smiles "character" type of SMILES codes.
@@ -33,7 +33,7 @@
 #' }
 #' N.B. The data.frame may also contain additional columns 
 #' @param descriptors character vector of molecular descriptor class names from 
-#' \code{\link{get.desc.names}}. If NULL then all molecular descriptors will be considered.
+#' \link{get.desc.names}. If NULL then all molecular descriptors will be considered.
 #' @param removeOut logical (default = TRUE). If true outliers identified by
 #' Tukey's method that is a retention time deviation of any of the training
 #' set compounds greater than 1.5 * the interquartile range will be removed and
@@ -46,9 +46,9 @@
 #' correlation value (values 0-1, default = 0.9),  if any molecular descriptors 
 #' have high pair-wise correlation then the variables with the largest mean 
 #' absolute correlation of each group are removed.
-#' @param ... additional arguments to \code{\link{nearZeroVar}}.'
+#' @param ... additional arguments to \link{nearZeroVar}.
 #' @param verbose logical if TRUE display progress bars.
-#' @seealso \code{\link{nearZeroVar}}, \code{\link{rfe}}, \code{\link{randomForest}}.
+#' @seealso \link{nearZeroVar}, \link{rfe}, \link{randomForest}.
 #' @source Predicting retention time in hydrophilic interaction liquid chromatography mass spectrometry and its use for peak annotation in metabolomics \emph{et. al.} Metabolomics 2015 \url{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4419193/}  
 #' @examples 
 #' compMS2Example <- metID(compMS2Example, 'rtPred')

@@ -16,7 +16,7 @@
 #'  \item molecular_formula. Molecular formula of LMSD entry 
 #'  \item cas_number. CAS registry number of LMSD entry
 #'  \item compound_class. compound class information utilized by annoCompoundClass function.
-#'  \item - 294. (n=286) all molecular descriptors extracted from the chemistry development kit using the \code{\link{rcdk}} package and a 1024bit chemical fingerprint obtained using the \code{\link{chemmineR}} package in the form of an index rather than full length 1024 binary representation. see table below for details:
+#'  \item - 294. (n=286) all molecular descriptors extracted from the chemistry development kit using the rcdk package and a 1024bit chemical fingerprint obtained using the ChemmineR package in the form of an index rather than full length 1024 binary representation. see table below for details:
 #'  }
 #'  
 #' \tabular{lll}{

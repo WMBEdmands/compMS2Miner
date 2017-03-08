@@ -84,12 +84,7 @@ setMethod("metID.chemSim", signature = "compMS2", function(object, autoPossId=FA
   if(length(network(object)) == 0){
     stop('either the correlation network and/or spectral similarity network must be calculated before chemical similarity calculation')
   }
-  # add parameters
-  Parameters(object)$autoPossId_chemSim <- autoPossId
-  Parameters(object)$minSimScore <- minSimScore
-  Parameters(object)$possContam <- possContam
-  Parameters(object)$bitsChemFP <- bitsChemFP
-  
+   
   # index which bestAnnos have entries
   emptyIndx <- sapply(BestAnno(object), nrow) > 0
   if(all(emptyIndx == FALSE)){
@@ -103,7 +98,7 @@ setMethod("metID.chemSim", signature = "compMS2", function(object, autoPossId=FA
   # edge pairs from network
   edgePairs <- unlist(lapply(network(object)[netGraphIndx], function(x) attr(igraph::E(x), 'vnames')))
   # edge values i.e. corr coeff or spectral similarities for weighting
-  edgeValues <- unlist(lapply(network(object)[netGraphIndx], function(x) abs(igraph::E(x)$value)))
+  edgeValues <- unlist(lapply(network(object)[netGraphIndx], function(x) abs(as.numeric(igraph::E(x)$value))))
   # duplicate edges 
   meanEdgeValues <- tapply(edgeValues, edgePairs, mean)
   edgePairs <- unique(edgePairs)
@@ -169,9 +164,21 @@ setMethod("metID.chemSim", signature = "compMS2", function(object, autoPossId=FA
   smilesDf <- smilesDf[, colnames(smilesDf) %in% c('DBid', 'SMILES', 'DBname',
                                                    'SubStr_type', 'ESI_type', 'WebAddress',
                                                    'chemFP', 'specNamesTmp')]
+  
+  if(!is.null(Parameters(object)$bitsChemFP)){
+    if(Parameters(object)$bitsChemFP != bitsChemFP){
+      smilesDf$chemFP <- NULL
+    }
+  }
   # remove duplicates 
   smilesDfSub <- smilesDf[duplicated(smilesDf$DBid) == FALSE, , drop=FALSE]
 
+  # add parameters
+  Parameters(object)$autoPossId_chemSim <- autoPossId
+  Parameters(object)$minSimScore <- minSimScore
+  Parameters(object)$possContam <- possContam
+  Parameters(object)$bitsChemFP <- bitsChemFP
+  
 if(('chemFP' %in% colnames(smilesDfSub)) == FALSE){
   # add new column
   smilesDfSub$chemFP <- ''

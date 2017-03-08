@@ -28,7 +28,7 @@
 #' @slot Comments data.frame containing all user made comments or annotations
 #' automatically added using \code{\link{metID.chemSim}},
 #' \code{\link{metID.buildConsensus}} or \code{\link{metID.optimConsensus}}.
-#' @slot file.paths character vector with absolute path names of each MS/MS 
+#' @slot filePaths character vector with absolute path names of each MS/MS 
 #' mzXML file.
 #' @slot Parameters data.frame containing user supplied parameters for compMS2Miner
 #' functions for reproducibility purposes.
