@@ -21,7 +21,6 @@ LinkingTo: Rcpp
 Imports:
     mzR,
     foreach,
-    lme4,
     Rcpp,
     shiny,
     couchDB,
