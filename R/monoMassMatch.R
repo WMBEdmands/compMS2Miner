@@ -1,6 +1,4 @@
 #' Monoisotopic mass matching unknown to data base entry
-#' @importFrom Rcpp evalCpp
-#' @useDynLib compMS2Miner
 monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL, esiAdducts=NULL,
                           subStrMasses = NULL, mode="pos", ppm = 10, 
                           nCores=NULL){
@@ -80,7 +78,20 @@ monoMassMatch <- function(unknowns = NULL, metMasses.df = NULL, esiAdducts=NULL,
           flush.console()
           
           matches.tmp <- vector("list", length(unknowns))
-          matches.tmp <- exactMassMatchCpp(matches.tmp, unknowns, metMassesAllEsiSub, 1:length(metMassesAllEsiSub), ppm, 1E06)
+          
+          Rcpp::cppFunction('List exactMassMatchC(List Res, NumericVector unknowns, 
+                      NumericVector metMasses, CharacterVector metMassesNames, 
+                            double ppm, double mill) {
+                            int n = unknowns.size();
+                            for(int i = 0; i < n; ++i) {
+                            Res[i] = metMassesNames[(metMasses < unknowns[i] + (unknowns[i] / mill) * ppm) & (metMasses > unknowns[i] - (unknowns[i] / mill) * ppm)];
+                            
+                            }
+                            return Res;
+                            
+                            }')
+          
+          matches.tmp <- exactMassMatchC(matches.tmp, unknowns, metMassesAllEsiSub, 1:length(metMassesAllEsiSub), ppm, 1E06)
           
           matches.tmp <- lapply(1:length(matches.tmp), function(x){
             mTmp <- as.numeric(matches.tmp[[x]])

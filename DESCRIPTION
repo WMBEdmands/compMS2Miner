@@ -17,7 +17,6 @@ Description: metabolite identification workflow for metabolomic high-resolution
     LC-MS datasets.
 Depends:
     R (>= 3.1.0)
-LinkingTo: Rcpp
 Imports:
     mzR,
     foreach,
