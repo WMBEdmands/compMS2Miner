@@ -15,7 +15,7 @@ cleanAbs <- function(Abs, rmNum = TRUE, tolw = TRUE, toup = FALSE,
     text2.corpus = tm::tm_map(text2.corpus, toupper)
   }
   if (rmWords == TRUE) {
-    text2.corpus = tm::tm_map(text2.corpus, tm::removeWords, stopwords("english"))
+    text2.corpus = tm::tm_map(text2.corpus, tm::removeWords, tm::stopwords("english"))
     if (!is.null(yrWords)) {
       text2.corpus = tm::tm_map(text2.corpus, tm::removeWords, 
                             yrWords)
