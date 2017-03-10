@@ -8,7 +8,7 @@ shiny::shinyUI(shiny::fluidPage(
   tags$style(type="text/css", ".recalculating { opacity: 1.0; }"),
   shiny::titlePanel(title='Composite MS2 Explorer'), 
   shiny::fluidRow(shiny::column(width=2, 
-                                a(shiny::tags$img(src='compMS2MinerLogoTutorial.png', height=121, width=324), href='http://bit.ly/28T06oN', target="_blank"),
+                                a(shiny::tags$img(src='compMS2MinerLogoTutorial.png', height=121, width=324), href='http://bit.ly/2nnPwL1', target="_blank"),
                                 shiny::h4(shiny::tags$b("Search Options:")),
                                 shiny::checkboxInput("All_Features", "All features", value=TRUE), 
                                 shiny::checkboxInput("specDBMatch", "spectral database matches", value=FALSE),
