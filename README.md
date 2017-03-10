@@ -33,7 +33,7 @@ devtools::install_github('WMBEdmands/compMS2Miner', dependencies=c("Depends", "I
 **2.** Download the latest stable release tar /zip and install package locally. The devtools install_local function ensures all package dependencies are also installed.
 ```{r}
 # N.B. include full file path to your downloads directory
-devtools::install_local('compMS2Miner_v2.2.3.tar.gz')
+devtools::install_local('compMS2Miner_v2.2.6.tar.gz')
 ```
 
 #Getting started
