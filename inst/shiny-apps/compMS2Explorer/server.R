@@ -933,7 +933,10 @@ shiny::shinyServer(function(input,  output, session){
           row.names(splashCodeTmp) <- 'compSpectrum_splashCode'
           metadata.tmp.sub <- rbind(metadata.tmp.sub, splashCodeTmp)
           }
-          metadata.tmp.sub <- metadata.tmp.sub[-grep('isoMass|isoInt', row.names(metadata.tmp.sub)), , drop=FALSE]
+          isoIdx <- grep('isoMass|isoInt', row.names(metadata.tmp.sub))
+          if(length(isoIdx) > 0){
+          metadata.tmp.sub <- metadata.tmp.sub[-isoIdx, , drop=FALSE]
+          }
           return(metadata.tmp.sub)    
         },  options = list(pageLength = 20))
         
