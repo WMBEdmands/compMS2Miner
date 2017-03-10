@@ -1183,7 +1183,7 @@ shiny::shinyServer(function(input,  output, session){
                                      input$nPMIDAbstracts, length(PMIDs)))
            randPMIDs <- PMIDs[randIndx]
            articleTitles <- getTitles(randPMIDs)
-           Abs <- PubMedWordcloud::getAbstracts(randPMIDs)
+           Abs <- getAbs(randPMIDs)
            wordCloudDf <- data.frame(randPMIDs, articleTitles, stringsAsFactors=F)
            wordCloudDf$url <- paste0('http://www.ncbi.nlm.nih.gov/pubmed/', wordCloudDf$randPMIDs)   
            row.names(wordCloudDf) <- paste0("article ", 
@@ -1191,7 +1191,7 @@ shiny::shinyServer(function(input,  output, session){
            colnames(wordCloudDf)[1] <- paste0('Search term: ', searchTerm, " total PubMedIds returned: ", Count)
                     
             if(length(Abs) > 0){
-                  ClAbs <- PubMedWordcloud::cleanAbstracts(Abs)
+                  ClAbs <- cleanAbs(Abs)
                   ###remove compound names from word frequency table
                   subsName <- strsplit(input$wordCloudSelect, " ")[[1]]
                   subsName <- unlist(lapply(subsName, function(x) grep(paste0("\\b", x, "\\b"), ClAbs$word, ignore.case=T)))
