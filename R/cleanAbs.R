@@ -22,9 +22,9 @@ cleanAbs <- function(Abs, rmNum = TRUE, tolw = TRUE, toup = FALSE,
     }
   }
   if (stemDoc == TRUE) {
-    text2.corpus = tm_map(text2.corpus, tm::stemDocument)
+    text2.corpus = tm::tm_map(text2.corpus, tm::stemDocument)
   }
-  text2.corpus <- tm_map(text2.corpus, tm::PlainTextDocument)
+  text2.corpus <- tm::tm_map(text2.corpus, tm::PlainTextDocument)
   
   # tdm <- TermDocumentMatrix(text2.corpus)
   indWords <- gsub(' ', '', unlist(strsplit(text2.corpus$content$content, ' ')))
