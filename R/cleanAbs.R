@@ -30,7 +30,8 @@ cleanAbs <- function(Abs, rmNum = TRUE, tolw = TRUE, toup = FALSE,
   indWords <- gsub(' ', '', unlist(strsplit(text2.corpus$content$content, ' ')))
   indWords <- indWords[indWords != '']
   tdm <- table(indWords)
-  v <- sort(rowSums(tdm), decreasing = TRUE)
+  m <- as.matrix(tdm)
+  v <- sort(rowSums(m), decreasing = TRUE)
   d <- data.frame(word = names(v), freq = v)
   return(d)
 } # end function
