@@ -52,7 +52,7 @@ Suggests:
 	DEoptim (>= 2.2.4),
 	splashR (>= 0.0.4)
 BugReports: https://github.com/WMBEdmands/compMS2Miner/issues/new
-URL: doi.org/10.5281/zenodo.56582 (stable release v2.2.3)
+URL: doi.org/10.1021/acs.analchem.6b02394
 LazyData: true
 LazyLoad: true
 VignetteBuilder: knitr
