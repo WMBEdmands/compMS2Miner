@@ -9,6 +9,8 @@ Authors@R: c(
     person("Lauren", "Petrick", role = "aut", email = "lpetrick@berkeley.edu"),
     person("Dinesh K", "Barupal", role = "aut", email = "dinkumar@ucdavis.edu"),
     person("Augustin", "Scalbert", role = "aut", email = "scalberta@iarc.fr"),
+    person("Mark J", "Wilson", role = "aut", email = "mwilson9@tulane.edu"),
+    person("Jeffrey K", "Wickliffe", role = "aut", email = "jwicklif@tulane.edu"),
     person("Stephen M", "Rappaport", role = "aut", email = "srappaport@berkeley.edu"))
 Author: William MB Edmands [aut, cre], Lauren Petrick [aut], Dinesh K Barupal
     [aut], Augustin Scalbert [aut], Stephen M Rappaport [aut]
