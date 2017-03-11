@@ -1,9 +1,9 @@
 Package: compMS2Miner
 Type: Package
-Title: metabolite identification workflow for metabolomic
-    high-resolution LC-MS datasets
+Title: an automatable metabolite identification, visualization and data-sharing
+  R package for high-resolution LC-MS datasets
 Version: 2.2.6
-Date: 2016-06-23
+Date: 2017-02-22
 Authors@R: c(
     person("William MB", "Edmands", role = c("aut", "cre"), email="edmandsw@berkeley.edu"),
     person("Lauren", "Petrick", role = "aut", email = "lpetrick@berkeley.edu"),
@@ -15,8 +15,8 @@ Authors@R: c(
 Author: William MB Edmands [aut, cre], Lauren Petrick [aut], Dinesh K Barupal
     [aut], Augustin Scalbert [aut], Stephen M Rappaport [aut]
 Maintainer: William MB Edmands <edmandsw@berkeley.edu>
-Description: metabolite identification workflow for metabolomic high-resolution
-    LC-MS datasets.
+Description: an automatable metabolite identification, visualization and 
+  data-sharing R package for high-resolution LC-MS datasets
 Depends:
 	R (>= 3.3.3)
 Imports:
