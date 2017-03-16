@@ -25,8 +25,9 @@ Analytical Chemistry Just Accepted Manuscript
 
 **N.B.** Forewarned is forearmed. Users have reported difficulty installing the correct version of Java (which seems to be a common issue). Java is required for rcdk and it's dependency rJava however this package is only required for usage of the ```metID.rtPred``` function (specifically molecular descriptor calculation). If installation of Java is too problematic/frustrating then this function can be skipped in your compMS2Miner workflow.  
 
-Ensure that you install Java from this downloads page https://java.com/en/download/manual.jsp
-Make sure to install the Offline version which matches your operating system and your computers processor if Windows (i.e. 32 bit or 64 bit).
+Ensure that you install Java from the manual downloads page https://java.com/en/download/manual.jsp
+
+Make sure to install the Offline version which matches your operating system and your computers processor if using Windows (i.e. 32 bit or 64 bit).
 
 **1.** install the latest development version and all package dependencies in one-line of code directly from GitHub using the devtools package. First ensure devtools is installed, instructions can be found here: https://github.com/hadley/devtools
 ```{r}
