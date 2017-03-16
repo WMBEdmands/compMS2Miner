@@ -5,7 +5,7 @@ compMS2Miner is an R package for comprehensive and automatable annotation of met
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.376671.svg)](https://doi.org/10.5281/zenodo.376671)
 latest stable release v2.2.6 (archived on zenodo).
 
-#Purpose
+# Purpose
 A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS<sup>2</sup> fragmentation data.
 
 The number of MS<sup>2</sup> spectra commonly collected in a precursor selection based experiment (often thousands in a single MS<sup>2</sup> datafile) limits the feasibility of painstaking manual interpretation of every spectrum. A degree of autonomous unknown annotation and at the very least a confident annotation of an unknowns most probable compound class is highly desirous. A holistic overview of the relationships between spectra can greatly facilitate the correct annotation of statistically relevant unknowns. When a handful of unknowns are targeted in isolation the broader context of an unknown can be easily missed and therefore putative identities poorly interpreted.
@@ -21,7 +21,9 @@ If you find compMS2Miner useful for your metabolite annotation challenges please
 Analytical Chemistry Just Accepted Manuscript
 [DOI: 10.1021/acs.analchem.6b02394](http://pubs.acs.org/doi/abs/10.1021/acs.analchem.6b02394)
 
-#Installation
+# Installation
+
+**N.B.** Forewarned is forearmed. Users have reported difficulty installing the correct version of Java (which seems to be a common issue). Java is required for rcdk and it's dependency rJava however this package is only required for usage of the ```metID.rtPred``` function. If installation of Java is problematic/frustrating then this function can be skipped in your compMS2Miner workflow.  
 
 **1.** install the latest development version and all package dependencies in one-line of code directly from GitHub using the devtools package. First ensure devtools is installed, instructions can be found here: https://github.com/hadley/devtools
 ```{r}
@@ -36,7 +38,7 @@ devtools::install_github('WMBEdmands/compMS2Miner', dependencies=c("Depends", "I
 devtools::install_local('compMS2Miner_v2.2.6.tar.gz')
 ```
 
-#Getting started
+# Getting started
 
 After compMS2Miner is installed begin by reading the package vignette *"compMS2Miner_Workflow"*
 Just type ```vignette('compMS2Miner_Workflow')``` to view the pdf of the workflow. Or view an html version of the vignette on the web by clicking the image below:
@@ -45,7 +47,7 @@ Just type ```vignette('compMS2Miner_Workflow')``` to view the pdf of the workflo
 
 Example data illustrating compMS2Miner is provided internal to the package and consists of a peak-picker output table from a nano-flow LC-HRMS metabolomic dataset of human blood samples and corresponding data-dependent MS<sup>2</sup> data files. An example workflow using this data is illustrated in the package vignette. 
 
-#Features
+# Features
 
 The compMS2Miner structured workflow performs the following (v2.2.6, 2017/03/10): 
 * Matches unknown mass spectral features to precursor MS<sup>2</sup> scans and constructs the "compMS2" class object. ```compMS2Construct()```
@@ -79,6 +81,6 @@ This app publication approach could provide a feasible mechanism for transparenc
 
 Please give us your valuable feedback on anything you like/don't like and any suggestions for improvement or alternative methods you may find useful. We are always open to collaborations from fellow metabolomic investigators.
 
-#Licence
+# Licence
 The compMS2Miner package is licenced under the GPLv3 (http://www.gnu.org/licenses/gpl.html).
 
