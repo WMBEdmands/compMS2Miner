@@ -19,6 +19,8 @@
 #' \item Stanstrup, J., Gerlich, M., Dragsted, L.O. et al. 
 #' Anal Bioanal Chem (2013) 405: 5037. doi:10.1007/s00216-013-6954-6
 #' }
+#' @examples
+#' massDiffs <- adduct2mass(c('[M-H]-', '[2M+2CH3OH]2-', '[M-H+C2H4O2+Na]-'))
 #' @export
 adduct2mass <- function(adductNames=c('[M-H]-', '[2M+2CH3OH]2-', '[M-H+C2H4O2+Na]-')){
   # create empty formula from exactMassEle
