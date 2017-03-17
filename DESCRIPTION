@@ -18,7 +18,7 @@ Maintainer: William MB Edmands <edmandsw@berkeley.edu>
 Description: an automatable metabolite identification, visualization and 
   data-sharing R package for high-resolution LC-MS datasets
 Depends:
-	R (>= 3.3.3)
+	R (>= 3.2.0)
 Imports:
 	mzR (>= 2.8.1),
 	foreach (>= 1.4.3),
