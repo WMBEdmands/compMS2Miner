@@ -18,7 +18,7 @@ clustering of MS1 masses (default = 0.01). Utilizes the median method of the
 isobaric ions. Sequences of possible contaminants will be identified using this
 difference in retention time (default = 60).}
 
-\item{nContams}{numeric number of isobaric ions in a sequence seperated by a maximum
+\item{nContams}{numeric number of isobaric ions in a sequence separated by a maximum
 retention time gap (maxRtGap). Any sequences of isobaric ions greater than or equal 
 to this number will be removed (default = 10).}
 

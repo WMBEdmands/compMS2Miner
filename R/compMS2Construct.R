@@ -160,6 +160,19 @@ compMS2Construct <-  function(MS1features = NULL, msDataDir = NULL, MS2files=NUL
       flush.console()
     }
     
+    if(!is.data.frame(MS1features)){
+      stop('The MS1features object is not a data.frame.')
+    }
+    # error handling
+    if(!is.integer(MS1features[, 1])){
+      stop('The first column of the MS1 feature table must be an integer (EIC/unique number).')
+    }
+    if(!is.numeric(MS1features[, 2])){
+      stop('The second column of the MS1 feature table must be a numeric (mass-to-charge ratio).')
+    }
+    if(!is.numeric(MS1features[, 3])){
+      stop('The third column of the MS1 feature table must be a numeric (retention time in seconds).')
+    }
     # sort dataframe by unique ID/ EIC number
     MS1features <- MS1features[order(MS1features[, 1]), ]
     row.names(MS1features) <- seq(1, nrow(MS1features), 1)

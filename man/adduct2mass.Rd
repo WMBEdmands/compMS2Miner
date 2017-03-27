@@ -31,6 +31,9 @@ converts ESI adduct names into table of monoisotopic masses
 this function can be used to generate a table of ESI adducts for the
 \code{\link{metID.dbAnnotate}} function.
 }
+\examples{
+massDiffs <- adduct2mass(c('[M-H]-', '[2M+2CH3OH]2-', '[M-H+C2H4O2+Na]-'))
+}
 \references{
 \enumerate{
 \item Stanstrup, J., Gerlich, M., Dragsted, L.O. et al. 

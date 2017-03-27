@@ -12,7 +12,7 @@
 #' @param maxRtGap numeric maximum retention time gap (in seconds) between two 
 #' isobaric ions. Sequences of possible contaminants will be identified using this
 #' difference in retention time (default = 60). 
-#' @param nContams numeric number of isobaric ions in a sequence seperated by a maximum
+#' @param nContams numeric number of isobaric ions in a sequence separated by a maximum
 #' retention time gap (maxRtGap). Any sequences of isobaric ions greater than or equal 
 #' to this number will be removed (default = 10).
 #' @param minSimScore numeric minimum spectral similarity score (values between 0-1).
@@ -53,7 +53,7 @@ mzsTmp <- sapply(metaData(object), function(x) x[grep('_MS1_mz', names(x))][[1]]
 mzsTmp <- mzsTmp[order(rtsTmp)]
 rtsTmp <- rtsTmp[order(rtsTmp)]
 
-plot(rtsTmp, mzsTmp, ylab='mass', xlab='retentionTime', pch=19)
+plot(rtsTmp, mzsTmp, ylab='m/z', xlab='retentionTime', pch=19)
 hr <- fastcluster::hclust(dist(mzsTmp), method = "median", members=NULL)
 
 # cut tree according to absolute m/z error
@@ -84,7 +84,7 @@ possContams <- unlist(possContams)
 if(length(possContams) > 0){
   message('Of ', length(mzsTmp), ' composite spectra.\n', length(possContams),
           ' possible contaminants (', round(length(possContams)/length(mzsTmp), 1) * 100, '%) were detected.\n', 
-          '(i.e. greater than or equal to ', nContams, ' isobaric ions in a sequence seperated by no greater than ', maxRtGap, ' seconds)\n\n')
+          '(i.e. greater than or equal to ', nContams, ' isobaric ions in a sequence separated by no greater than ', maxRtGap, ' seconds)\n\n')
   flush.console()
   
   possContamIndx <- names(massGroup) %in% possContams

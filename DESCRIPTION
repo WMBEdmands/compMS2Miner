@@ -2,7 +2,7 @@ Package: compMS2Miner
 Type: Package
 Title: an automatable metabolite identification, visualization and data-sharing
   R package for high-resolution LC-MS datasets
-Version: 2.2.6
+Version: 2.2.7
 Date: 2017-02-22
 Authors@R: c(
     person("William MB", "Edmands", role = c("aut", "cre"), email="edmandsw@berkeley.edu"),
