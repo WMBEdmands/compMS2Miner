@@ -18,7 +18,7 @@ If you find compMS2Miner useful for your metabolite annotation challenges please
 
 **compMS2Miner: an automatable metabolite identification, visualization and data-sharing R package for high-resolution LC-MS datasets**
 *William Matthew Bell Edmands, Lauren M. Petrick, Dinesh Kumar Barupal, Augustin Scalbert, Mark Wilson, Jeffrey Wickliffe, and Stephen M Rappaport*
-Analytical Chemistry Just Accepted Manuscript
+Analytical Chemistry Article ASAP
 [DOI: 10.1021/acs.analchem.6b02394](http://pubs.acs.org/doi/abs/10.1021/acs.analchem.6b02394)
 
 # Installation
