@@ -2,7 +2,7 @@ Package: compMS2Miner
 Type: Package
 Title: an automatable metabolite identification, visualization and data-sharing
   R package for high-resolution LC-MS datasets
-Version: 2.2.7
+Version: 2.2.8
 Date: 2017-02-22
 Authors@R: c(
     person("William MB", "Edmands", role = c("aut", "cre"), email="edmandsw@berkeley.edu"),
@@ -23,7 +23,7 @@ Imports:
 	mzR (>= 2.8.1),
 	foreach (>= 1.4.3),
 	Rcpp (>= 0.12.9),
-	shiny (>= 1.0.0),
+	shiny (>= 1.0.1),
 	couchDB (>= 1.4.1),
 	fastcluster (>= 1.1.22),
 	data.table (>= 1.10.4),
@@ -31,7 +31,7 @@ Imports:
 	DT (>= 0.2),
 	methods (>= 3.3.2),
 	parallel (>= 3.3.2),
-	RcppEigen (>= 0.3.2.9.0),
+	RcppEigen (>= 0.3.2.9.1),
 	reshape2 (>= 1.4.2),
 	rjson (>= 0.2.15),
 	igraph (>= 1.0.1),

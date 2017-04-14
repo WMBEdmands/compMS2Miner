@@ -144,16 +144,14 @@ setMethod("combineMS2.Spectra", signature = "compMS2", function(object,
               mzError)
     }
     
-    metaDataGroups <-  tapply(metaData(object), as.factor(MSfeatureNos), function(x) rbind(x))
-    metaDataGroups <- lapply(metaDataGroups, function(x){ 
-      tmp <- do.call(c, x)
-      tmp.names <-  paste(rep(colnames(x), 
-                              each = length(tmp)/ ncol(x)),
-                          names(tmp), sep = "_")
-      names(tmp) <- tmp.names
-      return(tmp)
-    })
+    metaDataGroups <- vector('list', length(metaData(object)))
+    for(k in 1:length(metaData(object))){
+      namesTmp <- paste0(names(metaData(object)[k]), '_', names(metaData(object)[[k]]))
+      metaDataGroups[[k]] <- metaData(object)[[k]]
+      names(metaDataGroups[[k]]) <- namesTmp
+    }
     
+    metaDataGroups <- lapply(split(metaDataGroups, as.factor(MSfeatureNos)), function(x) do.call(c, x))
     names.tmp <- paste0("CC_",names(specGroups))
     names(sign.group) <- names.tmp
     compSpectra(object) <- sign.group[groupIndx]
