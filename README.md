@@ -53,7 +53,7 @@ Example data illustrating compMS2Miner is provided internal to the package and c
 
 # Features
 
-The compMS2Miner structured workflow performs the following (v2.2.6, 2017/03/10): 
+The compMS2Miner structured workflow performs the following (v2.2.8, 2017/04/14): 
 * Matches unknown mass spectral features to precursor MS<sup>2</sup> scans and constructs the "compMS2" class object. ```compMS2Construct()```
 * Dynamically filters variable noise. ```deconvNoise()```: (additional noise filtration method options are in development) 
 ![DNF animation](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/DNFanimation.gif)
