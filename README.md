@@ -3,11 +3,7 @@
 compMS2Miner is an R package for comprehensive and automatable annotation of metabolomic high-resolution LC-MS datasets.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.546281.svg)](https://doi.org/10.5281/zenodo.546281)
-latest stable release v2.2.8 (archived on zenodo). *bug fixed combineMS2.Spectra for certain usage cases*
-
-**Warning: Current issue with metID.matchSpectralDB function (2017/04/17)** 
-
-msp files downloadable from [MoNA](http://mona.fiehnlab.ucdavis.edu/downloads) no longer contain unique chemical identification codes (i.e. InChI or SMILES). This has temporarily broken the `metID.matchSpectralDB` function when using the latest msp files from [MoNA](http://mona.fiehnlab.ucdavis.edu/downloads). However, example msp files hosted  on our GitHub repo [mspFiles](https://github.com/WMBEdmands/mspFiles) can still be used in the meantime. An issue has been opened on the MoNA database [issue #194](https://bitbucket.org/fiehnlab/mona/issues/194/only-inchikeys-in-msp-files-no-longer-a). This is a relatively recent change and [OpenBabel](www.openbabel.org) has no functionality to convert InChIKeys to InChI or SMILES codes. This is because InChIKeys do not represent truly unique chemical structures. See:
+latest stable release v2.3.0 (archived on zenodo). *bug fixed in matchSpectralDB InChI codes now in Comments fields of MoNA msp files. InChIKeys are now the unique identifiers however these are dead-ends for OpenBabel. While loop to catch any OpenBabel errors*
 
 *"Note: that while a molecule with a particular InChI will always give the same InChIKey, the reverse is not true; there may exist more than one molecule which have different InChIs but yield the same InChIKey."* https://openbabel.org/docs/dev/FileFormats/InChIKey.html
 
@@ -59,7 +55,7 @@ Example data illustrating compMS2Miner is provided internal to the package and c
 
 # Features
 
-The compMS2Miner structured workflow performs the following (v2.2.8, 2017/04/14): 
+The compMS2Miner structured workflow performs the following (v2.3.0, 2017/04/18): 
 * Matches unknown mass spectral features to precursor MS<sup>2</sup> scans and constructs the "compMS2" class object. ```compMS2Construct()```
 * Dynamically filters variable noise. ```deconvNoise()```: (additional noise filtration method options are in development) 
 ![DNF animation](https://github.com/WMBEdmands/compMS2Miner/blob/master/inst/shiny-apps/compMS2Explorer/www/DNFanimation.gif)
