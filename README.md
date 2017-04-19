@@ -5,8 +5,6 @@ compMS2Miner is an R package for comprehensive and automatable annotation of met
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.546281.svg)](https://doi.org/10.5281/zenodo.546281)
 latest stable release v2.3.0 (archived on zenodo). *bug fixed in matchSpectralDB InChI codes now in Comments fields of MoNA msp files. InChIKeys are now the unique identifiers however these are dead-ends for OpenBabel. While loop to catch any OpenBabel errors*
 
-*"Note: that while a molecule with a particular InChI will always give the same InChIKey, the reverse is not true; there may exist more than one molecule which have different InChIs but yield the same InChIKey."* https://openbabel.org/docs/dev/FileFormats/InChIKey.html
-
 # Purpose
 A long-standing challenge of untargeted metabolomic profiling by liquid-chromatography - high resolution mass spectrometry analysis (LC-HRMS) is rapid, precise and automatable transition from unknown mass spectral features in the form of a peak-picking software output table to full metabolite identification using MS<sup>2</sup> fragmentation data.
 
