@@ -91,7 +91,7 @@ setMethod("metID.matchSpectralDB", signature = "compMS2", function(object, mspFi
   colnames(mandEntryData) <- c('DBname', 'DBIonMode', 'DBSMILES', 'DBINCHI', 
                                'DBprecursorMasses', 'DBesiType', 'chState')
   # name of entry
-  mandFieldsRegEx <- c('_NAME$', '_ION MODE$|_MODE$', '_SMILES$', '_INCHI$',
+  mandFieldsRegEx <- c('_NAME$', '_ION MODE$|_MODE$', '_SMILES$', '_INCHI$', 
                        '_PRECURSORMZ$|_PRECURSOR M/Z$|_PRECURSOR MZ$|_PEPMASS$',
                        '_PRECURSORTYPE$|_PRECURSOR TYPE$|_ADDUCT$|_ION TYPE$|_IONTYPE$',
                        '_CHARGE$')
@@ -138,7 +138,7 @@ setMethod("metID.matchSpectralDB", signature = "compMS2", function(object, mspFi
     message('SMILES code entries were not found in the .msp file.\n')
     flush.console()
     # inchi present and correct mode
-    mfIdxTmp <- mfIdxTmp & mandEntryData$DBINCHI != ''
+    mfIdxTmp <- mfIdxTmp & mandEntryData$DBINCHI != '' 
     mfIdxTmp <- mfIdxTmp & grepl(Parameters(object)$mode, mandEntryData$DBIonMode, 
                                  ignore.case = TRUE)
     if(any(mfIdxTmp)){
@@ -146,17 +146,99 @@ setMethod("metID.matchSpectralDB", signature = "compMS2", function(object, mspFi
       flush.console()
       outDir <- tempfile(pattern = "compMS2Miner")
       dir.create(outDir)
-      # create file for plink
-      inchiFile <- paste0(outDir, '/tmp.inchi')
-      smiFile <- paste0(outDir, '/tmp.smi')
-      writeLines(paste0(mandEntryData$DBINCHI[mfIdxTmp], collapse='\n'), con=inchiFile)
-      command <- paste0('obabel ', inchiFile, ' -O ', smiFile)
-      log <- try(system(command, intern=TRUE, show.output.on.console = FALSE, ignore.stderr = TRUE))
-      if(class(log) != "try-error"){
-        mandEntryData$DBSMILES[mfIdxTmp] <- readLines(smiFile)
-        # remove tab delimiter
-        mandEntryData$DBSMILES <- gsub('\t', '', mandEntryData$DBSMILES)
+      # create file for openBabel
+      in2conv <- mandEntryData$DBINCHI[mfIdxTmp]
+      # while loop to determine if every structure converted
+      nStrs <- length(in2conv)
+      st2conv <- 1
+      pb <- txtProgressBar(max=nStrs, style = 3)
+      while(st2conv < nStrs){
+        inchiFile <- paste0(outDir, '/tmp.inchi')
+        smiFile <- paste0(outDir, '/tmp.smi')
+        writeLines(paste0(in2conv[st2conv:nStrs], collapse='\n'), con=inchiFile)
+        command <- paste0('obabel ', inchiFile, ' -O ', smiFile)
+        log <- try(system(command, intern=TRUE, show.output.on.console = FALSE, ignore.stderr = TRUE))
+        if(class(log) != "try-error"){
+          smiConvTmp <- readLines(smiFile)
+          if(length(smiConvTmp) > 0){
+            lSmi <- length(smiConvTmp)
+            meIdx <- st2conv:{{st2conv - 1} + lSmi}
+            mandEntryData$DBSMILES[which(mfIdxTmp)[meIdx]] <- smiConvTmp
+            st2conv <- st2conv + lSmi 
+          } else {
+            #iterate if error
+            st2conv <- st2conv + 1  
+          }
+        }
+        setTxtProgressBar(pb, st2conv)
+        if(st2conv == nStrs){
+          break
+        }
       }
+      # remove tab delimiter
+      mandEntryData$DBSMILES <- gsub('\t', '', mandEntryData$DBSMILES)
+      
+    }
+  } 
+  # else if smiles still missing try the inchiKey
+  mfIdxTmp <- mandEntryData$DBSMILES == ''
+  
+  if(all(mfIdxTmp)){
+    message('SMILES code entries were still not found in the .msp file. Looking in Comments for InChI codes. Please wait...\n')
+    flush.console()
+    
+    entInfoTmp <- entryInfo[grep('_COMMENTS$', names(entryInfo), ignore.case = TRUE)]
+    entryNosTmp <- gsub('_COMMENTS$', '', names(entInfoTmp), ignore.case=TRUE)
+    # remove any double entries
+    dupIdx <- duplicated(entryNosTmp) == FALSE
+    entInfoTmp <- entInfoTmp[dupIdx]
+    entryNosTmp <- entryNosTmp[dupIdx]
+    indxTmp <- row.names(mandEntryData) %in% entryNosTmp
+    # strsplit comments
+    inChIsTmp <- sapply(strsplit(entInfoTmp, '"'), function(x){ 
+      gsub('.+InChI=', 'InChI=', x[grep('^InChI |^InChI', x, ignore.case=TRUE)], ignore.case = TRUE)})
+    mandEntryData$DBINCHI[indxTmp] <- inChIsTmp
+    # inchi present and correct mode
+    mfIdxTmp <- mfIdxTmp & mandEntryData$DBINCHI != '' 
+    mfIdxTmp <- mfIdxTmp & grepl(Parameters(object)$mode, mandEntryData$DBIonMode, 
+                                 ignore.case = TRUE)
+    if(any(mfIdxTmp)){
+      message(prettyNum(sum(mfIdxTmp), big.mark=','), ' InChI code entries will be converted to SMILES using the command-line interface of OpenBabel (obabel). Please make sure to install this program (openbabel.org) and place in the path...Please wait (processing time highly dependent on number of entries).\n')
+      flush.console()
+      outDir <- tempfile(pattern = "compMS2Miner")
+      dir.create(outDir)
+      # create file for openBabel
+      in2conv <- mandEntryData$DBINCHI[mfIdxTmp]
+      # while loop to determine if every structure converted
+      nStrs <- length(in2conv)
+      st2conv <- 1
+      pb <- txtProgressBar(max=nStrs, style = 3)
+      while(st2conv < nStrs){
+        inchiFile <- paste0(outDir, '/tmp.inchi')
+        smiFile <- paste0(outDir, '/tmp.smi')
+        writeLines(paste0(in2conv[st2conv:nStrs], collapse='\n'), con=inchiFile)
+        command <- paste0('obabel ', inchiFile, ' -O ', smiFile)
+        log <- try(system(command, intern=TRUE, show.output.on.console = FALSE, ignore.stderr = TRUE))
+        if(class(log) != "try-error"){
+          smiConvTmp <- readLines(smiFile)
+          if(length(smiConvTmp) > 0){
+          lSmi <- length(smiConvTmp)
+          meIdx <- st2conv:{{st2conv - 1} + lSmi}
+          mandEntryData$DBSMILES[which(mfIdxTmp)[meIdx]] <- smiConvTmp
+          st2conv <- st2conv + lSmi 
+          } else {
+            #iterate if error
+          st2conv <- st2conv + 1  
+          }
+        }
+        setTxtProgressBar(pb, st2conv)
+        if(st2conv == nStrs){
+          break
+        }
+      }
+      # remove tab delimiter
+      mandEntryData$DBSMILES <- gsub('\t', '', mandEntryData$DBSMILES)
+      
     }
   } 
   
@@ -265,6 +347,12 @@ setMethod("metID.matchSpectralDB", signature = "compMS2", function(object, mspFi
   corrMode <- grepl(Parameters(object)$mode, mandEntryData$DBIonMode, 
                        ignore.case = TRUE)
   missingVals <- apply(mandEntryData[, c('DBSMILES', 'DBprecursorMasses', 'DBesiType')], 1, function(x) all(x != ''))
+  # any NAs introduced
+  # convert numeric precursor masses
+  mandEntryData$DBprecursorMasses <- suppressWarnings(as.numeric(mandEntryData$DBprecursorMasses))
+  naIdx <- !is.na(mandEntryData$DBprecursorMasses)
+  missingVals <- missingVals & naIdx
+  
   if(any(missingVals[corrMode] == FALSE)){
     message(sum(missingVals[corrMode] == FALSE), ' of the ', prettyNum(length(nEntries), big.mark = ','), ' .msp file entries are missing mandatory entry information:\n\n',
             '1. Chemical structural information (either SMILES or InChI).\n',
@@ -281,9 +369,7 @@ setMethod("metID.matchSpectralDB", signature = "compMS2", function(object, mspFi
   
   message(prettyNum(length(nEntries), big.mark = ','), ' entries remaining.\n')
   flush.console()
-  # convert numeric precursor masses
-  mandEntryData$DBprecursorMasses <- as.numeric(mandEntryData$DBprecursorMasses)
-  
+   
   # add database data to table
   DBdf <- cbind(mass=massesTmp, Rel_Intensity=relIntTmp)
   # replace common esi types
@@ -291,7 +377,7 @@ setMethod("metID.matchSpectralDB", signature = "compMS2", function(object, mspFi
   mandEntryData$DBesiType <- ifelse(mandEntryData$DBesiType == '[M+FA-H]-', "'[M-H+HCOOH]-'", mandEntryData$DBesiType)
   
   dbNamesTmp <- paste0('DB_', row.names(DBdf))
-  message('\ncalculating spectral similarities (dot product >= ', round(minDBDotProdThresh, 1),
+  message('\ncalculating spectral similarities (dot product >= ', round(minDBDotProdThresh, 2),
           # ' or minimum proportion of spectrum explained >= ', minPropEx, 
           ') between database and composite spectra...\n')
   flush.console()
